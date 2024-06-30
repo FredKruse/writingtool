@@ -2,196 +2,196 @@
 <oor:component-data xmlns:oor="http://openoffice.org/2001/registry" xmlns:xs="http://www.w3.org/2001/XMLSchema" oor:name="Addons" oor:package="org.openoffice.Office">
   <node oor:name="AddonUI">
         <node oor:name="Images">
-            <node oor:name="org.languagetool.openoffice.Main.Lt" oor:op="replace">
+            <node oor:name="org.writingtool.WritingTool.Lt" oor:op="replace">
                 <prop oor:name="URL" oor:type="xs:string">
-                    <value>service:org.languagetool.openoffice.Main?lt</value>
+                    <value>service:org.writingtool.WritingTool?lt</value>
                 </prop>
                 <node oor:name="UserDefinedImages">
                     <prop oor:name="ImageSmallURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolSmall.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolSmall.png</value>
                     </prop>
                     <prop oor:name="ImageBigURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolBig.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolBig.png</value>
                     </prop>
                 </node>
             </node>
-            <node oor:name="org.languagetool.openoffice.Main.imageLtCheck" oor:op="replace">
+            <node oor:name="org.writingtool.WritingTool.imageLtCheck" oor:op="replace">
                 <prop oor:name="URL" oor:type="xs:string">
-                    <value>service:org.languagetool.openoffice.Main?checkDialog</value>
+                    <value>service:org.writingtool.WritingTool?checkDialog</value>
                 </prop>
                 <node oor:name="UserDefinedImages">
                     <prop oor:name="ImageSmallURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolCheckSmall.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolCheckSmall.png</value>
                     </prop>
                     <prop oor:name="ImageBigURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolCheckBig.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolCheckBig.png</value>
                     </prop>
                 </node>
             </node>
-            <node oor:name="org.languagetool.openoffice.Main.imageLtCheckAgain" oor:op="replace">
+            <node oor:name="org.writingtool.WritingTool.imageLtCheckAgain" oor:op="replace">
                 <prop oor:name="URL" oor:type="xs:string">
-                    <value>service:org.languagetool.openoffice.Main?checkAgainDialog</value>
+                    <value>service:org.writingtool.WritingTool?checkAgainDialog</value>
                 </prop>
                 <node oor:name="UserDefinedImages">
                     <prop oor:name="ImageSmallURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolCheckAgainSmall.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolCheckAgainSmall.png</value>
                     </prop>
                     <prop oor:name="ImageBigURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolCheckAgainBig.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolCheckAgainBig.png</value>
                     </prop>
                 </node>
             </node>
-            <node oor:name="org.languagetool.openoffice.Main.imageLtOptions" oor:op="replace">
+            <node oor:name="org.writingtool.WritingTool.imageLtOptions" oor:op="replace">
                 <prop oor:name="URL" oor:type="xs:string">
-                    <value>service:org.languagetool.openoffice.Main?configure</value>
+                    <value>service:org.writingtool.WritingTool?configure</value>
                 </prop>
                 <node oor:name="UserDefinedImages">
                     <prop oor:name="ImageSmallURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolOptionsSmall.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolOptionsSmall.png</value>
                     </prop>
                     <prop oor:name="ImageBigURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolOptionsBig.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolOptionsBig.png</value>
                     </prop>
                 </node>
             </node>
-            <node oor:name="org.languagetool.openoffice.Main.imageLtNext" oor:op="replace">
+            <node oor:name="org.writingtool.WritingTool.imageLtNext" oor:op="replace">
                 <prop oor:name="URL" oor:type="xs:string">
-                    <value>service:org.languagetool.openoffice.Main?nextError</value>
+                    <value>service:org.writingtool.WritingTool?nextError</value>
                 </prop>
                 <node oor:name="UserDefinedImages">
                     <prop oor:name="ImageSmallURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolNextSmall.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolNextSmall.png</value>
                     </prop>
                     <prop oor:name="ImageBigURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolNextBig.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolNextBig.png</value>
                     </prop>
                 </node>
             </node>
-            <node oor:name="org.languagetool.openoffice.Main.imageLtRefresh" oor:op="replace">
+            <node oor:name="org.writingtool.WritingTool.imageLtRefresh" oor:op="replace">
                 <prop oor:name="URL" oor:type="xs:string">
-                    <value>service:org.languagetool.openoffice.Main?refreshCheck</value>
+                    <value>service:org.writingtool.WritingTool?refreshCheck</value>
                 </prop>
                 <node oor:name="UserDefinedImages">
                     <prop oor:name="ImageSmallURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolRefreshSmall.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolRefreshSmall.png</value>
                     </prop>
                     <prop oor:name="ImageBigURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolRefreshBig.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolRefreshBig.png</value>
                     </prop>
                 </node>
             </node>
-            <node oor:name="org.languagetool.openoffice.Main.imageLtAbout" oor:op="replace">
+            <node oor:name="org.writingtool.WritingTool.imageLtAbout" oor:op="replace">
                 <prop oor:name="URL" oor:type="xs:string">
-                    <value>service:org.languagetool.openoffice.Main?about</value>
+                    <value>service:org.writingtool.WritingTool?about</value>
                 </prop>
                 <node oor:name="UserDefinedImages">
                     <prop oor:name="ImageSmallURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolAboutSmall.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolAboutSmall.png</value>
                     </prop>
                     <prop oor:name="ImageBigURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolAboutBig.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolAboutBig.png</value>
                     </prop>
                 </node>
             </node>
-            <node oor:name="org.languagetool.openoffice.Main.imageLtStatisticalAnalyses" oor:op="replace">
+            <node oor:name="org.writingtool.WritingTool.imageLtStatisticalAnalyses" oor:op="replace">
                 <prop oor:name="URL" oor:type="xs:string">
-                    <value>service:org.languagetool.openoffice.Main?statisticalAnalyses</value>
+                    <value>service:org.writingtool.WritingTool?statisticalAnalyses</value>
                 </prop>
                 <node oor:name="UserDefinedImages">
                     <prop oor:name="ImageSmallURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolStatAnSmall.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolStatAnSmall.png</value>
                     </prop>
                     <prop oor:name="ImageBigURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolStatAnBig.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolStatAnBig.png</value>
                     </prop>
                 </node>
             </node>
 <!--
-            <node oor:name="org.languagetool.openoffice.Main.imageLtStatisticalAnalysesOff" oor:op="replace">
+            <node oor:name="org.writingtool.WritingTool.imageLtStatisticalAnalysesOff" oor:op="replace">
                 <prop oor:name="URL" oor:type="xs:string">
-                    <value>service:org.languagetool.openoffice.Main?offStatisticalAnalyses</value>
+                    <value>service:org.writingtool.WritingTool?offStatisticalAnalyses</value>
                 </prop>
                 <node oor:name="UserDefinedImages">
                     <prop oor:name="ImageSmallURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolStatAnOffSmall.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolStatAnOffSmall.png</value>
                     </prop>
                     <prop oor:name="ImageBigURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolStatAnOffBig.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolStatAnOffBig.png</value>
                     </prop>
                 </node>
             </node>
 -->
-            <node oor:name="org.languagetool.openoffice.Main.imageLtActivateRules" oor:op="replace">
+            <node oor:name="org.writingtool.WritingTool.imageLtActivateRules" oor:op="replace">
                 <prop oor:name="URL" oor:type="xs:string">
-                    <value>service:org.languagetool.openoffice.Main?activateRules</value>
+                    <value>service:org.writingtool.WritingTool?activateRules</value>
                 </prop>
                 <node oor:name="UserDefinedImages">
                     <prop oor:name="ImageSmallURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolActivateRulesSmall.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolActivateRulesSmall.png</value>
                     </prop>
                     <prop oor:name="ImageBigURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolActivateRulesBig.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolActivateRulesBig.png</value>
                     </prop>
                 </node>
             </node>
-            <node oor:name="org.languagetool.openoffice.Main.imageLtBackCheckOff" oor:op="replace">
+            <node oor:name="org.writingtool.WritingTool.imageLtBackCheckOff" oor:op="replace">
                 <prop oor:name="URL" oor:type="xs:string">
-                    <value>service:org.languagetool.openoffice.Main?backgroundCheckOff</value>
+                    <value>service:org.writingtool.WritingTool?backgroundCheckOff</value>
                 </prop>
                 <node oor:name="UserDefinedImages">
                     <prop oor:name="ImageSmallURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolBackCheckOffSmall.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolBackCheckOffSmall.png</value>
                     </prop>
                     <prop oor:name="ImageBigURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolBackCheckOffBig.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolBackCheckOffBig.png</value>
                     </prop>
                 </node>
             </node>
-            <node oor:name="org.languagetool.openoffice.Main.imageLtBackCheckOn" oor:op="replace">
+            <node oor:name="org.writingtool.WritingTool.imageLtBackCheckOn" oor:op="replace">
                 <prop oor:name="URL" oor:type="xs:string">
-                    <value>service:org.languagetool.openoffice.Main?backgroundCheckOn</value>
+                    <value>service:org.writingtool.WritingTool?backgroundCheckOn</value>
                 </prop>
                 <node oor:name="UserDefinedImages">
                     <prop oor:name="ImageSmallURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolBackCheckOnSmall.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolBackCheckOnSmall.png</value>
                     </prop>
                     <prop oor:name="ImageBigURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolBackCheckOnBig.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolBackCheckOnBig.png</value>
                     </prop>
                 </node>
             </node>
-            <node oor:name="org.languagetool.openoffice.Main.imageLtResetPermanent" oor:op="replace">
+            <node oor:name="org.writingtool.WritingTool.imageLtResetPermanent" oor:op="replace">
                 <prop oor:name="URL" oor:type="xs:string">
-                    <value>service:org.languagetool.openoffice.Main?resetIgnorePermanent</value>
+                    <value>service:org.writingtool.WritingTool?resetIgnorePermanent</value>
                 </prop>
                 <node oor:name="UserDefinedImages">
                     <prop oor:name="ImageSmallURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolResetPermanentSmall.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolResetPermanentSmall.png</value>
                     </prop>
                     <prop oor:name="ImageBigURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolResetPermanentBig.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolResetPermanentBig.png</value>
                     </prop>
                 </node>
             </node>
-            <node oor:name="org.languagetool.openoffice.Main.imageLtProfiles" oor:op="replace">
+            <node oor:name="org.writingtool.WritingTool.imageLtProfiles" oor:op="replace">
                 <prop oor:name="URL" oor:type="xs:string">
-                    <value>service:org.languagetool.openoffice.Main?profiles</value>
+                    <value>service:org.writingtool.WritingTool?profiles</value>
                 </prop>
                 <node oor:name="UserDefinedImages">
                     <prop oor:name="ImageSmallURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolProfilesSmall.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolProfilesSmall.png</value>
                     </prop>
                     <prop oor:name="ImageBigURL">
-                        <value>vnd.sun.star.extension://org.openoffice.languagetool.oxt/images/LanguageToolProfilesBig.png</value>
+                        <value>vnd.sun.star.extension://org.openoffice.writingtool.oxt/images/LanguageToolProfilesBig.png</value>
                     </prop>
                 </node>
             </node>
         </node>
         <node oor:name="OfficeToolBar">
-            <node oor:name="org.languagetool.openoffice.Main.toolbar" oor:op="replace">
+            <node oor:name="org.writingtool.WritingTool.toolbar" oor:op="replace">
                 <node oor:name="T1" oor:op="replace">
                     <prop oor:name="URL" oor:type="xs:string">
-                        <value>service:org.languagetool.openoffice.Main?nextError</value>
+                        <value>service:org.writingtool.WritingTool?nextError</value>
                     </prop>
                     <prop oor:name="Target" oor:type="xs:string">
                         <value>_self</value>
@@ -210,7 +210,7 @@
                 </node>
                 <node oor:name="T2" oor:op="replace">
                     <prop oor:name="URL" oor:type="xs:string">
-                        <value>service:org.languagetool.openoffice.Main?checkDialog</value>
+                        <value>service:org.writingtool.WritingTool?checkDialog</value>
                     </prop>
                     <prop oor:name="Target" oor:type="xs:string">
                         <value>_self</value>
@@ -249,7 +249,7 @@
                 </node>
                 <node oor:name="T3" oor:op="replace">
                     <prop oor:name="URL" oor:type="xs:string">
-                        <value>service:org.languagetool.openoffice.Main?checkAgainDialog</value>
+                        <value>service:org.writingtool.WritingTool?checkAgainDialog</value>
                     </prop>
                     <prop oor:name="Target" oor:type="xs:string">
                         <value>_self</value>
@@ -286,7 +286,7 @@
                 </node>
                 <node oor:name="T4" oor:op="replace">
                     <prop oor:name="URL" oor:type="xs:string">
-                        <value>service:org.languagetool.openoffice.Main?refreshCheck</value>
+                        <value>service:org.writingtool.WritingTool?refreshCheck</value>
                     </prop>
                     <prop oor:name="Target" oor:type="xs:string">
                         <value>_self</value>
@@ -303,7 +303,7 @@
                 </node>
                 <node oor:name="T5" oor:op="replace">
                     <prop oor:name="URL" oor:type="xs:string">
-                        <value>service:org.languagetool.openoffice.Main?configure</value>
+                        <value>service:org.writingtool.WritingTool?configure</value>
                     </prop>
                     <prop oor:name="Target" oor:type="xs:string">
                         <value>_self</value>
@@ -342,7 +342,7 @@
                 </node>
                 <node oor:name="T6" oor:op="replace">
                     <prop oor:name="URL" oor:type="xs:string">
-                        <value>service:org.languagetool.openoffice.Main?about</value>
+                        <value>service:org.writingtool.WritingTool?about</value>
                     </prop>
                     <prop oor:name="Target" oor:type="xs:string">
                         <value>_self</value>
@@ -355,35 +355,35 @@
                     <value xml:lang="de">Über...</value>
                     <value xml:lang="pl">Informacje...</value>
                     <value xml:lang="sl">O razširitvi ...</value>
-                    <value xml:lang="sk">O LanguageTool...</value>
-                    <value xml:lang="ru">О программе LanguageTool...</value>
-                    <value xml:lang="uk">Про програму LanguageTool...</value>   
+                    <value xml:lang="sk">O WritingTool...</value>
+                    <value xml:lang="ru">О программе WritingTool...</value>
+                    <value xml:lang="uk">Про програму WritingTool...</value>   
                     <value xml:lang="is">Upplýsingar...</value>    
-                    <value xml:lang="da">Om LanguageTool</value>
+                    <value xml:lang="da">Om WritingTool</value>
                     <value xml:lang="gl">Sobre...</value>
                     <value xml:lang="pt">Sobre...</value>
-                    <value xml:lang="es">Acerca de LanguageTool</value>
-                    <value xml:lang="be">Пра LanguageTool</value>
+                    <value xml:lang="es">Acerca de WritingTool</value>
+                    <value xml:lang="be">Пра WritingTool</value>
                     <value xml:lang="eo">Pri...</value>
                     <value xml:lang="fr">À propos...</value>
                     <value xml:lang="ast">Tocante a...</value>
                     <value xml:lang="zh-CN">关于...</value>
                     <value xml:lang="zh-TW">關於...</value>
                     <value xml:lang="br">Diwar-benn...</value>
-                    <value xml:lang="el">Σχετικά με το LanguageTool</value>
+                    <value xml:lang="el">Σχετικά με το WritingTool</value>
                     <value xml:lang="ca">Sobre...</value>
                     <value xml:lang="ta">எங்களைப் பற்றி...</value>
-                    <value xml:lang="sr">О програму LanguageTool ...</value>
-                    <value xml:lang="sv">Om LanguageTool ...</value>
+                    <value xml:lang="sr">О програму WritingTool ...</value>
+                    <value xml:lang="sv">Om WritingTool ...</value>
                     </prop>
                 </node>
             </node>
         </node>
         <node oor:name="OfficeNotebookBar">
-            <node oor:name="org.languagetool.openoffice.Main.notebar" oor:op="replace">
+            <node oor:name="org.writingtool.WritingTool.notebar" oor:op="replace">
                 <node oor:name="T1" oor:op="replace">
                     <prop oor:name="URL" oor:type="xs:string">
-                        <value>service:org.languagetool.openoffice.Main?nextError</value>
+                        <value>service:org.writingtool.WritingTool?nextError</value>
                     </prop>
                     <prop oor:name="Target" oor:type="xs:string">
                         <value>_self</value>
@@ -402,7 +402,7 @@
                 </node>
                 <node oor:name="T2" oor:op="replace">
                     <prop oor:name="URL" oor:type="xs:string">
-                        <value>service:org.languagetool.openoffice.Main?checkDialog</value>
+                        <value>service:org.writingtool.WritingTool?checkDialog</value>
                     </prop>
                     <prop oor:name="Target" oor:type="xs:string">
                         <value>_self</value>
@@ -441,7 +441,7 @@
                 </node>
                 <node oor:name="T3" oor:op="replace">
                     <prop oor:name="URL" oor:type="xs:string">
-                        <value>service:org.languagetool.openoffice.Main?checkAgainDialog</value>
+                        <value>service:org.writingtool.WritingTool?checkAgainDialog</value>
                     </prop>
                     <prop oor:name="Target" oor:type="xs:string">
                         <value>_self</value>
@@ -478,7 +478,7 @@
                 </node>
                 <node oor:name="T4" oor:op="replace">
                     <prop oor:name="URL" oor:type="xs:string">
-                        <value>service:org.languagetool.openoffice.Main?refreshCheck</value>
+                        <value>service:org.writingtool.WritingTool?refreshCheck</value>
                     </prop>
                     <prop oor:name="Target" oor:type="xs:string">
                         <value>_self</value>
@@ -495,7 +495,7 @@
                 </node>
                 <node oor:name="T5" oor:op="replace">
                     <prop oor:name="URL" oor:type="xs:string">
-                        <value>service:org.languagetool.openoffice.Main?configure</value>
+                        <value>service:org.writingtool.WritingTool?configure</value>
                     </prop>
                     <prop oor:name="Target" oor:type="xs:string">
                         <value>_self</value>
@@ -534,7 +534,7 @@
                 </node>
                 <node oor:name="T6" oor:op="replace">
                     <prop oor:name="URL" oor:type="xs:string">
-                        <value>service:org.languagetool.openoffice.Main?about</value>
+                        <value>service:org.writingtool.WritingTool?about</value>
                     </prop>
                     <prop oor:name="Target" oor:type="xs:string">
                         <value>_self</value>
@@ -547,26 +547,26 @@
                     <value xml:lang="de">Über...</value>
                     <value xml:lang="pl">Informacje...</value>
                     <value xml:lang="sl">O razširitvi ...</value>
-                    <value xml:lang="sk">O LanguageTool...</value>
-                    <value xml:lang="ru">О программе LanguageTool...</value>
-                    <value xml:lang="uk">Про програму LanguageTool...</value>   
+                    <value xml:lang="sk">O WritingTool...</value>
+                    <value xml:lang="ru">О программе WritingTool...</value>
+                    <value xml:lang="uk">Про програму WritingTool...</value>   
                     <value xml:lang="is">Upplýsingar...</value>    
-                    <value xml:lang="da">Om LanguageTool</value>
+                    <value xml:lang="da">Om WritingTool</value>
                     <value xml:lang="gl">Sobre...</value>
                     <value xml:lang="pt">Sobre...</value>
-                    <value xml:lang="es">Acerca de LanguageTool</value>
-                    <value xml:lang="be">Пра LanguageTool</value>
+                    <value xml:lang="es">Acerca de WritingTool</value>
+                    <value xml:lang="be">Пра WritingTool</value>
                     <value xml:lang="eo">Pri...</value>
                     <value xml:lang="fr">À propos...</value>
                     <value xml:lang="ast">Tocante a...</value>
                     <value xml:lang="zh-CN">关于...</value>
                     <value xml:lang="zh-TW">關於...</value>
                     <value xml:lang="br">Diwar-benn...</value>
-                    <value xml:lang="el">Σχετικά με το LanguageTool</value>
+                    <value xml:lang="el">Σχετικά με το WritingTool</value>
                     <value xml:lang="ca">Sobre...</value>
                     <value xml:lang="ta">எங்களைப் பற்றி...</value>
-                    <value xml:lang="sr">О програму LanguageTool ...</value>
-                    <value xml:lang="sv">Om LanguageTool ...</value>
+                    <value xml:lang="sr">О програму WritingTool ...</value>
+                    <value xml:lang="sv">Om WritingTool ...</value>
                     </prop>
                 </node>
             </node>
@@ -574,7 +574,7 @@
 
   
     <node oor:name="OfficeMenuBarMerging">
-      <node oor:name="org.languagetool.openoffice.Main.menubar" oor:op="replace">
+      <node oor:name="org.writingtool.WritingTool.menubar" oor:op="replace">
         <node oor:name="S1" oor:op="replace">
           <prop oor:name="MergePoint">
 <!--
@@ -602,29 +602,29 @@
           <node oor:name="MenuItems">
             <node oor:name="M0" oor:op="replace">
               <prop oor:name="Title">
-                <value xml:lang="en-US">LanguageTool</value>
-                <value xml:lang="sk">Gramatika - LanguageTool</value>
-                <value xml:lang="sl">Skladnja (LanguageTool) ...</value>
-                <value xml:lang="ru">Грамматика – LanguageTool</value>
-                <value xml:lang="uk">Граматика - LanguageTool</value>
-                <value xml:lang="is">Málfar (LanguageTool)</value>
-                <value xml:lang="be">Правапіс (LanguageTool)</value>
-                <value xml:lang="eo">Lingvoilo (LanguageTool)</value>
-                <value xml:lang="br">Yezhadur (LanguageTool)</value>
-                <value xml:lang="fr">Grammaire (LanguageTool)</value>
+                <value xml:lang="en-US">WritingTool</value>
+                <value xml:lang="sk">Gramatika - WritingTool</value>
+                <value xml:lang="sl">Skladnja (WritingTool) ...</value>
+                <value xml:lang="ru">Грамматика – WritingTool</value>
+                <value xml:lang="uk">Граматика - WritingTool</value>
+                <value xml:lang="is">Málfar (WritingTool)</value>
+                <value xml:lang="be">Правапіс (WritingTool)</value>
+                <value xml:lang="eo">Lingvoilo (WritingTool)</value>
+                <value xml:lang="br">Yezhadur (WritingTool)</value>
+                <value xml:lang="fr">Grammaire (WritingTool)</value>
                 <value xml:lang="pt">Gramática</value>
                 <value xml:lang="gl">Gramática</value>
-                <value xml:lang="es">Gramática (LanguageTool)</value>
-                <value xml:lang="el">Γραμματική (LanguageTool)</value>
-                <value xml:lang="ca">Gramàtica (LanguageTool)</value>
+                <value xml:lang="es">Gramática (WritingTool)</value>
+                <value xml:lang="el">Γραμματική (WritingTool)</value>
+                <value xml:lang="ca">Gramàtica (WritingTool)</value>
                 <value xml:lang="ta">லேங்குவேஜ் டூல்</value>
-                <value xml:lang="sr">Правопис (LanguageTool)</value>
-                <value xml:lang="sv">Grammatik (LanguageTool)</value>
+                <value xml:lang="sr">Правопис (WritingTool)</value>
+                <value xml:lang="sv">Grammatik (WritingTool)</value>
                </prop>
              <node oor:name="Submenu">
                 <node oor:name="M1" oor:op="replace">
                   <prop oor:name="URL" oor:type="xs:string">
-                    <value>service:org.languagetool.openoffice.Main?nextError</value>
+                    <value>service:org.writingtool.WritingTool?nextError</value>
                   </prop>
                   <prop oor:name="Title" oor:type="xs:string">
                     <value/>
@@ -643,7 +643,7 @@
                 </node>
                 <node oor:name="M2" oor:op="replace">
                   <prop oor:name="URL" oor:type="xs:string">
-                    <value>service:org.languagetool.openoffice.Main?checkDialog</value>
+                    <value>service:org.writingtool.WritingTool?checkDialog</value>
 <!--                     <value>.uno:SpellingAndGrammarDialog</value>  -->
                   </prop>
                   <prop oor:name="Title" oor:type="xs:string">
@@ -684,7 +684,7 @@
                 </node>
                 <node oor:name="M3" oor:op="replace">
                   <prop oor:name="URL" oor:type="xs:string">
-                    <value>service:org.languagetool.openoffice.Main?checkAgainDialog</value>
+                    <value>service:org.writingtool.WritingTool?checkAgainDialog</value>
 <!--                    <value>.uno:RecheckDocument</value>    -->
                   </prop>
                   <prop oor:name="Title" oor:type="xs:string">
@@ -723,7 +723,7 @@
                 </node>
                 <node oor:name="M4" oor:op="replace">
                   <prop oor:name="URL" oor:type="xs:string">
-                    <value>service:org.languagetool.openoffice.Main?refreshCheck</value>
+                    <value>service:org.writingtool.WritingTool?refreshCheck</value>
 <!--                    <value>.uno:RecheckDocument</value>    -->
                   </prop>
                   <prop oor:name="Title" oor:type="xs:string">
@@ -742,7 +742,7 @@
                 </node>
                 <node oor:name="M6" oor:op="replace">
                   <prop oor:name="URL" oor:type="xs:string">
-                    <value>service:org.languagetool.openoffice.Main?configure</value>
+                    <value>service:org.writingtool.WritingTool?configure</value>
                   </prop>
                   <prop oor:name="Title" oor:type="xs:string">
                     <value/>
@@ -782,7 +782,7 @@
                 </node>
                 <node oor:name="M7" oor:op="replace">
                   <prop oor:name="URL" oor:type="xs:string">
-                    <value>service:org.languagetool.openoffice.Main?about</value>
+                    <value>service:org.writingtool.WritingTool?about</value>
                   </prop>
                   <prop oor:name="Title" oor:type="xs:string">
                     <value/>
@@ -790,26 +790,26 @@
                     <value xml:lang="de">Über...</value>
                     <value xml:lang="pl">Informacje...</value>
                     <value xml:lang="sl">O razširitvi ...</value>
-                    <value xml:lang="sk">O LanguageTool...</value>
-                    <value xml:lang="ru">О программе LanguageTool...</value>
-                    <value xml:lang="uk">Про програму LanguageTool...</value>   
+                    <value xml:lang="sk">O WritingTool...</value>
+                    <value xml:lang="ru">О программе WritingTool...</value>
+                    <value xml:lang="uk">Про програму WritingTool...</value>   
                     <value xml:lang="is">Upplýsingar...</value>    
-                    <value xml:lang="da">Om LanguageTool</value>
+                    <value xml:lang="da">Om WritingTool</value>
                     <value xml:lang="gl">Sobre...</value>
                     <value xml:lang="pt">Sobre...</value>
-                    <value xml:lang="es">Acerca de LanguageTool</value>
-                    <value xml:lang="be">Пра LanguageTool</value>
+                    <value xml:lang="es">Acerca de WritingTool</value>
+                    <value xml:lang="be">Пра WritingTool</value>
                     <value xml:lang="eo">Pri...</value>
                     <value xml:lang="fr">À propos...</value>
                     <value xml:lang="ast">Tocante a...</value>
                     <value xml:lang="zh-CN">关于...</value>
                     <value xml:lang="zh-TW">關於...</value>
                     <value xml:lang="br">Diwar-benn...</value>
-                    <value xml:lang="el">Σχετικά με το LanguageTool</value>
+                    <value xml:lang="el">Σχετικά με το WritingTool</value>
                     <value xml:lang="ca">Sobre...</value>
                     <value xml:lang="ta">எங்களைப் பற்றி...</value>
-                    <value xml:lang="sr">О програму LanguageTool ...</value>
-                    <value xml:lang="sv">Om LanguageTool ...</value>
+                    <value xml:lang="sr">О програму WritingTool ...</value>
+                    <value xml:lang="sv">Om WritingTool ...</value>
                   </prop>
                   <prop oor:name="Target" oor:type="xs:string">
                     <value>_self</value>

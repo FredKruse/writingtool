@@ -2,12 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.languagetool</groupId>
+    <groupId>org.writingtool</groupId>
     <version>${revision}</version>
 
-    <artifactId>languagetool-office-extension</artifactId>
+    <artifactId>writingtool</artifactId>
     <packaging>jar</packaging>
-    <name>LibreOffice/OpenOffice extension (based on LanguageTool)</name>
+    <name>WritingTool</name>
 
     <licenses>
         <license>
@@ -21,12 +21,12 @@
         <dependency>
             <groupId>org.languagetool</groupId>
             <artifactId>language-all</artifactId>
-            <version>${revision}</version>
+            <version>${lt-revision}</version>
         </dependency>
         <dependency>
             <groupId>org.languagetool</groupId>
             <artifactId>languagetool-core</artifactId>
-            <version>${revision}</version>
+            <version>${lt-revision}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.optimaize.languagedetector</groupId>
@@ -37,7 +37,7 @@
         <dependency>
             <groupId>org.languagetool</groupId>
             <artifactId>languagetool-http-client</artifactId>
-            <version>${revision}</version>
+            <version>${lt-revision}</version>
         </dependency>
         <dependency>
             <groupId>org.openoffice</groupId>
@@ -98,7 +98,7 @@
                         <manifestEntries>
                             <!-- as we later unzip the language JARs (see oxt.xml), we need to add the top directory to the classpath: -->
                             <Class-Path>./</Class-Path>
-                            <RegistrationClassName>org.languagetool.openoffice.Main</RegistrationClassName>
+                            <RegistrationClassName>org.writingtool.WritingTool</RegistrationClassName>
                             <ComponentVersion>${revision}</ComponentVersion>
                             <Implementation-Date>${maven.build.timestamp}</Implementation-Date>
                         </manifestEntries>
@@ -113,7 +113,7 @@
                     <descriptors>
                         <descriptor>src/main/assembly/oxt.xml</descriptor>
                     </descriptors>
-                    <finalName>LanguageTool-${revision}</finalName>
+                    <finalName>WritingTool-${revision}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
                     <archive>
                         <manifest>
@@ -135,14 +135,17 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
+                <version>${maven-deploy-plugin.version}</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
@@ -151,7 +154,8 @@
     </build>
 
     <properties>
-        <revision>6.5-SNAPSHOT</revision>
+        <revision>1.0-SNAPSHOT</revision>
+        <lt-revision>6.5-SNAPSHOT</lt-revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
