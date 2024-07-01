@@ -17,13 +17,6 @@
         </license>
     </licenses>
 
-    <repositories>
-        <repository>
-            <id>repo.languagetool.org</id>
-            <url>https://repo.languagetool.org/artifactory/languagetool-os-snapshot/</url>
-        </repository>
-    </repositories>
-
     <dependencies>
         <dependency>
             <groupId>org.languagetool</groupId>

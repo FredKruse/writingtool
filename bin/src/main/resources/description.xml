@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<description xmlns="http://openoffice.org/extensions/description/2006" xmlns:d="http://openoffice.org/extensions/description/2006" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<version value="1.0-SNAPSHOT"/>
+	<identifier value="org.openoffice.writingtool.oxt"/>
+	<dependencies>
+		<OpenOffice.org-minimal-version d:name="4.1" value="4.1"/>
+	</dependencies>
+	<update-information>
+		<src xlink:href="https://languagetool.org/languagetool.update.xml"/>
+	</update-information>
+	<publisher>
+		<name lang="pt" xlink:href="https://languagetool.org/pt">WritingTool</name>
+		<name lang="fr" xlink:href="https://languagetool.org/fr">WritingTool</name>
+		<name lang="ru" xlink:href="https://languagetool.org/ru">WritingTool</name>
+		<name lang="uk" xlink:href="https://languagetool.org/uk">WritingTool</name>
+		<name lang="de" xlink:href="https://languagetool.org/de">WritingTool</name>
+		<name lang="es" xlink:href="https://languagetool.org/es">WritingTool</name>
+		<name lang="en" xlink:href="https://languagetool.org/en">WritingTool</name>
+		<name lang="ca" xlink:href="https://languagetool.org/ca">WritingTool</name>
+		<name lang="pl" xlink:href="https://languagetool.org/pl">WritingTool</name>
+	</publisher>
+	<release-notes>
+		<src lang="zh-CN" xlink:href=""/>
+		<src lang="sl" xlink:href=""/>
+		<src lang="pt" xlink:href=""/>
+		<src lang="fr" xlink:href=""/>
+		<src lang="ru" xlink:href=""/>
+		<src lang="gl" xlink:href=""/>
+		<src lang="br" xlink:href=""/>
+		<src lang="zh-TW" xlink:href=""/>
+		<src lang="sr" xlink:href=""/>
+		<src lang="uk" xlink:href=""/>
+		<src lang="is" xlink:href=""/>
+		<src lang="sk" xlink:href=""/>
+		<src lang="da" xlink:href=""/>
+		<src lang="be" xlink:href=""/>
+		<src lang="de" xlink:href=""/>
+		<src lang="es" xlink:href=""/>
+		<src lang="en" xlink:href="CHANGES.md"/>
+		<src lang="eo" xlink:href=""/>
+		<src lang="sv" xlink:href=""/>
+		<src lang="el" xlink:href=""/>
+		<src lang="ca" xlink:href=""/>
+		<src lang="ta" xlink:href=""/>
+		<src lang="pl" xlink:href=""/>
+	</release-notes>
+	<display-name>
+		<name lang="zh-CN">WritingTool</name>
+		<name lang="sl">WritingTool</name>
+		<name lang="pt">WritingTool</name>
+		<name lang="fr">WritingTool</name>
+		<name lang="ru">WritingTool</name>
+		<name lang="gl">WritingTool</name>
+		<name lang="br">WritingTool</name>
+		<name lang="zh-TW">WritingTool</name>
+		<name lang="sr">WritingTool</name>
+		<name lang="uk">WritingTool</name>
+		<name lang="is">WritingTool</name>
+		<name lang="sk">WritingTool</name>
+		<name lang="da">WritingTool</name>
+		<name lang="be">WritingTool</name>
+		<name lang="de">WritingTool</name>
+		<name lang="es">WritingTool</name>
+		<name lang="en">WritingTool</name>
+		<name lang="eo">WritingTool</name>
+		<name lang="sv">WritingTool</name>
+		<name lang="el">WritingTool</name>
+		<name lang="ca">WritingTool</name>
+		<name lang="ta">WritingTool</name>
+		<name lang="pl">WritingTool</name>
+	</display-name>
+	<icon>
+		<default xlink:href="images/LanguageToolBig.png"/>
+	</icon>
+	<extension-description>
+		<src lang="zh-CN" xlink:href="description/desc_zh-CN.txt"/>
+		<src lang="sl" xlink:href="description/desc_sl.txt"/>
+		<src lang="pt" xlink:href="description/desc_pt.txt"/>
+		<src lang="fr" xlink:href="description/desc_fr.txt"/>
+		<src lang="ru" xlink:href="description/desc_ru.txt"/>
+		<src lang="gl" xlink:href="description/desc_gl.txt"/>
+		<src lang="br" xlink:href="description/desc_br.txt"/>
+		<src lang="zh-TW" xlink:href="description/desc_zh-TW.txt"/>
+		<src lang="sr" xlink:href="description/desc_sr.txt"/>
+		<src lang="uk" xlink:href="description/desc_uk.txt"/>
+		<src lang="is" xlink:href="description/desc_is.txt"/>
+		<src lang="sk" xlink:href="description/desc_sk.txt"/>
+		<src lang="da" xlink:href="description/desc_da.txt"/>
+		<src lang="be" xlink:href="description/desc_be.txt"/>
+		<src lang="de" xlink:href="description/desc_de.txt"/>
+		<src lang="es" xlink:href="description/desc_es.txt"/>
+		<src lang="en" xlink:href="description/desc_en.txt"/>
+		<src lang="eo" xlink:href="description/desc_eo.txt"/>
+		<src lang="sv" xlink:href="description/desc_sv.txt"/>
+		<src lang="el" xlink:href="description/desc_el.txt"/>
+		<src lang="ca" xlink:href="description/desc_ca.txt"/>
+		<src lang="ta" xlink:href="description/desc_ta.txt"/>
+		<src lang="pl" xlink:href="description/desc_pl.txt"/>
+	</extension-description>
+</description>
