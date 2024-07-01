@@ -1,1 +1,2 @@
-# writingtool
+# WritingTool
+based on LanguageTool
