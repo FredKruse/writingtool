@@ -1,6 +1,6 @@
 # WritingTool (based on LanguageTool)
 
-The extension offers the following advantages over the internal use of LanguageTool in Libreoffice:
+The extension offers the following advantages over the use of internal LanguageTool in Libreoffice:
 * The extension runs on the local machine. No remote server is needed.
 * The extension supports all rules working on the level of full text (e.g., opening and closing quotes are recognized even if they are more than one paragraph away from each other).
 * The extension uses the LanguageTool spell checker in addition to that of Libreoffice.
