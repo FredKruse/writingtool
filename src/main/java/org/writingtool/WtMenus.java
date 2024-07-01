@@ -104,7 +104,7 @@ public class WtMenus {
 //  public static final String LT_MENU_REPLACE_COLON = "__|__";
   public static final String LT_MENU_REPLACE_COLON = ":";
 
-  private static final ResourceBundle MESSAGES = JLanguageTool.getMessageBundle();
+  private static final ResourceBundle MESSAGES = OfficeTools.getMessageBundle();
   private static final int SUBMENU_ID_DIFF = 21;
   private static final short SUBMENU_ID_AI = 1000;
 //  private static final String LT_TOOLBAR_URL = "private:resource/toolbar/addon_" + OfficeTools.WT_SERVICE_NAME + ".toolbar";

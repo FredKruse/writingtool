@@ -22,13 +22,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
 import org.languagetool.rules.Rule;
 import org.writingtool.gui.Configuration;
 import org.writingtool.gui.ConfigurationDialog;
-
-import com.sun.star.uno.XComponentContext;
 
 /**
  * A thread that shows the configuration dialog which lets the
@@ -54,7 +51,7 @@ class ConfigThread extends Thread {
     this.config = config;
     this.lt = lt;
     this.documents = documents;
-    String title = JLanguageTool.getMessageBundle().getString("guiConfigWindowTitle") + " (LT " + OfficeTools.getLtInformation() + ")";
+    String title = OfficeTools.getMessageBundle().getString("guiConfigWindowTitle") + " (LT " + OfficeTools.getLtInformation() + ")";
     cfgDialog = new ConfigurationDialog(null, true, OfficeTools.getLtImage(), title, config);
   }
 

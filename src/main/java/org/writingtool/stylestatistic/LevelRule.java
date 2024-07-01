@@ -31,6 +31,7 @@ import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleMatch;
 import org.languagetool.rules.TextLevelRule;
 import org.writingtool.MessageHandler;
+import org.writingtool.OfficeTools;
 import org.writingtool.ResultCache;
 
 /**
@@ -42,7 +43,7 @@ public class LevelRule {
 
   private boolean debugMode = false;
   
-  private final static ResourceBundle MESSAGES = JLanguageTool.getMessageBundle();
+  private final static ResourceBundle MESSAGES = OfficeTools.getMessageBundle();
   private final TextLevelRule rule;
   private boolean withDirectSpeech;
   private int procentualStep;

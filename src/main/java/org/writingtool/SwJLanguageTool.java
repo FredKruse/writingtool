@@ -55,7 +55,7 @@ import org.writingtool.gui.Configuration;
  */
 public class SwJLanguageTool {
   
-  private static final ResourceBundle MESSAGES = JLanguageTool.getMessageBundle();
+  private static final ResourceBundle MESSAGES = OfficeTools.getMessageBundle();
 
   private final MultiThreadedJLanguageToolLo mlt;
   private final LORemoteLanguageTool rlt;

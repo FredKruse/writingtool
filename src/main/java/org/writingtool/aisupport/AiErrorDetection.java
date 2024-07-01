@@ -50,7 +50,7 @@ public class AiErrorDetection {
   boolean debugModeTm = true;
   boolean debugMode = OfficeTools.DEBUG_MODE_AI;
   
-  private static final ResourceBundle messages = JLanguageTool.getMessageBundle();
+  private static final ResourceBundle messages = OfficeTools.getMessageBundle();
   private final SingleDocument document;
   private final DocumentCache docCache;
   private final Configuration config;

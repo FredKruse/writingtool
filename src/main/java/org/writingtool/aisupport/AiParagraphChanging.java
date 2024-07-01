@@ -65,7 +65,7 @@ public class AiParagraphChanging extends Thread {
   private final static String STYLE_COMMAND = "Formuliere um";
   private final static String EXPAND_COMMAND = "Erweitere den Text";
 */
-  private static final ResourceBundle messages = JLanguageTool.getMessageBundle();
+  private static final ResourceBundle messages = OfficeTools.getMessageBundle();
 
   private boolean debugMode = OfficeTools.DEBUG_MODE_AI;   //  should be false except for testing
 

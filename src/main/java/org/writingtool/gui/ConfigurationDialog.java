@@ -21,12 +21,13 @@ package org.writingtool.gui;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
 import org.languagetool.Languages;
 import org.languagetool.languagemodel.LuceneLanguageModel;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleOption;
+import org.writingtool.MessageHandler;
+import org.writingtool.OfficeTools;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -98,7 +99,7 @@ public class ConfigurationDialog implements ActionListener {
     this.config = original.copy(original);
     this.ltImage = ltImage;
     dialogTitle = title;
-    messages = JLanguageTool.getMessageBundle();
+    messages = OfficeTools.getMessageBundle();
   }
 
   /**
@@ -359,6 +360,7 @@ public class ConfigurationDialog implements ActionListener {
     cons.fill = GridBagConstraints.BOTH;
     cons.weighty = 1.0f;
     jPane.add(new JPanel(), cons);
+    
     tabpane.addTab(messages.getString("guiGeneral"), new JScrollPane(jPane));
 
 //  Grammar rules tab    

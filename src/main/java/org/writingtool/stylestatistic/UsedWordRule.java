@@ -34,6 +34,7 @@ import org.languagetool.rules.AbstractStyleTooOftenUsedWordRule;
 import org.languagetool.rules.ReadabilityRule;
 import org.languagetool.rules.TextLevelRule;
 import org.writingtool.MessageHandler;
+import org.writingtool.OfficeTools;
 import org.writingtool.ResultCache;
 
 import com.sun.star.linguistic2.SingleProofreadingError;
@@ -49,7 +50,7 @@ public class UsedWordRule {
 
   private boolean debugMode = false;
   
-  private final static ResourceBundle MESSAGES = JLanguageTool.getMessageBundle();
+  private final static ResourceBundle MESSAGES = OfficeTools.getMessageBundle();
   private final TextLevelRule rule;
   private int procentualStep;
   private int optimalNumberWords;

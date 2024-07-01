@@ -95,7 +95,7 @@ public class MultiDocumentsHandler {
   // e.g. language ="qlt" country="ES" variant="ca-ES-valencia":
   private static final String LIBREOFFICE_SPECIAL_LANGUAGE_TAG = "qlt";
   
-  private static final ResourceBundle messages = JLanguageTool.getMessageBundle();
+  private static final ResourceBundle messages = OfficeTools.getMessageBundle();
 
   private static final int HEAP_CHECK_INTERVAL = 1000;
 

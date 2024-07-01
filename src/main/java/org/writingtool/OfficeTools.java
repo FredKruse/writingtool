@@ -18,11 +18,15 @@
  */
 package org.writingtool;
 
+import static org.languagetool.JLanguageTool.MESSAGE_BUNDLE;
+
 import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -32,6 +36,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.jetbrains.annotations.Nullable;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
+import org.languagetool.ResourceBundleWithFallback;
 import org.languagetool.rules.AbstractStatisticSentenceStyleRule;
 import org.languagetool.rules.AbstractStatisticStyleRule;
 import org.languagetool.rules.AbstractStyleTooOftenUsedWordRule;
@@ -95,6 +100,7 @@ public class OfficeTools {
   public static final String WT_SPELL_SERVICE_NAME = "org.writingtool.WritingToolSpellChecker";
   public static final String WT_NAME = "WritingTool";
   public static final String WT_DISPLAY_SERVICE_NAME = WT_NAME;
+  
   public static final int PROOFINFO_UNKNOWN = 0;
   public static final int PROOFINFO_GET_PROOFRESULT = 1;
   public static final int PROOFINFO_MARK_PARAGRAPH = 2;
@@ -152,6 +158,8 @@ public class OfficeTools {
   private static String OFFICE_EXTENSION_ID = null;
   private static OfficeProductInfo OFFICE_PRODUCT_INFO = null;
 
+  private static final String RESOURCES = "org.writingtool.MessagesBundle";
+  
   private static final String MENU_BAR = "private:resource/menubar/menubar";
   private static final String LOG_DELIMITER = ",";
   
@@ -766,7 +774,7 @@ public class OfficeTools {
   
   public static boolean hasStatisticalStyleRules(Language lang) {
     try {
-      for (Rule rule : lang.getRelevantRules(JLanguageTool.getMessageBundle(), null, lang, null)) {
+      for (Rule rule : lang.getRelevantRules(OfficeTools.getMessageBundle(), null, lang, null)) {
         if (rule instanceof AbstractStatisticSentenceStyleRule || rule instanceof AbstractStatisticStyleRule ||
             rule instanceof ReadabilityRule || rule instanceof AbstractStyleTooOftenUsedWordRule) {
           return true;
@@ -777,6 +785,29 @@ public class OfficeTools {
     return false;
   }
   
+  /**
+   * Gets the ResourceBundle (i18n strings) for the default language of the user's system.
+   */
+  public static ResourceBundle getMessageBundle() {
+    return getMessageBundle(null);
+  }
+
+  public static ResourceBundle getMessageBundle(Language lang) {
+    java.util.Locale locale = lang == null ? java.util.Locale.getDefault() : lang.getLocaleWithCountryAndVariant();
+    ResourceBundle wtBundle = null;
+    ResourceBundle ltBundle = null;
+    try {
+      wtBundle = ResourceBundle.getBundle(RESOURCES, locale);
+    } catch (MissingResourceException ex) {
+    }
+    try {
+      ltBundle = JLanguageTool.getDataBroker().getResourceBundle(MESSAGE_BUNDLE, locale);
+    } catch (MissingResourceException ex) {
+    }
+    ResourceBundle fallbackBundle = JLanguageTool.getDataBroker().getResourceBundle(MESSAGE_BUNDLE, java.util.Locale.ENGLISH);
+    return new WtResourceBundle(wtBundle, ltBundle, fallbackBundle);
+  }
+
   /**
    * Handle logLevel for debugging and development
    */

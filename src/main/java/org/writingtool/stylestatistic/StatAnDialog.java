@@ -85,7 +85,7 @@ import com.sun.star.lang.XComponent;
  */
 public class StatAnDialog extends Thread  {
   
-  private final static ResourceBundle MESSAGES = JLanguageTool.getMessageBundle();
+  private final static ResourceBundle MESSAGES = OfficeTools.getMessageBundle();
   private final static boolean debugMode = false;
   private final static String dialogName = MESSAGES.getString("loStatisticalAnalysis");
   private final static int MIN_DIALOG_WIDTH = 640;
@@ -148,7 +148,7 @@ public class StatAnDialog extends Thread  {
     if (lang != null) {
       try {
         Map<String, Object[]> ruleValues = new HashMap<>();
-        for (Rule rule : lang.getRelevantRules(JLanguageTool.getMessageBundle(), null, lang, null)) {
+        for (Rule rule : lang.getRelevantRules(OfficeTools.getMessageBundle(), null, lang, null)) {
           if (rule instanceof AbstractStatisticSentenceStyleRule || rule instanceof AbstractStatisticStyleRule ||
               rule instanceof ReadabilityRule || rule instanceof AbstractStyleTooOftenUsedWordRule) {
             Object[] o = new Object[1];
@@ -157,7 +157,7 @@ public class StatAnDialog extends Thread  {
           }
         }
         UserConfig userConfig = new UserConfig(ruleValues);
-        for (Rule rule : lang.getRelevantRules(JLanguageTool.getMessageBundle(), userConfig, lang, null)) {
+        for (Rule rule : lang.getRelevantRules(OfficeTools.getMessageBundle(), userConfig, lang, null)) {
           if (rule instanceof AbstractStatisticSentenceStyleRule || rule instanceof AbstractStatisticStyleRule ||
               (rule instanceof ReadabilityRule && !hasReadabilityRule()) || rule instanceof AbstractStyleTooOftenUsedWordRule) {
             rules.add((TextLevelRule)rule);

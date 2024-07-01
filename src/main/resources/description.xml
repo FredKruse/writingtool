@@ -9,15 +9,15 @@
 		<src xlink:href="https://languagetool.org/languagetool.update.xml"/>
 	</update-information>
 	<publisher>
-		<name lang="pt" xlink:href="https://languagetool.org/pt">LanguageTool</name>
-		<name lang="fr" xlink:href="https://languagetool.org/fr">LanguageTool</name>
-		<name lang="ru" xlink:href="https://languagetool.org/ru">LanguageTool</name>
-		<name lang="uk" xlink:href="https://languagetool.org/uk">LanguageTool</name>
-		<name lang="de" xlink:href="https://languagetool.org/de">LanguageTool</name>
-		<name lang="es" xlink:href="https://languagetool.org/es">LanguageTool</name>
-		<name lang="en" xlink:href="https://languagetool.org">WritingTool</name>
-		<name lang="ca" xlink:href="https://languagetool.org/ca">LanguageTool</name>
-		<name lang="pl" xlink:href="https://languagetool.org/pl">LanguageTool</name>
+		<name lang="pt" xlink:href="https://languagetool.org/pt">WritingTool</name>
+		<name lang="fr" xlink:href="https://languagetool.org/fr">WritingTool</name>
+		<name lang="ru" xlink:href="https://languagetool.org/ru">WritingTool</name>
+		<name lang="uk" xlink:href="https://languagetool.org/uk">WritingTool</name>
+		<name lang="de" xlink:href="https://languagetool.org/de">WritingTool</name>
+		<name lang="es" xlink:href="https://languagetool.org/es">WritingTool</name>
+		<name lang="en" xlink:href="https://languagetool.org/en">WritingTool</name>
+		<name lang="ca" xlink:href="https://languagetool.org/ca">WritingTool</name>
+		<name lang="pl" xlink:href="https://languagetool.org/pl">WritingTool</name>
 	</publisher>
 	<release-notes>
 		<src lang="zh-CN" xlink:href=""/>
@@ -45,29 +45,29 @@
 		<src lang="pl" xlink:href=""/>
 	</release-notes>
 	<display-name>
-		<name lang="zh-CN"></name>
-		<name lang="sl"></name>
-		<name lang="pt"></name>
-		<name lang="fr"></name>
-		<name lang="ru"></name>
-		<name lang="gl"></name>
-		<name lang="br"></name>
-		<name lang="zh-TW"></name>
-		<name lang="sr"></name>
-		<name lang="uk"></name>
-		<name lang="is"></name>
-		<name lang="sk"></name>
-		<name lang="da"></name>
-		<name lang="be"></name>
-		<name lang="de"></name>
-		<name lang="es"></name>
+		<name lang="zh-CN">WritingTool</name>
+		<name lang="sl">WritingTool</name>
+		<name lang="pt">WritingTool</name>
+		<name lang="fr">WritingTool</name>
+		<name lang="ru">WritingTool</name>
+		<name lang="gl">WritingTool</name>
+		<name lang="br">WritingTool</name>
+		<name lang="zh-TW">WritingTool</name>
+		<name lang="sr">WritingTool</name>
+		<name lang="uk">WritingTool</name>
+		<name lang="is">WritingTool</name>
+		<name lang="sk">WritingTool</name>
+		<name lang="da">WritingTool</name>
+		<name lang="be">WritingTool</name>
+		<name lang="de">WritingTool</name>
+		<name lang="es">WritingTool</name>
 		<name lang="en">WritingTool</name>
-		<name lang="eo"></name>
-		<name lang="sv"></name>
-		<name lang="el"></name>
-		<name lang="ca"></name>
-		<name lang="ta"></name>
-		<name lang="pl"></name>
+		<name lang="eo">WritingTool</name>
+		<name lang="sv">WritingTool</name>
+		<name lang="el">WritingTool</name>
+		<name lang="ca">WritingTool</name>
+		<name lang="ta">WritingTool</name>
+		<name lang="pl">WritingTool</name>
 	</display-name>
 	<icon>
 		<default xlink:href="images/LanguageToolBig.png"/>

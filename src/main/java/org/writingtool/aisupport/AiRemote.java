@@ -59,7 +59,7 @@ import com.sun.star.lang.Locale;
  */
 public class AiRemote {
   
-  private static final ResourceBundle messages = JLanguageTool.getMessageBundle();
+  private static final ResourceBundle messages = OfficeTools.getMessageBundle();
   public final static String TRANSLATE_INSTRUCTION = "loAiTranslateInstruction";
   public final static String CORRECT_INSTRUCTION = "loAiCorrectInstruction";
   public final static String STYLE_INSTRUCTION = "loAiStyleInstruction";
@@ -345,7 +345,7 @@ public class AiRemote {
     }
     return (instruction);
 */
-    ResourceBundle messages = JLanguageTool.getMessageBundle(MultiDocumentsHandler.getLanguage(locale));
+    ResourceBundle messages = OfficeTools.getMessageBundle(MultiDocumentsHandler.getLanguage(locale));
     String instruction = messages.getString(mess) + " (language: " + locale.Language + ")"; 
     return instruction;
   }
