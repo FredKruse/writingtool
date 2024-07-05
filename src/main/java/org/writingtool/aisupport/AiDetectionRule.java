@@ -27,6 +27,7 @@ import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 
 import org.languagetool.AnalyzedSentence;
+import org.languagetool.AnalyzedToken;
 import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.Tag;
 import org.languagetool.rules.Categories;
@@ -47,10 +48,12 @@ import com.sun.star.lang.Locale;
  */
 public class AiDetectionRule extends TextLevelRule {
 
+  public static final int STYLE_HINT_LIMIT = 25;  //  Limit of changed tokens in a sentence in percent (after that a style hint is assumed)
+  
   public static final String RULE_ID = "LO_AI_DETECTION_RULE";
   public static final Color RULE_HINT_COLOR = new Color(90, 0, 255);
   public static final Color RULE_OTHER_COLOR = new Color(150, 150, 0);
-  private static final Pattern QUOTES = Pattern.compile("[\"“”„»«]");
+  private static final Pattern QUOTES = Pattern.compile("[\"“”“„»«]");
   private static final Pattern SINGLE_QUOTES = Pattern.compile("[‚‘’'›‹]");
   private static final Pattern PUNCTUATION = Pattern.compile("[,.!?:]");
   private static final Pattern OPENING_BRACKETS = Pattern.compile("[{(\\[]");
@@ -59,7 +62,6 @@ public class AiDetectionRule extends TextLevelRule {
 
   private final ResourceBundle messages;
   private final String aiResultText;
-  private final String paraText;
   private final List<AnalyzedSentence> analyzedAiResult;
   private final String ruleMessage;
   private final boolean showStylisticHints;
@@ -67,12 +69,11 @@ public class AiDetectionRule extends TextLevelRule {
   private final Locale locale;
 
   
-  AiDetectionRule(String aiResultText, String paraText, List<AnalyzedSentence> analyzedAiResult, 
+  AiDetectionRule(String aiResultText, List<AnalyzedSentence> analyzedAiResult, 
       LinguisticServices linguServices, Locale locale, ResourceBundle messages, boolean showStylisticHints) {
     this.aiResultText = aiResultText;
     this.analyzedAiResult = analyzedAiResult;
     this.messages = messages;
-    this.paraText = paraText;
     this.showStylisticHints = showStylisticHints;
     this.linguServices = linguServices;
     this.locale = locale;
@@ -85,8 +86,14 @@ public class AiDetectionRule extends TextLevelRule {
     if (debugMode) {
       MessageHandler.printToLogFile("AiDetectionRule: showStylisticHints: " + showStylisticHints);
     }
+  }
 
-
+  /**
+   * Override this function for specific Languages
+   * zzz -> no specific language
+   */
+  public String getLanguage() {
+    return "zzz";
   }
   
   private boolean isIgnoredToken(String paraToken, String resultToken) {
@@ -133,7 +140,7 @@ public class AiDetectionRule extends TextLevelRule {
     for (AnalyzedSentence sentence : sentences) {
       AnalyzedTokenReadings[] tokens = sentence.getTokensWithoutWhitespace();
       for (int i = 1; i < tokens.length; i++) {
-        paraTokens.add(new AiToken(tokens[i].getToken(), tokens[i].getStartPos() + pos, sentence, tokens[i].isNonWord()));
+        paraTokens.add(new AiToken(tokens[i], pos, sentence));
         sEnd++;
       }
       pos += sentence.getCorrectedTextLength();
@@ -144,26 +151,30 @@ public class AiDetectionRule extends TextLevelRule {
     for (AnalyzedSentence sentence : analyzedAiResult) {
       AnalyzedTokenReadings[] tokens = sentence.getTokensWithoutWhitespace();
       for (int i = 1; i < tokens.length; i++) {
-        resultTokens.add(new AiToken(tokens[i].getToken(), tokens[i].getStartPos() + pos, null, tokens[i].isNonWord()));
+        resultTokens.add(new AiToken(tokens[i], pos, sentence));
       }
       pos += sentence.getCorrectedTextLength();
     }
     int i;
     int j = 0;
     for (i = 0; i < paraTokens.size() && j < resultTokens.size(); i++) {
-      if (!paraTokens.get(i).token.equals(resultTokens.get(j).token) 
-          && !isIgnoredToken(paraTokens.get(i).token, resultTokens.get(j).token)) {
-        if ((i == 0 && ("{".equals(resultTokens.get(j).token) || "\"".equals(resultTokens.get(j).token)))
-            && j + 1 < resultTokens.size() && paraTokens.get(i).token.equals(resultTokens.get(j + 1).token)) {
+      if (!paraTokens.get(i).getToken().equals(resultTokens.get(j).getToken()) 
+          && !isIgnoredToken(paraTokens.get(i).getToken(), resultTokens.get(j).getToken())) {
+        if ((i == 0 && ("{".equals(resultTokens.get(j).getToken()) || QUOTES.matcher(resultTokens.get(j).getToken()).matches()))
+            && j + 1 < resultTokens.size() && paraTokens.get(i).getToken().equals(resultTokens.get(j + 1).getToken())) {
           j += 2;
           continue;
         }
-        if (isQuote(paraTokens.get(i).token)
-            && i + 1 < paraTokens.size() && paraTokens.get(i + 1).token.equals(resultTokens.get(j).token)) {
+        if (isQuote(paraTokens.get(i).getToken())
+            && i + 1 < paraTokens.size() && paraTokens.get(i + 1).getToken().equals(resultTokens.get(j).getToken())) {
           continue;
         }
-        int posStart = paraTokens.get(i).startPos;
-        AnalyzedSentence sentence = paraTokens.get(i).sentence;
+        int posStart = paraTokens.get(i).getStartPos();
+        int nParaTokenStart = i;
+        int nParaTokenEnd = 0;
+        int nResultTokenStart = 0;
+        int nResultTokenEnd = 0;
+        AnalyzedSentence sentence = paraTokens.get(i).getSentence();
         int posEnd = 0;
         String suggestion = null;
         AiToken singleWordToken = null;
@@ -171,30 +182,38 @@ public class AiDetectionRule extends TextLevelRule {
         for (int n = 1; !endFound && i + n < paraTokens.size() && j + n < resultTokens.size(); n++) {
           for (int i1 = i + n; !endFound && i1 >= i; i1--) {
             for(int j1 = j + n; j1 >= j; j1--) {
-              if (paraTokens.get(i1).token.equals(resultTokens.get(j1).token) 
-                  || isIgnoredToken(paraTokens.get(i1).token, resultTokens.get(j1).token)) {
+              if (paraTokens.get(i1).getToken().equals(resultTokens.get(j1).getToken()) 
+                  || isIgnoredToken(paraTokens.get(i1).getToken(), resultTokens.get(j1).getToken())) {
                 endFound = true;
                 if (i1 - 1 < i) {
                   if (i > 0) {
-                    posStart = paraTokens.get(i - 1).startPos;
-                    posEnd = paraTokens.get(i1 - 1).endPos;
-                    sugStart = resultTokens.get(j - 1).startPos;
-                    sugEnd = resultTokens.get(j1 - 1).endPos;
+                    posStart = paraTokens.get(i - 1).getStartPos();
+                    posEnd = paraTokens.get(i1 - 1).getEndPos();
+                    sugStart = resultTokens.get(j - 1).getStartPos();
+                    sugEnd = resultTokens.get(j1 - 1).getEndPos();
                     singleWordToken = j == j1 ? resultTokens.get(j1 - 1) : null;
+                    nParaTokenStart = i - 1;
+                    nParaTokenEnd = i1 - 1;
+                    nResultTokenStart = j - 1;
+                    nResultTokenEnd = j1 -1;
                   } else {
-                    posEnd = paraTokens.get(i1).endPos;
+                    posEnd = paraTokens.get(i1).getEndPos();
+                    nParaTokenEnd = i1;
                     if (j < 1) {
                       j = 1;
                     }
                     if (j1 < 0) {
                       j1 = 0;
                     }
-                    sugStart = resultTokens.get(j - 1).startPos;
-                    sugEnd = resultTokens.get(j1).endPos;
+                    sugStart = resultTokens.get(j - 1).getStartPos();
+                    sugEnd = resultTokens.get(j1).getEndPos();
+                    nResultTokenStart = j - 1;
+                    nResultTokenEnd = j1;
                     singleWordToken = j - 1 == j1 ? resultTokens.get(j1) : null;
                   }
                 } else {
-                  posEnd = paraTokens.get(i1 - 1).endPos;
+                  posEnd = paraTokens.get(i1 - 1).getEndPos();
+                  nParaTokenEnd = i1 - 1;
                   if (j < 0) {
                     j = 0;
                   }
@@ -202,17 +221,21 @@ public class AiDetectionRule extends TextLevelRule {
                     j1 = 1;
                   }
                   if (j <= j1 - 1) {
-                    sugStart = resultTokens.get(j).startPos;
-                    sugEnd = resultTokens.get(j1 - 1).endPos;
+                    sugStart = resultTokens.get(j).getStartPos();
+                    sugEnd = resultTokens.get(j1 - 1).getEndPos();
+                    nResultTokenStart = j;
+                    nResultTokenEnd = j1 -1;
                     singleWordToken = j == j1 - 1 ? resultTokens.get(j) : null;
                   } else {
-                    if (i > 0 && !PUNCTUATION.matcher(paraTokens.get(i - 1).token).matches()) {
-                      posStart = paraTokens.get(i - 1).endPos;
+                    if (i > 0 && !PUNCTUATION.matcher(paraTokens.get(i - 1).getToken()).matches()) {
+                      posStart = paraTokens.get(i - 1).getEndPos();
                     } else {
-                      posEnd = paraTokens.get(i1).startPos;
+                      posEnd = paraTokens.get(i1).getStartPos();
                     }
-                    sugStart = resultTokens.get(j1).endPos;
-                    sugEnd = resultTokens.get(j1).endPos;
+                    sugStart = resultTokens.get(j1).getEndPos();
+                    sugEnd = resultTokens.get(j1).getEndPos();
+                    nResultTokenStart = j1;
+                    nResultTokenEnd = j1 -1;
                   }
                 }
                 nSenTokens += (i1 - i + 1);
@@ -224,18 +247,23 @@ public class AiDetectionRule extends TextLevelRule {
           }
         }
         if (!endFound) {
-          posEnd = paraTokens.get(paraTokens.size() - 1).endPos;
-          sugStart = resultTokens.get(j).startPos;
-          sugEnd = resultTokens.get(resultTokens.size() - 1).endPos;
+          posEnd = paraTokens.get(paraTokens.size() - 1).getEndPos();
+          nParaTokenEnd = paraTokens.size() - 1;
+          sugStart = resultTokens.get(j).getStartPos();
+          sugEnd = resultTokens.get(resultTokens.size() - 1).getEndPos();
+          nResultTokenStart = j;
+          nResultTokenEnd = resultTokens.size() - 1;
           j = resultTokens.size() - 1;
         }
         suggestion = sugStart >= sugEnd ? "" : aiResultText.substring(sugStart, sugEnd);
-        if (suggestion.isEmpty() || singleWordToken == null || singleWordToken.isNonWord
+        if (!(j == resultTokens.size() - 1 && QUOTES.matcher(resultTokens.get(j).getToken()).matches())
+            || suggestion.isEmpty() || singleWordToken == null || singleWordToken.isNonWord()
             || linguServices.isCorrectSpell(suggestion, locale)) {
           RuleMatch ruleMatch = new RuleMatch(this, sentence, posStart, posEnd, ruleMessage);
           ruleMatch.addSuggestedReplacement(suggestion);
           ruleMatch.setType(Type.Hint);
-          tmpMatches.add(new AiRuleMatch(ruleMatch, sugStart, sugEnd));
+          setType(nParaTokenStart, nParaTokenEnd, nResultTokenStart, nResultTokenEnd, paraTokens, resultTokens, ruleMatch);
+          tmpMatches.add(new AiRuleMatch(ruleMatch, sugStart, sugEnd, nParaTokenStart, nParaTokenEnd, nResultTokenStart, nResultTokenEnd));
           if (debugMode) {
             MessageHandler.printToLogFile("AiDetectionRule: match: found: start: " + posStart + ", end: " + posEnd
                 + ", suggestion: " + suggestion);
@@ -255,7 +283,7 @@ public class AiDetectionRule extends TextLevelRule {
       if (i == sentenceEnds.get(nSentence) - 1) {
         if (nSenTokens > 0) {
           int allSenTokens = nSentence == 0 ? sentenceEnds.get(nSentence) : sentenceEnds.get(nSentence) - sentenceEnds.get(nSentence - 1);
-          if (mergeSentences || nSenTokens > allSenTokens / 2) {
+          if (mergeSentences || styleHintAssumed(nSenTokens, allSenTokens, tmpMatches, paraTokens, resultTokens)) {
             if (showStylisticHints) {
               int startPos = tmpMatches.get(0).ruleMatch.getFromPos();
               int endPos = tmpMatches.get(tmpMatches.size() - 1).ruleMatch.getToPos();
@@ -286,9 +314,9 @@ public class AiDetectionRule extends TextLevelRule {
         lastResultStart = j;
       }
     }
-    if (tmpMatches.size() > 0 || (j < resultTokens.size() && (!paraTokens.get(i - 1).token.equals(resultTokens.get(j - 1).token)
-        || (!"}".equals(resultTokens.get(j).token) && !"\"".equals(resultTokens.get(j).token) 
-            && !OPENING_BRACKETS.matcher(resultTokens.get(j).token).matches())))) {
+    if (tmpMatches.size() > 0 || (j < resultTokens.size() && (!paraTokens.get(i - 1).getToken().equals(resultTokens.get(j - 1).getToken())
+        || (!"}".equals(resultTokens.get(j).getToken()) && !QUOTES.matcher(resultTokens.get(j).getToken()).matches() 
+            && !OPENING_BRACKETS.matcher(resultTokens.get(j).getToken()).matches())))) {
       nSenTokens++;
       if (nSentence > 0) {
         nSentence--;
@@ -298,7 +326,7 @@ public class AiDetectionRule extends TextLevelRule {
         MessageHandler.printToLogFile("AiDetectionRule: match: j < resultTokens.size(): mergeSentences: " + mergeSentences
             + ", nSenTokens: " + nSenTokens + ", allSenTokens: " + allSenTokens);
       }
-      if (mergeSentences || nSenTokens > allSenTokens / 2) {
+      if (mergeSentences || styleHintAssumed(nSenTokens, allSenTokens, tmpMatches, paraTokens, resultTokens)) {
         if (showStylisticHints) {
           int startPos;
           int endPos;
@@ -310,10 +338,10 @@ public class AiDetectionRule extends TextLevelRule {
             suggestionStart = tmpMatches.get(0).suggestionStart;
             suggestionEnd = tmpMatches.get(tmpMatches.size() - 1).suggestionEnd;
           } else {
-            startPos = nSentence == 0 ? paraTokens.get(0).startPos : paraTokens.get(sentenceEnds.get(nSentence - 1)).startPos;
-            endPos = paraTokens.get(paraTokens.size() - 1).endPos;
-            suggestionStart = resultTokens.get(lastResultStart).startPos;
-            suggestionEnd = resultTokens.get(resultTokens.size() - 1).endPos;
+            startPos = nSentence == 0 ? paraTokens.get(0).getStartPos() : paraTokens.get(sentenceEnds.get(nSentence - 1)).getStartPos();
+            endPos = paraTokens.get(paraTokens.size() - 1).getEndPos();
+            suggestionStart = resultTokens.get(lastResultStart).getStartPos();
+            suggestionEnd = resultTokens.get(resultTokens.size() - 1).getEndPos();
           }
           RuleMatch ruleMatch = new RuleMatch(this, null, startPos, endPos, ruleMessage);
           String suggestion = aiResultText.substring(suggestionStart, suggestionEnd);
@@ -326,17 +354,18 @@ public class AiDetectionRule extends TextLevelRule {
         }
       } else {
         int j1;
-        for (j1 = j + 1; j1 < resultTokens.size() && !OPENING_BRACKETS.matcher(resultTokens.get(j1).token).matches(); j1++);
+        for (j1 = j + 1; j1 < resultTokens.size() && !OPENING_BRACKETS.matcher(resultTokens.get(j1).getToken()).matches(); j1++);
         if (j1 > resultTokens.size()) {
           j1 = resultTokens.size();
         }
-        String suggestion = aiResultText.substring(resultTokens.get(j - 1).startPos, resultTokens.get(j1 - 1).endPos);
-        if (suggestion.isEmpty() || j != j1 || resultTokens.get(j - 1).isNonWord || linguServices.isCorrectSpell(suggestion, locale)) {
-          RuleMatch ruleMatch = new RuleMatch(this, null, paraTokens.get(paraTokens.size() - 1).startPos, 
-              paraTokens.get(paraTokens.size() - 1).endPos, ruleMessage);
+        String suggestion = aiResultText.substring(resultTokens.get(j - 1).getStartPos(), resultTokens.get(j1 - 1).getEndPos());
+        if (suggestion.isEmpty() || j != j1 || resultTokens.get(j - 1).isNonWord() || linguServices.isCorrectSpell(suggestion, locale)) {
+          RuleMatch ruleMatch = new RuleMatch(this, null, paraTokens.get(paraTokens.size() - 1).getStartPos(), 
+              paraTokens.get(paraTokens.size() - 1).getEndPos(), ruleMessage);
           ruleMatch.addSuggestedReplacement(suggestion);
-          ruleMatch.setType(Type.Hint);
-          tmpMatches.add(new AiRuleMatch(ruleMatch, resultTokens.get(j - 1).startPos, resultTokens.get(resultTokens.size() - 1).endPos));
+          setType(paraTokens.size() - 1, paraTokens.size() - 1, j - 1, j1 - 1, paraTokens, resultTokens, ruleMatch);
+          tmpMatches.add(new AiRuleMatch(ruleMatch, resultTokens.get(j - 1).getStartPos(), resultTokens.get(resultTokens.size() - 1).getEndPos(),
+              paraTokens.size() - 1, paraTokens.size() - 1, j - 1, j1 - 1));
         }
         addAllRuleMatches(matches, tmpMatches);
         if (debugMode) {
@@ -346,16 +375,93 @@ public class AiDetectionRule extends TextLevelRule {
       }
     }
     if (debugMode && j < resultTokens.size()) {
-      MessageHandler.printToLogFile("AiDetectionRule: match: j < resultTokens.size(): paraTokens.get(i - 1): " + paraTokens.get(i - 1).token
-          + ", resultTokens.get(j - 1): " + resultTokens.get(j - 1).token);
+      MessageHandler.printToLogFile("AiDetectionRule: match: j < resultTokens.size(): paraTokens.get(i - 1): " + paraTokens.get(i - 1).getToken()
+          + ", resultTokens.get(j - 1): " + resultTokens.get(j - 1).getToken());
     }
     return toRuleMatchArray(matches);
   }
+/*  
+  private AnalyzedSentence getSentence(int n, List<Integer> sentenceEnds, List<AnalyzedSentence> sentences) {
+    for (int i = 0; i < sentenceEnds.size(); i++) {
+      if (n >= i) {
+        return (i == 0) ? sentences.get(0) : sentences.get(i - 1);
+      }
+    }
+    return sentences.get(sentences.size() - 1);
+  }
+*/  
+  private void setType(int nParaTokenStart, int nParaTokenEnd, int nResultTokenStart, int nResultTokenEnd,
+      List<AiToken> paraTokens, List<AiToken> resultTokens, RuleMatch ruleMatch) {
+    if (nParaTokenStart == nParaTokenEnd && nResultTokenStart == nResultTokenEnd) {
+      if (PUNCTUATION.matcher(paraTokens.get(nParaTokenStart).getToken()).matches()) {
+        ruleMatch.setType(Type.Hint);
+      } else if (shareLemma(paraTokens.get(nParaTokenStart), resultTokens.get(nResultTokenStart))
+          || isHintException(paraTokens.get(nParaTokenStart), resultTokens.get(nResultTokenStart))) {
+        ruleMatch.setType(Type.Hint);
+      } else {
+        ruleMatch.setType(Type.Other);
+      }
+    } else {
+      ruleMatch.setType(Type.Other);
+    }
+  }
   
-  private void addAllRuleMatches (List<RuleMatch> matches, List<AiRuleMatch> aiMatches) {
+  private boolean matchesShareLemma(int nParaTokenStart, int nParaTokenEnd, int nResultTokenStart, int nResultTokenEnd,
+      List<AiToken> paraTokens, List<AiToken> resultTokens) {
+    for (int i = nParaTokenStart; i <= nParaTokenEnd; i++) {
+      for (int j = nResultTokenStart; j <= nResultTokenStart; j++) {
+        if (shareLemma(paraTokens.get(i), resultTokens.get(j))) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  
+  private boolean styleHintAssumed(int nRuleTokens, int nSentTokens, 
+      List<AiRuleMatch> aiMatches, List<AiToken> paraTokens, List<AiToken> resultTokens) {
+    if (nRuleTokens >= nSentTokens / 2) {
+      return true;
+    }
+    if (nSentTokens > 300 / STYLE_HINT_LIMIT && nRuleTokens >= 100 / STYLE_HINT_LIMIT ) {
+      return true;
+    }
+    for (int i = 0; i < aiMatches.size(); i++) {
+      for (int j = 0; j < aiMatches.size(); j++) {
+        if (i != j) {
+          if (matchesShareLemma(aiMatches.get(i).nParaTokenStart, aiMatches.get(i).nParaTokenEnd, 
+              aiMatches.get(j).nResultTokenStart, aiMatches.get(j).nResultTokenEnd,
+              paraTokens, resultTokens)) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+  
+  private boolean shareLemma(AiToken a, AiToken b) {
+    for (AnalyzedToken t : a.getReadings()) {
+      String lemma = t.getLemma();
+      if (lemma != null && !lemma.isEmpty() && b.hasLemma(lemma)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  private void addAllRuleMatches(List<RuleMatch> matches, List<AiRuleMatch> aiMatches) {
     for (AiRuleMatch match : aiMatches) {
       matches.add(match.ruleMatch);
     }
+  }
+  
+  /**
+   * Set Exceptions to set Color for specific Languages
+   */
+  public boolean isHintException(AiToken paraToken, AiToken resultToken) {
+    MessageHandler.printToLogFile("isHintException in: general");
+    return false;   
   }
 
   @Override
@@ -377,11 +483,20 @@ public class AiDetectionRule extends TextLevelRule {
     public final RuleMatch ruleMatch;
     public final int suggestionStart;
     public final int suggestionEnd;
+    public final int nParaTokenStart;
+    public final int nParaTokenEnd;
+    public final int nResultTokenStart;
+    public final int nResultTokenEnd;
     
-    AiRuleMatch(RuleMatch ruleMatch, int suggestionStart, int suggestionEnd) {
+    AiRuleMatch(RuleMatch ruleMatch, int suggestionStart, int suggestionEnd, 
+        int nParaTokenStart, int nParaTokenEnd, int nResultTokenStart, int nResultTokenEnd) {
       this.ruleMatch = ruleMatch;
       this.suggestionStart = suggestionStart;
       this.suggestionEnd = suggestionEnd;
+      this.nParaTokenStart = nParaTokenStart;
+      this.nParaTokenEnd = nParaTokenEnd;
+      this.nResultTokenStart = nResultTokenStart;
+      this.nResultTokenEnd = nResultTokenEnd;
     }
   }
 

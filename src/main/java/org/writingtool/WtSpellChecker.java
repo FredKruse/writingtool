@@ -35,7 +35,7 @@ import org.languagetool.rules.spelling.hunspell.HunspellRule;
 import org.languagetool.rules.spelling.morfologik.MorfologikSpellerRule;
 import org.writingtool.CacheIO.SpellCache;
 import org.writingtool.OfficeTools.OfficeProductInfo;
-import org.writingtool.gui.Configuration;
+import org.writingtool.config.Configuration;
 
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.lang.IllegalArgumentException;

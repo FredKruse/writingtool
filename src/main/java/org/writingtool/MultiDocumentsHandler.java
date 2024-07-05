@@ -60,8 +60,8 @@ import org.writingtool.aisupport.AiCheckQueue;
 import org.writingtool.aisupport.AiErrorDetection;
 import org.writingtool.aisupport.AiParagraphChanging;
 import org.writingtool.aisupport.AiRemote.AiCommand;
-import org.writingtool.gui.Configuration;
-import org.writingtool.gui.ConfigurationDialog;
+import org.writingtool.config.Configuration;
+import org.writingtool.config.ConfigurationDialog;
 import org.writingtool.stylestatistic.StatAnDialog;
 
 import com.sun.star.beans.PropertyValue;
@@ -1542,7 +1542,7 @@ public class MultiDocumentsHandler {
                   if (StringUtils.isEmpty(tmp)) {
                     tmp = error.aFullComment;
                   }
-                  String msg = org.writingtool.gui.Tools.shortenComment(tmp);
+                  String msg = org.writingtool.config.Tools.shortenComment(tmp);
                   String sUrl = null;
                   for (PropertyValue prop : error.aProperties) {
                     if ("FullCommentURL".equals(prop.Name)) {

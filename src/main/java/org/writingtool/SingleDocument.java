@@ -36,7 +36,7 @@ import org.writingtool.DocumentCache.TextParagraph;
 import org.writingtool.OfficeTools.DocumentType;
 import org.writingtool.OfficeTools.LoErrorType;
 import org.writingtool.TextLevelCheckQueue.QueueEntry;
-import org.writingtool.gui.Configuration;
+import org.writingtool.config.Configuration;
 
 import com.sun.star.awt.MouseButton;
 import com.sun.star.awt.MouseEvent;

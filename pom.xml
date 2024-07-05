@@ -21,6 +21,14 @@
         <repository>
             <id>repo.languagetool.org</id>
             <url>https://repo.languagetool.org/artifactory/languagetool-os-snapshot/</url>
+	        <snapshots>
+	            <enabled>true</enabled>
+	            <updatePolicy>daily</updatePolicy>
+	        </snapshots>
+	        <releases>
+	            <enabled>true</enabled>
+	            <updatePolicy>daily</updatePolicy>
+	        </releases>
         </repository>
     </repositories>
 

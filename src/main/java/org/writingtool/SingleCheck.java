@@ -38,7 +38,7 @@ import org.writingtool.OfficeTools.LoErrorType;
 import org.writingtool.ResultCache.CacheEntry;
 import org.writingtool.aisupport.AiDetectionRule;
 import org.writingtool.aisupport.AiErrorDetection;
-import org.writingtool.gui.Configuration;
+import org.writingtool.config.Configuration;
 
 import com.sun.star.beans.PropertyState;
 import com.sun.star.beans.PropertyValue;
@@ -692,7 +692,7 @@ public class SingleCheck {
     } else {
       aError.aShortComment = aError.aFullComment;
     }
-    aError.aShortComment = org.writingtool.gui.Tools.shortenComment(aError.aShortComment);
+    aError.aShortComment = org.writingtool.config.Tools.shortenComment(aError.aShortComment);
     //  Filter: provide user to delete footnotes by suggestion
     boolean noSuggestions = false;
     if (footnotes != null && footnotes.length > 0 && !ruleMatch.getSuggestedReplacements().isEmpty()) {

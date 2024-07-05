@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.writingtool.gui;
+package org.writingtool.config;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -88,7 +88,7 @@ public class Configuration {
   static final String DEFAULT_AI_URL = "http://localhost:8080/v1/chat/completions/";
   static final String DEFAULT_AI_APIKEY = "1234567";
 
-  static final Color STYLE_COLOR = new Color(0, 175, 0);
+  static final Color STYLE_COLOR = new Color(0, 100, 0);
 
   private static final String CONFIG_FILE = ".languagetool.cfg";
 

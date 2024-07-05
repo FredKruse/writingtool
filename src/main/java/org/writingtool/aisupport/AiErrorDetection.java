@@ -23,19 +23,17 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.languagetool.AnalyzedSentence;
-import org.languagetool.JLanguageTool;
-import org.languagetool.Language;
 import org.languagetool.rules.RuleMatch;
 import org.writingtool.DocumentCache;
+import org.writingtool.LinguisticServices;
 import org.writingtool.MessageHandler;
-import org.writingtool.MultiDocumentsHandler;
 import org.writingtool.OfficeTools;
 import org.writingtool.ResultCache;
 import org.writingtool.SingleCheck;
 import org.writingtool.SingleDocument;
 import org.writingtool.SwJLanguageTool;
 import org.writingtool.ViewCursorTools;
-import org.writingtool.gui.Configuration;
+import org.writingtool.config.Configuration;
 
 import com.sun.star.lang.Locale;
 import com.sun.star.linguistic2.SingleProofreadingError;
@@ -181,7 +179,7 @@ public class AiErrorDetection {
       startTime = System.currentTimeMillis();
     }
     List<AnalyzedSentence> analyzedAiResult =  lt.analyzeText(result.replace("\u00AD", ""));
-    AiDetectionRule aiRule = new AiDetectionRule(result, paraText, analyzedAiResult, 
+    AiDetectionRule aiRule = getAiDetectionRule(result, analyzedAiResult, 
         document.getMultiDocumentsHandler().getLinguisticServices(), locale , messages, config.aiShowStylisticChanges());
     RuleMatch[] matches = aiRule.match(analyzedSentences);
     if (debugModeTm) {
@@ -251,4 +249,23 @@ public class AiErrorDetection {
     }
   }
 */
+  
+  private AiDetectionRule getAiDetectionRule(String aiResultText, List<AnalyzedSentence> analyzedAiResult, 
+      LinguisticServices linguServices, Locale locale, ResourceBundle messages, boolean showStylisticHints) {
+    try {
+      Class<?>[] cArgs = { String.class, List.class, LinguisticServices.class, Locale.class, ResourceBundle.class, boolean.class };
+      Class<?> clazz = Class.forName("org.writingtool.aisupport.AiDetectionRule_" + locale.Language);
+      MessageHandler.printToLogFile("Use detection rule for: " + locale.Language);
+      return (AiDetectionRule) clazz.getDeclaredConstructor(cArgs).newInstance(aiResultText, 
+          analyzedAiResult, linguServices, locale, messages, showStylisticHints);
+    } catch (Exception e) {
+      MessageHandler.printException(e);
+      MessageHandler.printToLogFile("Use general detection rule");
+      return new AiDetectionRule(aiResultText, analyzedAiResult, linguServices, locale, messages, showStylisticHints);
+    }
+    
+  }
+  
+  
+  
 }

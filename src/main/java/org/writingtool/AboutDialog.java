@@ -52,7 +52,7 @@ import org.languagetool.LanguageMaintainedState;
 import org.languagetool.Languages;
 import org.languagetool.language.Contributor;
 import org.writingtool.OfficeTools.OfficeProductInfo;
-import org.writingtool.gui.Tools;
+import org.writingtool.config.Tools;
 
 import com.sun.star.uno.XComponentContext;
 

@@ -72,7 +72,7 @@ import org.writingtool.SingleDocument;
 import org.writingtool.ViewCursorTools;
 import org.writingtool.DocumentCache.TextParagraph;
 import org.writingtool.MultiDocumentsHandler.WaitDialogThread;
-import org.writingtool.gui.Configuration;
+import org.writingtool.config.Configuration;
 import org.writingtool.stylestatistic.StatAnCache.Heading;
 import org.writingtool.stylestatistic.StatAnCache.Paragraph;
 

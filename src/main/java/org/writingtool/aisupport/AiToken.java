@@ -18,7 +18,11 @@
  */
 package org.writingtool.aisupport;
 
+import java.util.List;
+
 import org.languagetool.AnalyzedSentence;
+import org.languagetool.AnalyzedToken;
+import org.languagetool.AnalyzedTokenReadings;
 
 /**
  * Defines an easy token
@@ -26,18 +30,42 @@ import org.languagetool.AnalyzedSentence;
  * @author Fred Kruse
  */
 public class AiToken {
-  final String token;
-  final AnalyzedSentence sentence;
-  final int startPos;
-  final int endPos;
-  final boolean isNonWord;
+  private final AnalyzedTokenReadings token;
+  private final AnalyzedSentence sentence;
+  private final int sentencePos;
   
-  AiToken(String token, int startPos, AnalyzedSentence sentence, boolean isNonWord) {
+  AiToken(AnalyzedTokenReadings token, int sentencePos, AnalyzedSentence sentence) {
     this.sentence = sentence;
     this.token = token;
-    this.startPos = startPos;
-    this.endPos = startPos + token.length();
-    this.isNonWord = isNonWord;
+    this.sentencePos = sentencePos;
+  }
+  
+  int getStartPos() {
+    return token.getStartPos() + sentencePos;
   }
 
+  int getEndPos() {
+    return token.getEndPos() + sentencePos;
+  }
+
+  String getToken() {
+    return token.getToken();
+  }
+  
+  AnalyzedSentence getSentence() {
+    return sentence;
+  }
+  
+  boolean isNonWord() {
+    return token.isNonWord();
+  }
+  
+  boolean hasLemma(String s) {
+    return token.hasLemma(s);
+  }
+  
+  List<AnalyzedToken> getReadings() {
+    return token.getReadings();
+  }
+ 
 }

@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.writingtool.gui;
+package org.writingtool.config;
 
 import java.awt.Dimension;
 import java.awt.MouseInfo;

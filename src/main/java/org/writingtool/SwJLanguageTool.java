@@ -46,7 +46,7 @@ import org.languagetool.rules.RuleMatch;
 import org.writingtool.DocumentCache.AnalysedText;
 import org.writingtool.DocumentCache.TextParagraph;
 import org.writingtool.OfficeTools.RemoteCheck;
-import org.writingtool.gui.Configuration;
+import org.writingtool.config.Configuration;
 
 /**
  * Class to switch between running LanguageTool in multi or single thread mode

@@ -47,7 +47,7 @@ import org.languagetool.JLanguageTool;
 import org.writingtool.MessageHandler;
 import org.writingtool.MultiDocumentsHandler;
 import org.writingtool.OfficeTools;
-import org.writingtool.gui.Configuration;
+import org.writingtool.config.Configuration;
 
 import com.sun.star.lang.Locale;
 

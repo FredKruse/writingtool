@@ -83,7 +83,7 @@ import org.writingtool.MultiDocumentsHandler.WaitDialogThread;
 import org.writingtool.OfficeDrawTools.UndoMarkupContainer;
 import org.writingtool.OfficeTools.DocumentType;
 import org.writingtool.OfficeTools.LoErrorType;
-import org.writingtool.gui.Tools;
+import org.writingtool.config.Tools;
 
 import com.sun.star.beans.PropertyState;
 import com.sun.star.beans.PropertyValue;

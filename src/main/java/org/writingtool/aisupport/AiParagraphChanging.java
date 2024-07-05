@@ -31,7 +31,7 @@ import org.writingtool.ViewCursorTools;
 import org.writingtool.DocumentCache.TextParagraph;
 import org.writingtool.MultiDocumentsHandler.WaitDialogThread;
 import org.writingtool.aisupport.AiRemote.AiCommand;
-import org.writingtool.gui.Configuration;
+import org.writingtool.config.Configuration;
 
 import com.sun.star.frame.XController;
 import com.sun.star.frame.XModel;

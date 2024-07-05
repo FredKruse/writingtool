@@ -31,7 +31,7 @@ import org.writingtool.aisupport.AiErrorDetection;
 import org.writingtool.aisupport.AiParagraphChanging;
 import org.writingtool.aisupport.AiRemote;
 import org.writingtool.aisupport.AiRemote.AiCommand;
-import org.writingtool.gui.Configuration;
+import org.writingtool.config.Configuration;
 import org.writingtool.stylestatistic.StatAnDialog;
 
 import com.sun.star.awt.MenuEvent;

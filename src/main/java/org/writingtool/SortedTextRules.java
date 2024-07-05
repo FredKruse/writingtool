@@ -24,7 +24,7 @@ import java.util.Set;
 
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.TextLevelRule;
-import org.writingtool.gui.Configuration;
+import org.writingtool.config.Configuration;
 
 /**
  * class to store all text level rules sorted by the minimum to check paragraphs

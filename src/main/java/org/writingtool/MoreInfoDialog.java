@@ -42,7 +42,7 @@ import javax.swing.JTextPane;
 import org.languagetool.rules.Category;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.patterns.FalseFriendPatternRule;
-import org.writingtool.gui.Tools;
+import org.writingtool.config.Tools;
 
 
 /**

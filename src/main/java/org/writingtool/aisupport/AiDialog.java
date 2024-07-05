@@ -62,7 +62,7 @@ import org.writingtool.ViewCursorTools;
 import org.writingtool.DocumentCache.TextParagraph;
 import org.writingtool.MultiDocumentsHandler.WaitDialogThread;
 import org.writingtool.OfficeTools.DocumentType;
-import org.writingtool.gui.Configuration;
+import org.writingtool.config.Configuration;
 
 import com.sun.star.lang.Locale;
 import com.sun.star.lang.XComponent;

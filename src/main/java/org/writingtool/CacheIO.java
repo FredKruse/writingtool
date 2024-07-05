@@ -40,7 +40,7 @@ import org.languagetool.JLanguageTool;
 import org.writingtool.DocumentCache.SerialLocale;
 import org.writingtool.IgnoredMatches.LocaleEntry;
 import org.writingtool.OfficeTools.LoErrorType;
-import org.writingtool.gui.Configuration;
+import org.writingtool.config.Configuration;
 
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.Locale;

@@ -24,8 +24,8 @@ import java.util.Set;
 
 import org.languagetool.Language;
 import org.languagetool.rules.Rule;
-import org.writingtool.gui.Configuration;
-import org.writingtool.gui.ConfigurationDialog;
+import org.writingtool.config.Configuration;
+import org.writingtool.config.ConfigurationDialog;
 
 /**
  * A thread that shows the configuration dialog which lets the

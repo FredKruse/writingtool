@@ -49,7 +49,7 @@ import org.languagetool.rules.RuleMatch;
 import org.languagetool.rules.RuleOption;
 import org.languagetool.rules.TextLevelRule;
 import org.writingtool.OfficeTools.RemoteCheck;
-import org.writingtool.gui.Configuration;
+import org.writingtool.config.Configuration;
 
 /**
  * Class to run LanguageTool in LO to use a remote server
