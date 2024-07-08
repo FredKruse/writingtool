@@ -23,4 +23,6 @@ Compared to using the internal LanguageTool in LibreOffice, the extension offers
 * The extension offers the possibility of statistical analyses, such as frequently used words, filler words, etc. (So far only for individual languages).
 * Support for (local) AI (in progress) The nightly snapshots contain the current LanguageTool snapshots (see here). The releases contain the current LanguageTool releases (see here).
 
+You can find more information here: https://fk-es.de/index.php
+
 
