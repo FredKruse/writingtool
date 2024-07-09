@@ -1,5 +1,5 @@
-/* LanguageTool, a natural language style checker 
- * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
+/* WritingTool, a LibreOffice Extension based on LanguageTool 
+ * Copyright (C) 2024 Fred Kruse (https://fk-es.de)
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -42,14 +42,14 @@ public class WritingTool extends WeakBase implements XJobExecutor,
   // Service name required by the OOo API && our own name.
   private static final String[] SERVICE_NAMES = {
       "com.sun.star.linguistic2.Proofreader",
-      OfficeTools.WT_SERVICE_NAME };
+      WtOfficeTools.WT_SERVICE_NAME };
 
   private XComponentContext xContext;
-  private MultiDocumentsHandler documents;
+  private WtDocumentsHandler documents;
 
   public WritingTool(XComponentContext xCompContext) {
     changeContext(xCompContext);
-    documents = new MultiDocumentsHandler(xContext, this, this);
+    documents = new WtDocumentsHandler(xContext, this, this);
   }
 
   /**
@@ -96,7 +96,7 @@ public class WritingTool extends WeakBase implements XJobExecutor,
    */
   @Override
   public final Locale[] getLocales() {
-    return MultiDocumentsHandler.getLocales();
+    return WtDocumentsHandler.getLocales();
   }
 
   /**
@@ -106,7 +106,7 @@ public class WritingTool extends WeakBase implements XJobExecutor,
    */
   @Override
   public final boolean hasLocale(Locale locale) {
-    return MultiDocumentsHandler.hasLocale(locale);
+    return WtDocumentsHandler.hasLocale(locale);
   }
 
   /**
@@ -176,11 +176,11 @@ public class WritingTool extends WeakBase implements XJobExecutor,
    * Default method called by LO/OO extensions
    */
   public static XSingleComponentFactory __getComponentFactory(String sImplName) {
-    SingletonFactory xFactory = null;
+    WtSingletonFactory xFactory = null;
     if (sImplName.equals(WritingTool.class.getName())) {
-      xFactory = new SingletonFactory(false);
+      xFactory = new WtSingletonFactory(false);
     } else if (sImplName.equals(WtSpellChecker.class.getName())) {
-      xFactory = new SingletonFactory(true);
+      xFactory = new WtSingletonFactory(true);
     }
     return xFactory;
   }
@@ -219,7 +219,7 @@ public class WritingTool extends WeakBase implements XJobExecutor,
    * Give back the MultiDocumentsHandler - use only for test cases.
    * @since 5.3
    */
-  MultiDocumentsHandler getMultiDocumentsHandler() {
+  WtDocumentsHandler getMultiDocumentsHandler() {
     return documents;
   }
   
@@ -250,7 +250,7 @@ public class WritingTool extends WeakBase implements XJobExecutor,
    */
   @Override
   public String getServiceDisplayName(Locale locale) {
-    return MultiDocumentsHandler.getServiceDisplayName(locale);
+    return WtDocumentsHandler.getServiceDisplayName(locale);
   }
 
   /**

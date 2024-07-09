@@ -1,5 +1,5 @@
-/* LanguageTool, a natural language style checker
- * Copyright (C) 2011 Daniel Naber (http://www.danielnaber.de)
+/* WritingTool, a LibreOffice Extension based on LanguageTool
+ * Copyright (C) 2024 Fred Kruse (https://fk-es.de)
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public

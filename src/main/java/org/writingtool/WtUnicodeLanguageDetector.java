@@ -18,30 +18,25 @@
  */
 package org.writingtool;
 
-import org.junit.Test;
-import org.writingtool.WtKhmerDetector;
+/**
+ * Helps to detect the language of strings by the Unicode range used by the characters.
+ * @since 2.7
+ */
+abstract class WtUnicodeLanguageDetector {
 
-import static org.junit.Assert.*;
+  private static final int MAX_CHECK_LENGTH = 100;
 
-public class KhmerDetectorTest {
+  protected abstract boolean isInAlphabet(int numericValue);
 
-  @Test
-  public void testIsThisLanguage() {
-    WtKhmerDetector detector = new WtKhmerDetector();
-    
-    assertTrue(detector.isThisLanguage("ប៉ុ"));
-    assertTrue(detector.isThisLanguage("ប៉ុន្តែ​តើ"));
-    assertTrue(detector.isThisLanguage("ហើយដោយ​ព្រោះ​"));
-    assertTrue(detector.isThisLanguage("«ទៅ​បាន​។ «"));
-
-    assertFalse(detector.isThisLanguage("Hallo"));
-    assertFalse(detector.isThisLanguage("öäü"));
-
-    assertFalse(detector.isThisLanguage(""));
-    try {
-      assertFalse(detector.isThisLanguage(null));
-      fail();
-    } catch (NullPointerException ignored) {}
+  boolean isThisLanguage(String str) {
+    int maxCheckLength = Math.min(str.length(), MAX_CHECK_LENGTH);
+    for (int i = 0; i < maxCheckLength; i++) {
+      int numericValue = str.charAt(i);
+      if (isInAlphabet(numericValue)) {
+        return true;
+      }
+    }
+    return false;
   }
-  
+
 }

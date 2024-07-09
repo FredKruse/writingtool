@@ -18,30 +18,16 @@
  */
 package org.writingtool;
 
-import org.junit.Test;
-import org.writingtool.WtKhmerDetector;
+/**
+ * Helps to detect Tamil strings by their Unicode range.
+ * @since 2.7
+ */
+@SuppressWarnings("MagicNumber")
+class WtTamilDetector extends WtUnicodeLanguageDetector {
 
-import static org.junit.Assert.*;
-
-public class KhmerDetectorTest {
-
-  @Test
-  public void testIsThisLanguage() {
-    WtKhmerDetector detector = new WtKhmerDetector();
-    
-    assertTrue(detector.isThisLanguage("ប៉ុ"));
-    assertTrue(detector.isThisLanguage("ប៉ុន្តែ​តើ"));
-    assertTrue(detector.isThisLanguage("ហើយដោយ​ព្រោះ​"));
-    assertTrue(detector.isThisLanguage("«ទៅ​បាន​។ «"));
-
-    assertFalse(detector.isThisLanguage("Hallo"));
-    assertFalse(detector.isThisLanguage("öäü"));
-
-    assertFalse(detector.isThisLanguage(""));
-    try {
-      assertFalse(detector.isThisLanguage(null));
-      fail();
-    } catch (NullPointerException ignored) {}
+  @Override
+  protected boolean isInAlphabet(int numericValue) {
+    return numericValue >= 2946 && numericValue <= 3066;
   }
-  
+
 }

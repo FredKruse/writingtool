@@ -1,4 +1,4 @@
-/* LanguageTool, a natural language style checker 
+/* WritingTool, a LibreOffice Extension based on LanguageTool 
  * Copyright (C) 2009 Marcin Miłkowski (http://www.languagetool.org)
  * 
  * This library is free software; you can redistribute it and/or
@@ -24,13 +24,13 @@ import com.sun.star.lang.Locale;
 import com.sun.star.linguistic2.ProofreadingResult;
 import org.junit.Test;
 import org.languagetool.rules.Rule;
-import org.writingtool.DocumentCache;
+import org.writingtool.WtDocumentCache;
 import org.writingtool.WritingTool;
-import org.writingtool.MultiDocumentsHandler;
-import org.writingtool.SingleCheck;
-import org.writingtool.SingleDocument;
-import org.writingtool.SwJLanguageTool;
-import org.writingtool.OfficeTools.LoErrorType;
+import org.writingtool.WtDocumentsHandler;
+import org.writingtool.WtSingleCheck;
+import org.writingtool.WtSingleDocument;
+import org.writingtool.WtLanguageTool;
+import org.writingtool.WtOfficeTools.LoErrorType;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -47,35 +47,35 @@ public class MainTest {
     String textPara = "This is a test with one footnote1.";
     String flatPara = "This is a test with one footnote​.";
     int[] footnotes = { 32 };
-    assertTrue(DocumentCache.isEqualText(flatPara, textPara, footnotes));
+    assertTrue(WtDocumentCache.isEqualText(flatPara, textPara, footnotes));
     textPara = "This is a test with one footnote12, existing of two digits";
     flatPara = "This is a test with one footnote​, existing of two digits";
-    assertTrue(DocumentCache.isEqualText(flatPara, textPara, footnotes));
+    assertTrue(WtDocumentCache.isEqualText(flatPara, textPara, footnotes));
     textPara = "This is a test with one footnoteXIV, existing of Roman numerals.";
     flatPara = "This is a test with one footnote​, existing of Roman numerals.";
-    assertTrue(DocumentCache.isEqualText(flatPara, textPara, footnotes));
+    assertTrue(WtDocumentCache.isEqualText(flatPara, textPara, footnotes));
     textPara = "This is a test with one footnote1. And a Zero Space at the end of the second sentence.";
     flatPara = "This is a test with one footnote​. And a Zero Space at the end of the second sentence​.";
-    assertTrue(DocumentCache.isEqualText(flatPara, textPara, footnotes));
+    assertTrue(WtDocumentCache.isEqualText(flatPara, textPara, footnotes));
     footnotes = new int[2];
     footnotes[0] = 33;
     footnotes[1] = 54;
     textPara = "This is a test with two footnotes14. Here is the secondXIII.";
     flatPara = "This is a test with two footnotes​. Here is the second​.";
-    assertTrue(DocumentCache.isEqualText(flatPara, textPara, footnotes));
+    assertTrue(WtDocumentCache.isEqualText(flatPara, textPara, footnotes));
     textPara = "This is a test with two footnotes14. Here is the secondXIII.";
     flatPara = "This is a test with two footnotes​. Here is no second.";
-    assertTrue(!DocumentCache.isEqualText(flatPara, textPara, footnotes));
+    assertTrue(!WtDocumentCache.isEqualText(flatPara, textPara, footnotes));
     footnotes[0] = 33;
     footnotes[1] = 54;
     textPara = "This is a test with two footnotes14. Here is the second [17] with full Roman numerals in text paragraph.";
     flatPara = "This is a test with two footnotes​. Here is the second ​[17] with full Roman numerals in text paragraph.";
-    assertTrue(DocumentCache.isEqualText(flatPara, textPara, footnotes));
+    assertTrue(WtDocumentCache.isEqualText(flatPara, textPara, footnotes));
     footnotes[0] = 34;
     footnotes[1] = 59;
     textPara = "This is a test with two footnotes [14]. Here is the second1 with full Roman numerals in text paragraph.";
     flatPara = "This is a test with two footnotes ​[14]. Here is the second​ with full Roman numerals in text paragraph.";
-    assertTrue(DocumentCache.isEqualText(flatPara, textPara, footnotes));
+    assertTrue(WtDocumentCache.isEqualText(flatPara, textPara, footnotes));
   }
 
   @Test
@@ -117,8 +117,8 @@ public class MainTest {
     paragraphs.add("Dies ist ein vierter Satz.«");
     // all paragraphs are text paragraphs (not footnotes, tables, etc.
     List<List<String>> textParagraphs = new ArrayList<>();
-    for (int i = 0; i < DocumentCache.NUMBER_CURSOR_TYPES; i++) {
-      if (i == DocumentCache.CURSOR_TYPE_TEXT) {
+    for (int i = 0; i < WtDocumentCache.NUMBER_CURSOR_TYPES; i++) {
+      if (i == WtDocumentCache.CURSOR_TYPE_TEXT) {
         textParagraphs.add(new ArrayList<>(paragraphs));
       } else {
         textParagraphs.add(new ArrayList<>());
@@ -130,7 +130,7 @@ public class MainTest {
       footnotes.add(new int[0]);
     }
     List<List<Integer>> chapterBegins = new ArrayList<List<Integer>>();
-    for (int i = 0; i < DocumentCache.NUMBER_CURSOR_TYPES; i++) {
+    for (int i = 0; i < WtDocumentCache.NUMBER_CURSOR_TYPES; i++) {
       chapterBegins.add(new ArrayList<Integer>());
     }
     // German text
@@ -147,9 +147,9 @@ public class MainTest {
     assertEquals(2, paRes.aErrors.length);  // This may be critical if rules changed
     assertTrue(paRes.aErrors[0].aRuleIdentifier.equals("DE_UNPAIRED_QUOTES"));
     assertTrue(paRes.aErrors[1].aRuleIdentifier.equals("DE_AGREEMENT"));
-    MultiDocumentsHandler documents = prog.getMultiDocumentsHandler();
-    SingleDocument document = documents.getDocuments().get(0);
-    SwJLanguageTool lt = documents.getLanguageTool();
+    WtDocumentsHandler documents = prog.getMultiDocumentsHandler();
+    WtSingleDocument document = documents.getDocuments().get(0);
+    WtLanguageTool lt = documents.getLanguageTool();
     // disable all rules not needed for test
     // test rules are:
     // DE_AGREEMENT - test of rule on sentence level
@@ -231,41 +231,41 @@ public class MainTest {
     paragraphs.add("Dies ist ein (dritter.");
     paragraphs.add("Dies ist ein vierter Satz.« ");
     List<List<String>> textParagraphs = new ArrayList<>();
-    for (int i = 0; i < DocumentCache.NUMBER_CURSOR_TYPES; i++) {
+    for (int i = 0; i < WtDocumentCache.NUMBER_CURSOR_TYPES; i++) {
       textParagraphs.add(new ArrayList<>());
     }
     //  add Text paragraphs
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_TEXT).add("»Dies ist eine Beispieltext.");
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_TEXT).add("Dies ist ein  zweiter Satz.");
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_TEXT).add("Dies ist ein (dritter.");
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_TEXT).add("Dies ist ein vierter Satz.«i");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_TEXT).add("»Dies ist eine Beispieltext.");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_TEXT).add("Dies ist ein  zweiter Satz.");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_TEXT).add("Dies ist ein (dritter.");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_TEXT).add("Dies ist ein vierter Satz.«i");
     //  add Table paragraphs
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_TABLE).add("»Dies ist eine Beispieltabellentext.");
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_TABLE).add("Dies ist eine  zweite Zeile.");
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_TABLE).add("Dies ist eine (dritte.");
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_TABLE).add("Dies ist eine vierte Zeile.«1");
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_TABLE).add("Hier steht eine weitere Zeile.");
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_TABLE).add("Dies ist eine weitere Tabellenzelle.");
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_TABLE).add("»Dies ist noch eine Tabellenzelle.");
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_TABLE).add("Noch eine Zeile«");
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_TABLE).add("");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_TABLE).add("»Dies ist eine Beispieltabellentext.");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_TABLE).add("Dies ist eine  zweite Zeile.");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_TABLE).add("Dies ist eine (dritte.");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_TABLE).add("Dies ist eine vierte Zeile.«1");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_TABLE).add("Hier steht eine weitere Zeile.");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_TABLE).add("Dies ist eine weitere Tabellenzelle.");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_TABLE).add("»Dies ist noch eine Tabellenzelle.");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_TABLE).add("Noch eine Zeile«");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_TABLE).add("");
     //  add Footnote paragraphs
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_FOOTNOTE).add("»Dieses Zeile ist eine Beispielfußnote.");
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_FOOTNOTE).add("Dies ist eine  zweite Zeile.");
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_FOOTNOTE).add("Dies ist eine (dritte.");
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_FOOTNOTE).add("Dies ist eine vierte Zeile.«");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_FOOTNOTE).add("»Dieses Zeile ist eine Beispielfußnote.");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_FOOTNOTE).add("Dies ist eine  zweite Zeile.");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_FOOTNOTE).add("Dies ist eine (dritte.");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_FOOTNOTE).add("Dies ist eine vierte Zeile.«");
     //  add Endnote paragraphs
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_ENDNOTE).add("»Dieses Zeile ist eine Beispielendnote.");
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_ENDNOTE).add("Dies ist eine  zweite Zeile.");
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_ENDNOTE).add("Dies ist eine (dritte.");
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_ENDNOTE).add("Dies ist eine vierte Zeile.«");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_ENDNOTE).add("»Dieses Zeile ist eine Beispielendnote.");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_ENDNOTE).add("Dies ist eine  zweite Zeile.");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_ENDNOTE).add("Dies ist eine (dritte.");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_ENDNOTE).add("Dies ist eine vierte Zeile.«");
     //  add Header/Footer paragraphs
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_HEADER_FOOTER).add("»Dies ist ein Beispielkopfzeile.");
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_HEADER_FOOTER).add("Dies ist eine  zweite Zeile.");
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_HEADER_FOOTER).add("Dies ist eine (dritte.");
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_HEADER_FOOTER).add("Dies ist eine vierte Zeile.«");
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_HEADER_FOOTER).add("Hier steht eine weitere Zeile.");
-    textParagraphs.get(DocumentCache.CURSOR_TYPE_HEADER_FOOTER).add("Dies  ist ein Fußzeile.");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_HEADER_FOOTER).add("»Dies ist ein Beispielkopfzeile.");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_HEADER_FOOTER).add("Dies ist eine  zweite Zeile.");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_HEADER_FOOTER).add("Dies ist eine (dritte.");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_HEADER_FOOTER).add("Dies ist eine vierte Zeile.«");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_HEADER_FOOTER).add("Hier steht eine weitere Zeile.");
+    textParagraphs.get(WtDocumentCache.CURSOR_TYPE_HEADER_FOOTER).add("Dies  ist ein Fußzeile.");
     //  set end and footnotes
     List<int[]> footnotes = new ArrayList<>();
     for (int i = 0; i < paragraphs.size(); i++) {
@@ -281,15 +281,15 @@ public class MainTest {
     }
     //  add headings (only for table and footer)
     List<List<Integer>> chapterBegins = new ArrayList<List<Integer>>();
-    for (int i = 0; i < DocumentCache.NUMBER_CURSOR_TYPES; i++) {
+    for (int i = 0; i < WtDocumentCache.NUMBER_CURSOR_TYPES; i++) {
       chapterBegins.add(new ArrayList<Integer>());
     }
-    chapterBegins.get(DocumentCache.CURSOR_TYPE_TABLE).add(0);
-    chapterBegins.get(DocumentCache.CURSOR_TYPE_TABLE).add(5);
-    chapterBegins.get(DocumentCache.CURSOR_TYPE_TABLE).add(6);
-    chapterBegins.get(DocumentCache.CURSOR_TYPE_TABLE).add(8);
-    chapterBegins.get(DocumentCache.CURSOR_TYPE_HEADER_FOOTER).add(0);
-    chapterBegins.get(DocumentCache.CURSOR_TYPE_HEADER_FOOTER).add(5);
+    chapterBegins.get(WtDocumentCache.CURSOR_TYPE_TABLE).add(0);
+    chapterBegins.get(WtDocumentCache.CURSOR_TYPE_TABLE).add(5);
+    chapterBegins.get(WtDocumentCache.CURSOR_TYPE_TABLE).add(6);
+    chapterBegins.get(WtDocumentCache.CURSOR_TYPE_TABLE).add(8);
+    chapterBegins.get(WtDocumentCache.CURSOR_TYPE_HEADER_FOOTER).add(0);
+    chapterBegins.get(WtDocumentCache.CURSOR_TYPE_HEADER_FOOTER).add(5);
     // German text
     Locale locale = new Locale("de", "DE", "");
     // property value without any footnote
@@ -304,9 +304,9 @@ public class MainTest {
     assertEquals(2, paRes.aErrors.length);  // This may be critical if rules changed
     assertTrue(paRes.aErrors[0].aRuleIdentifier.equals("DE_UNPAIRED_QUOTES"));
     assertTrue(paRes.aErrors[1].aRuleIdentifier.equals("DE_AGREEMENT"));
-    MultiDocumentsHandler documents = prog.getMultiDocumentsHandler();
-    SingleDocument document = documents.getDocuments().get(0);
-    SwJLanguageTool lt = documents.getLanguageTool();
+    WtDocumentsHandler documents = prog.getMultiDocumentsHandler();
+    WtSingleDocument document = documents.getDocuments().get(0);
+    WtLanguageTool lt = documents.getLanguageTool();
     // disable all rules not needed for test
     // test rules are:
     // DE_AGREEMENT - test of rule on sentence level
@@ -331,7 +331,7 @@ public class MainTest {
     }
     assertEquals(5, enabledRules.size()); // test if not more than needed rules are enabled
     int textParagraphsSize = 0;
-    for (int i = 0; i < DocumentCache.NUMBER_CURSOR_TYPES; i++) {
+    for (int i = 0; i < WtDocumentCache.NUMBER_CURSOR_TYPES; i++) {
       textParagraphsSize += textParagraphs.get(i).size();
     }
     assertEquals(paragraphs.size(), textParagraphsSize);  // test of the size of flat paragraphs equals the number of text paragraphs
@@ -454,12 +454,12 @@ public class MainTest {
   public void testCleanFootnotes() {
     WritingTool main = new WritingTool(null);
     main.setTestMode(true);
-    assertEquals("A house.¹ Here comes more text.", SingleCheck.cleanFootnotes("A house.1 Here comes more text."));
-    assertEquals("A road that's 3.4 miles long.", SingleCheck.cleanFootnotes("A road that's 3.4 miles long."));
-    assertEquals("A house.1234 Here comes more text.", SingleCheck.cleanFootnotes("A house.1234 Here comes more text."));  // too many digits for a footnote
+    assertEquals("A house.¹ Here comes more text.", WtSingleCheck.cleanFootnotes("A house.1 Here comes more text."));
+    assertEquals("A road that's 3.4 miles long.", WtSingleCheck.cleanFootnotes("A road that's 3.4 miles long."));
+    assertEquals("A house.1234 Here comes more text.", WtSingleCheck.cleanFootnotes("A house.1234 Here comes more text."));  // too many digits for a footnote
     String input    = "Das Haus.1 Hier kommt mehr Text2. Und nochmal!3 Und schon wieder ein Satz?4 Jetzt ist aber Schluss.";
     String expected = "Das Haus.¹ Hier kommt mehr Text2. Und nochmal!¹ Und schon wieder ein Satz?¹ Jetzt ist aber Schluss.";
-    assertEquals(expected, SingleCheck.cleanFootnotes(input));
+    assertEquals(expected, WtSingleCheck.cleanFootnotes(input));
   }
 
 }

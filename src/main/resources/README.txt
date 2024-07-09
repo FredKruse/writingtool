@@ -1,6 +1,5 @@
-LanguageTool, a proof-reading tool for English, German, Polish,
-French, Dutch, Russian and more languages
+WritingTool (a LibreOffice Extension based on LanguageTool)
 
-Copyright (C) 2005-2023 the LanguageTool community and Daniel Naber (www.danielnaber.de)
+Copyright (C) 2024 Fred Kruse (https://fk-es.de)
 
-See https://www.languagetool.org for more information
+See https://fk-es.de for more information

@@ -1,5 +1,5 @@
-/* LanguageTool, a natural language style checker
- * Copyright (C) 2011 Daniel Naber (http://www.danielnaber.de)
+/* WritingTool, a LibreOffice Extension based on LanguageTool
+ * Copyright (C) 2024 Fred Kruse (https://fk-es.de)
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -248,27 +248,27 @@ public class WtDictionary {
     if (listIgnoredWords != null) {
       return;
     }
-    boolean debugMode = OfficeTools.DEBUG_MODE_LD;
+    boolean debugMode = WtOfficeTools.DEBUG_MODE_LD;
     for (XDictionary dictionary : dictionaryList) {
       if (dictionary.isActive()) {
         String name = dictionary.getName();
         if (!name.startsWith(INTERNAL_DICT_PREFIX) && !name.endsWith(DICT_FILE_POSTFIX)) {
           listIgnoredWords = new String(name);
           if (debugMode) {
-            MessageHandler.printToLogFile("dictionary for ignored words found: " + listIgnoredWords);
+            WtMessageHandler.printToLogFile("dictionary for ignored words found: " + listIgnoredWords);
           }
         }
       }
     }
     if (listIgnoredWords == null) {
-      MessageHandler.printToLogFile("WARNING: dictionary for ignored words not found!");
+      WtMessageHandler.printToLogFile("WARNING: dictionary for ignored words not found!");
     }
   }
   
   private static XDictionary getListIgnoredWords(XComponentContext xContext) {
-    XSearchableDictionaryList searchableDictionaryList = OfficeTools.getSearchableDictionaryList(xContext);
+    XSearchableDictionaryList searchableDictionaryList = WtOfficeTools.getSearchableDictionaryList(xContext);
     if (searchableDictionaryList == null) {
-      MessageHandler.printToLogFile("LtDictionary: getListIgnoredWords: searchableDictionaryList == null");
+      WtMessageHandler.printToLogFile("LtDictionary: getListIgnoredWords: searchableDictionaryList == null");
       return null;
     }
     if (listIgnoredWords == null) {
@@ -279,7 +279,7 @@ public class WtDictionary {
         return dictionary;
       }
     }
-    MessageHandler.printToLogFile("WARNING: dictionary for ignored words not found!");
+    WtMessageHandler.printToLogFile("WARNING: dictionary for ignored words not found!");
     return null;
   }
 /*  
@@ -476,9 +476,9 @@ public class WtDictionary {
     if (dictionaryName == null) {
       throw new RuntimeException("No dictionary selected (dictionaryName == null) ");
     }
-    XSearchableDictionaryList searchableDictionaryList = OfficeTools.getSearchableDictionaryList(xContext);
+    XSearchableDictionaryList searchableDictionaryList = WtOfficeTools.getSearchableDictionaryList(xContext);
     if (searchableDictionaryList == null) {
-      MessageHandler.printToLogFile("LtDictionary: addWordToDictionary: searchableDictionaryList == null");
+      WtMessageHandler.printToLogFile("LtDictionary: addWordToDictionary: searchableDictionaryList == null");
       return;
     }
     XDictionary dictionary = searchableDictionaryList.getDictionaryByName(dictionaryName);
@@ -492,9 +492,9 @@ public class WtDictionary {
    * Add a word to a user dictionary
    */
   public static void removeWordFromDictionary(String dictionaryName, String word, XComponentContext xContext) {
-    XSearchableDictionaryList searchableDictionaryList = OfficeTools.getSearchableDictionaryList(xContext);
+    XSearchableDictionaryList searchableDictionaryList = WtOfficeTools.getSearchableDictionaryList(xContext);
     if (searchableDictionaryList == null) {
-      MessageHandler.printToLogFile("LtDictionary: removeWordFromDictionary: searchableDictionaryList == null");
+      WtMessageHandler.printToLogFile("LtDictionary: removeWordFromDictionary: searchableDictionaryList == null");
       return;
     }
     XDictionary dictionary = searchableDictionaryList.getDictionaryByName(dictionaryName);
@@ -505,10 +505,10 @@ public class WtDictionary {
    * Get all user dictionaries
    */
   public static String[] getUserDictionaries(XComponentContext xContext) {
-    boolean debugMode = OfficeTools.DEBUG_MODE_LD;
-    XSearchableDictionaryList searchableDictionaryList = OfficeTools.getSearchableDictionaryList(xContext);
+    boolean debugMode = WtOfficeTools.DEBUG_MODE_LD;
+    XSearchableDictionaryList searchableDictionaryList = WtOfficeTools.getSearchableDictionaryList(xContext);
     if (searchableDictionaryList == null) {
-      MessageHandler.printToLogFile("LtDictionary: getUserDictionaries: searchableDictionaryList == null");
+      WtMessageHandler.printToLogFile("LtDictionary: getUserDictionaries: searchableDictionaryList == null");
       return null;
     }
     XDictionary[] dictionaryList = searchableDictionaryList.getDictionaries();
@@ -516,7 +516,7 @@ public class WtDictionary {
     List<String> userDictionaries = new ArrayList<String>();
     for (XDictionary dictionary : dictionaryList) {
       if (debugMode) {
-        MessageHandler.printToLogFile("LtDictionary: getUserDictionaries: dictionary: " + dictionary.getName() 
+        WtMessageHandler.printToLogFile("LtDictionary: getUserDictionaries: dictionary: " + dictionary.getName() 
             + ", isActive: " + dictionary.isActive() + ", Type: " + dictionary.getDictionaryType().getValue());
       }
       if (dictionary.isActive()) {

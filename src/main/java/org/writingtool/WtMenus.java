@@ -1,5 +1,5 @@
-/* LanguageTool, a natural language style checker
- * Copyright (C) 2011 Daniel Naber (http://www.danielnaber.de)
+/* WritingTool, a LibreOffice Extension based on LanguageTool
+ * Copyright (C) 2024 Fred Kruse (https://fk-es.de)
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,13 +26,13 @@ import java.util.ResourceBundle;
 
 import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
-import org.writingtool.OfficeTools.DocumentType;
-import org.writingtool.aisupport.AiErrorDetection;
-import org.writingtool.aisupport.AiParagraphChanging;
-import org.writingtool.aisupport.AiRemote;
-import org.writingtool.aisupport.AiRemote.AiCommand;
-import org.writingtool.config.Configuration;
-import org.writingtool.stylestatistic.StatAnDialog;
+import org.writingtool.WtOfficeTools.DocumentType;
+import org.writingtool.aisupport.WtAiErrorDetection;
+import org.writingtool.aisupport.WtAiParagraphChanging;
+import org.writingtool.aisupport.WtAiRemote;
+import org.writingtool.aisupport.WtAiRemote.AiCommand;
+import org.writingtool.config.WtConfiguration;
+import org.writingtool.stylestatistic.WtStatAnDialog;
 
 import com.sun.star.awt.MenuEvent;
 import com.sun.star.awt.MenuItemStyle;
@@ -69,42 +69,42 @@ import com.sun.star.view.XSelectionSupplier;
  */
 public class WtMenus {
   
-  public final static String LT_IGNORE_ONCE_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?ignoreOnce";
-  public final static String LT_IGNORE_ALL_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?ignoreAll";
-  public final static String LT_IGNORE_PERMANENT_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?ignorePermanent";
-  public final static String LT_DEACTIVATE_RULE_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?deactivateRule";
-  public final static String LT_MORE_INFO_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?moreInfo";
-  public final static String LT_ACTIVATE_RULES_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?activateRules";
-  public final static String LT_ACTIVATE_RULE_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?activateRule_";
-  public final static String LT_REMOTE_HINT_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?remoteHint";   
-  public final static String LT_RENEW_MARKUPS_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?renewMarkups";
-  public final static String LT_ADD_TO_DICTIONARY_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?addToDictionary_";
-  public final static String LT_NEXT_ERROR_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?nextError";
-  public final static String LT_CHECKDIALOG_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?checkDialog";
-  public final static String LT_CHECKAGAINDIALOG_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?checkAgainDialog";
-  public static final String LT_STATISTICAL_ANALYSES_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?statisticalAnalyses";   
-  public static final String LT_OFF_STATISTICAL_ANALYSES_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?offStatisticalAnalyses";   
-  public static final String LT_RESET_IGNORE_PERMANENT_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?resetIgnorePermanent";   
-  public static final String LT_TOGGLE_BACKGROUND_CHECK_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?toggleNoBackgroundCheck";
-  public static final String LT_BACKGROUND_CHECK_ON_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?backgroundCheckOn";
-  public static final String LT_BACKGROUND_CHECK_OFF_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?backgroundCheckOff";
-  public static final String LT_REFRESH_CHECK_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?refreshCheck";
-  public static final String LT_ABOUT_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?about";
-  public static final String LT_LANGUAGETOOL_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?lt";
-  public static final String LT_OPTIONS_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?configure";
-  public static final String LT_PROFILES_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?profiles";
-  public static final String LT_PROFILE_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?profileChangeTo_";
-  public static final String LT_NONE_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?noAction";
-  public static final String LT_AI_MARK_ERRORS = "service:" + OfficeTools.WT_SERVICE_NAME + "?aiAddErrorMarks";
-  public static final String LT_AI_CORRECT_ERRORS = "service:" + OfficeTools.WT_SERVICE_NAME + "?aiCorrectErrors";
-  public static final String LT_AI_BETTER_STYLE = "service:" + OfficeTools.WT_SERVICE_NAME + "?aiBetterStyle";
-  public static final String LT_AI_EXPAND_TEXT = "service:" + OfficeTools.WT_SERVICE_NAME + "?aiAdvanceText";
-  public static final String LT_AI_GENERAL_COMMAND = "service:" + OfficeTools.WT_SERVICE_NAME + "?aiGeneralCommand";
+  public final static String LT_IGNORE_ONCE_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?ignoreOnce";
+  public final static String LT_IGNORE_ALL_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?ignoreAll";
+  public final static String LT_IGNORE_PERMANENT_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?ignorePermanent";
+  public final static String LT_DEACTIVATE_RULE_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?deactivateRule";
+  public final static String LT_MORE_INFO_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?moreInfo";
+  public final static String LT_ACTIVATE_RULES_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?activateRules";
+  public final static String LT_ACTIVATE_RULE_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?activateRule_";
+  public final static String LT_REMOTE_HINT_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?remoteHint";   
+  public final static String LT_RENEW_MARKUPS_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?renewMarkups";
+  public final static String LT_ADD_TO_DICTIONARY_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?addToDictionary_";
+  public final static String LT_NEXT_ERROR_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?nextError";
+  public final static String LT_CHECKDIALOG_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?checkDialog";
+  public final static String LT_CHECKAGAINDIALOG_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?checkAgainDialog";
+  public static final String LT_STATISTICAL_ANALYSES_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?statisticalAnalyses";   
+  public static final String LT_OFF_STATISTICAL_ANALYSES_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?offStatisticalAnalyses";   
+  public static final String LT_RESET_IGNORE_PERMANENT_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?resetIgnorePermanent";   
+  public static final String LT_TOGGLE_BACKGROUND_CHECK_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?toggleNoBackgroundCheck";
+  public static final String LT_BACKGROUND_CHECK_ON_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?backgroundCheckOn";
+  public static final String LT_BACKGROUND_CHECK_OFF_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?backgroundCheckOff";
+  public static final String LT_REFRESH_CHECK_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?refreshCheck";
+  public static final String LT_ABOUT_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?about";
+  public static final String LT_LANGUAGETOOL_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?lt";
+  public static final String LT_OPTIONS_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?configure";
+  public static final String LT_PROFILES_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?profiles";
+  public static final String LT_PROFILE_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?profileChangeTo_";
+  public static final String LT_NONE_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?noAction";
+  public static final String LT_AI_MARK_ERRORS = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?aiAddErrorMarks";
+  public static final String LT_AI_CORRECT_ERRORS = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?aiCorrectErrors";
+  public static final String LT_AI_BETTER_STYLE = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?aiBetterStyle";
+  public static final String LT_AI_EXPAND_TEXT = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?aiAdvanceText";
+  public static final String LT_AI_GENERAL_COMMAND = "service:" + WtOfficeTools.WT_SERVICE_NAME + "?aiGeneralCommand";
   
 //  public static final String LT_MENU_REPLACE_COLON = "__|__";
   public static final String LT_MENU_REPLACE_COLON = ":";
 
-  private static final ResourceBundle MESSAGES = OfficeTools.getMessageBundle();
+  private static final ResourceBundle MESSAGES = WtOfficeTools.getMessageBundle();
   private static final int SUBMENU_ID_DIFF = 21;
   private static final short SUBMENU_ID_AI = 1000;
 //  private static final String LT_TOOLBAR_URL = "private:resource/toolbar/addon_" + OfficeTools.WT_SERVICE_NAME + ".toolbar";
@@ -124,17 +124,17 @@ public class WtMenus {
   
   private XComponentContext xContext;
   private XComponent xComponent;
-  private SingleDocument document;
-  private Configuration config;
+  private WtSingleDocument document;
+  private WtConfiguration config;
   private boolean isRemote;
   private LTHeadMenu ltHeadMenu;
   @SuppressWarnings("unused")
   private ContextMenuInterceptor ltContextMenu;
 
-  WtMenus(XComponentContext xContext, SingleDocument document, Configuration config) {
+  WtMenus(XComponentContext xContext, WtSingleDocument document, WtConfiguration config) {
     try {
-      debugMode = OfficeTools.DEBUG_MODE_LM;
-      debugModeTm = OfficeTools.DEBUG_MODE_TM;
+      debugMode = WtOfficeTools.DEBUG_MODE_LM;
+      debugModeTm = WtOfficeTools.DEBUG_MODE_TM;
       this.document = document;
       this.xContext = xContext;
       this.xComponent = document.getXComponent();
@@ -144,14 +144,14 @@ public class WtMenus {
       }
       ltContextMenu = new ContextMenuInterceptor(xComponent);
       if (debugMode) {
-        MessageHandler.printToLogFile("LanguageToolMenus initialised");
+        WtMessageHandler.printToLogFile("LanguageToolMenus initialised");
       }
     } catch (Throwable t) {
-      MessageHandler.showError(t);
+      WtMessageHandler.showError(t);
     }
   }
   
-  void setConfigValues(Configuration config) {
+  void setConfigValues(WtConfiguration config) {
     this.config = config;
     if (config != null) {
       isRemote = config.doRemoteCheck();
@@ -193,9 +193,9 @@ public class WtMenus {
     public LTHeadMenu(XComponent xComponent) {
       try {
         XMenuBar menubar = null;
-        menubar = OfficeTools.getMenuBar(xComponent);
+        menubar = WtOfficeTools.getMenuBar(xComponent);
         if (menubar == null) {
-          MessageHandler.printToLogFile("LanguageToolMenus: LTHeadMenu: Menubar is null");
+          WtMessageHandler.printToLogFile("LanguageToolMenus: LTHeadMenu: Menubar is null");
           return;
         }
         for (short i = 0; i < menubar.getItemCount(); i++) {
@@ -207,7 +207,7 @@ public class WtMenus {
           }
         }
         if (toolsMenu == null) {
-          MessageHandler.printToLogFile("LanguageToolMenus: LTHeadMenu: Tools Menu is null");
+          WtMessageHandler.printToLogFile("LanguageToolMenus: LTHeadMenu: Tools Menu is null");
           return;
         }
         for (short i = 0; i < toolsMenu.getItemCount(); i++) {
@@ -219,7 +219,7 @@ public class WtMenus {
           }
         }
         if (ltMenu == null) {
-          MessageHandler.printToLogFile("LanguageToolMenus: LTHeadMenu: LT Menu is null");
+          WtMessageHandler.printToLogFile("LanguageToolMenus: LTHeadMenu: LT Menu is null");
           return;
         }
         
@@ -232,7 +232,7 @@ public class WtMenus {
           }
         }
         if (switchOffId == 0) {
-          MessageHandler.printToLogFile("LanguageToolMenus: LTHeadMenu: switchOffId not found");
+          WtMessageHandler.printToLogFile("LanguageToolMenus: LTHeadMenu: switchOffId not found");
           return;
         }
         boolean hasStatisticalStyleRules = false;
@@ -240,7 +240,7 @@ public class WtMenus {
             !document.getMultiDocumentsHandler().isBackgroundCheckOff()) {
           Language lang = document.getLanguage();
           if (lang != null) {
-            hasStatisticalStyleRules = OfficeTools.hasStatisticalStyleRules(lang);
+            hasStatisticalStyleRules = WtOfficeTools.hasStatisticalStyleRules(lang);
           }
         }
         if (hasStatisticalStyleRules) {
@@ -262,10 +262,10 @@ public class WtMenus {
         toolsMenu.addMenuListener(this);
         ltMenu.addMenuListener(this);
         if (debugMode) {
-          MessageHandler.printToLogFile("LanguageToolMenus: LTHeadMenu: Menu listener set");
+          WtMessageHandler.printToLogFile("LanguageToolMenus: LTHeadMenu: Menu listener set");
         }
       } catch (Throwable t) {
-        MessageHandler.showError(t);
+        WtMessageHandler.showError(t);
       }
     }
     
@@ -327,9 +327,9 @@ public class WtMenus {
      */
     private void setProfileMenu(short profilesId, short profilesPos) throws Throwable {
       ltMenu.insertItem(profilesId, MESSAGES.getString("loMenuChangeProfiles"), MenuItemStyle.AUTOCHECK, profilesPos);
-      xProfileMenu = OfficeTools.getPopupMenu(xContext);
+      xProfileMenu = WtOfficeTools.getPopupMenu(xContext);
       if (xProfileMenu == null) {
-        MessageHandler.printToLogFile("LanguageToolMenus: setProfileMenu: Profile menu == null");
+        WtMessageHandler.printToLogFile("LanguageToolMenus: setProfileMenu: Profile menu == null");
         return;
       }
       
@@ -380,7 +380,7 @@ public class WtMenus {
     private void runProfileAction(String profile) throws Throwable {
       List<String> definedProfiles = config.getDefinedProfiles();
       if (profile != null && (definedProfiles == null || !definedProfiles.contains(profile))) {
-        MessageHandler.showMessage("profile '" + profile + "' not found");
+        WtMessageHandler.showMessage("profile '" + profile + "' not found");
       } else {
         try {
           List<String> saveProfiles = new ArrayList<>();
@@ -392,7 +392,7 @@ public class WtMenus {
           config.saveConfiguration(document.getLanguage());
           document.getMultiDocumentsHandler().resetConfiguration();
         } catch (IOException e) {
-          MessageHandler.showError(e);
+          WtMessageHandler.showError(e);
         }
       }
     }
@@ -405,9 +405,9 @@ public class WtMenus {
       if (!deactivatedRulesMap.isEmpty()) {
         if (ltMenu.getItemPos(id) < 1) {
           ltMenu.insertItem(id, MESSAGES.getString("loContextMenuActivateRule"), MenuItemStyle.AUTOCHECK, pos);
-          xActivateRuleMenu = OfficeTools.getPopupMenu(xContext);
+          xActivateRuleMenu = WtOfficeTools.getPopupMenu(xContext);
           if (xActivateRuleMenu == null) {
-            MessageHandler.printToLogFile("LanguageToolMenus: setActivateRuleMenu: activate rule menu == null");
+            WtMessageHandler.printToLogFile("LanguageToolMenus: setActivateRuleMenu: activate rule menu == null");
             return;
           }
           xActivateRuleMenu.addMenuListener(this);
@@ -492,7 +492,7 @@ public class WtMenus {
         try {
           setLtMenu();
         } catch (Throwable e) {
-          MessageHandler.showError(e);
+          WtMessageHandler.showError(e);
         }
       }
     }
@@ -509,7 +509,7 @@ public class WtMenus {
     public void itemSelected(MenuEvent event) {
       try {
         if (debugMode) {
-          MessageHandler.printToLogFile("LanguageToolMenus: itemSelected: event id: " + ((int)event.MenuId));
+          WtMessageHandler.printToLogFile("LanguageToolMenus: itemSelected: event id: " + ((int)event.MenuId));
         }
         if (event.MenuId == switchOffId) {
           if (document.getMultiDocumentsHandler().toggleNoBackgroundCheck()) {
@@ -518,18 +518,18 @@ public class WtMenus {
         } else if (event.MenuId == switchOffId + 1) {
           document.resetIgnorePermanent();
         } else if (event.MenuId == switchOffId + 2) {
-          StatAnDialog statAnDialog = new StatAnDialog(document);
+          WtStatAnDialog statAnDialog = new WtStatAnDialog(document);
           statAnDialog.start();
           return;
         } else if (event.MenuId > SUBMENU_ID_AI && event.MenuId < SUBMENU_ID_AI + 10) {
 //          if (debugMode) {
-            MessageHandler.printToLogFile("LanguageToolMenus: itemSelected: AI support: " + (event.MenuId - SUBMENU_ID_AI));
+            WtMessageHandler.printToLogFile("LanguageToolMenus: itemSelected: AI support: " + (event.MenuId - SUBMENU_ID_AI));
 //          }
           if (event.MenuId == SUBMENU_ID_AI + 1) {
-            AiErrorDetection aiError = new AiErrorDetection(document, config, document.getMultiDocumentsHandler().getLanguageTool());
+            WtAiErrorDetection aiError = new WtAiErrorDetection(document, config, document.getMultiDocumentsHandler().getLanguageTool());
             aiError.addAiRuleMatchesForParagraph();
           } else {
-            AiParagraphChanging aiChange = new AiParagraphChanging(document, config, AiCommand.GeneralAi);
+            WtAiParagraphChanging aiChange = new WtAiParagraphChanging(document, config, AiCommand.GeneralAi);
             aiChange.start();
           }
         } else if (event.MenuId == switchOffId + SUBMENU_ID_DIFF) {
@@ -543,7 +543,7 @@ public class WtMenus {
           for (String ruleId : deactivatedRulesMap.keySet()) {
             if(event.MenuId == j) {
               if (debugMode) {
-                MessageHandler.printToLogFile("LanguageToolMenus: itemSelected: activate rule: " + ruleId);
+                WtMessageHandler.printToLogFile("LanguageToolMenus: itemSelected: activate rule: " + ruleId);
               }
               document.getMultiDocumentsHandler().activateRule(ruleId);
               return;
@@ -552,7 +552,7 @@ public class WtMenus {
           }
         }
       } catch (Throwable e) {
-        MessageHandler.showError(e);
+        WtMessageHandler.showError(e);
       }
     }
 
@@ -570,29 +570,29 @@ public class WtMenus {
       try {
         XModel xModel = UnoRuntime.queryInterface(XModel.class, xComponent);
         if (xModel == null) {
-          MessageHandler.printToLogFile("LanguageToolMenus: ContextMenuInterceptor: XModel not found!");
+          WtMessageHandler.printToLogFile("LanguageToolMenus: ContextMenuInterceptor: XModel not found!");
           return;
         }
         XController xController = xModel.getCurrentController();
         if (xController == null) {
-          MessageHandler.printToLogFile("LanguageToolMenus: ContextMenuInterceptor: xController == null");
+          WtMessageHandler.printToLogFile("LanguageToolMenus: ContextMenuInterceptor: xController == null");
           return;
         }
         XContextMenuInterception xContextMenuInterception = UnoRuntime.queryInterface(XContextMenuInterception.class, xController);
         if (xContextMenuInterception == null) {
-          MessageHandler.printToLogFile("LanguageToolMenus: ContextMenuInterceptor: xContextMenuInterception == null");
+          WtMessageHandler.printToLogFile("LanguageToolMenus: ContextMenuInterceptor: xContextMenuInterception == null");
           return;
         }
         ContextMenuInterceptor aContextMenuInterceptor = new ContextMenuInterceptor();
         XContextMenuInterceptor xContextMenuInterceptor = 
             UnoRuntime.queryInterface(XContextMenuInterceptor.class, aContextMenuInterceptor);
         if (xContextMenuInterceptor == null) {
-          MessageHandler.printToLogFile("LanguageToolMenus: ContextMenuInterceptor: xContextMenuInterceptor == null");
+          WtMessageHandler.printToLogFile("LanguageToolMenus: ContextMenuInterceptor: xContextMenuInterceptor == null");
           return;
         }
         xContextMenuInterception.registerContextMenuInterceptor(xContextMenuInterceptor);
       } catch (Throwable t) {
-        MessageHandler.printException(t);
+        WtMessageHandler.printException(t);
       }
     }
   
@@ -603,18 +603,18 @@ public class WtMenus {
     public ContextMenuInterceptorAction notifyContextMenuExecute(ContextMenuExecuteEvent aEvent) {
       try {
         if (isRunning) {
-          MessageHandler.printToLogFile("LanguageToolMenus: notifyContextMenuExecute: is running: no change in Menu");
+          WtMessageHandler.printToLogFile("LanguageToolMenus: notifyContextMenuExecute: is running: no change in Menu");
           return ContextMenuInterceptorAction.IGNORED;
         }
         isRunning = true;
         long startTime = 0;
         if (debugModeTm) {
           startTime = System.currentTimeMillis();
-          MessageHandler.printToLogFile("Generate context menu started");
+          WtMessageHandler.printToLogFile("Generate context menu started");
         }
         XIndexContainer xContextMenu = aEvent.ActionTriggerContainer;
         if (debugMode) {
-          MessageHandler.printToLogFile("LanguageToolMenus: notifyContextMenuExecute: get xContextMenu");
+          WtMessageHandler.printToLogFile("LanguageToolMenus: notifyContextMenuExecute: get xContextMenu");
         }
         
         if (document.getDocumentType() == DocumentType.IMPRESS) {
@@ -631,13 +631,13 @@ public class WtMenus {
           xContextMenu.insertByIndex(1, xSeparator);
           if (debugModeTm) {
             long runTime = System.currentTimeMillis() - startTime;
-            if (runTime > OfficeTools.TIME_TOLERANCE) {
-              MessageHandler.printToLogFile("Time to generate context menu (Impress): " + runTime);
+            if (runTime > WtOfficeTools.TIME_TOLERANCE) {
+              WtMessageHandler.printToLogFile("Time to generate context menu (Impress): " + runTime);
             }
           }
           isRunning = false;
           if (debugMode) {
-            MessageHandler.printToLogFile("LanguageToolMenus: notifyContextMenuExecute: execute modified for Impress");
+            WtMessageHandler.printToLogFile("LanguageToolMenus: notifyContextMenuExecute: execute modified for Impress");
           }
           return ContextMenuInterceptorAction.EXECUTE_MODIFIED;
         }
@@ -675,7 +675,7 @@ public class WtMenus {
                 isSpellError = true;
                 String wrongWord = getSelectedWord(aEvent);
                 if (debugMode) {
-                  MessageHandler.printToLogFile("LanguageToolMenus: notifyContextMenuExecute: wrong word: " + wrongWord);
+                  WtMessageHandler.printToLogFile("LanguageToolMenus: notifyContextMenuExecute: wrong word: " + wrongWord);
                 }
                 if (wrongWord != null && !wrongWord.isEmpty()) {
                   if (wrongWord.charAt(wrongWord.length() - 1) == '.') {
@@ -720,13 +720,13 @@ public class WtMenus {
 
               if (debugModeTm) {
                 long runTime = System.currentTimeMillis() - startTime;
-                if (runTime > OfficeTools.TIME_TOLERANCE) {
-                  MessageHandler.printToLogFile("Time to generate context menu (grammar error): " + runTime);
+                if (runTime > WtOfficeTools.TIME_TOLERANCE) {
+                  WtMessageHandler.printToLogFile("Time to generate context menu (grammar error): " + runTime);
                 }
               }
               isRunning = false;
               if (debugMode) {
-                MessageHandler.printToLogFile("LanguageToolMenus: notifyContextMenuExecute: execute modified for Writer");
+                WtMessageHandler.printToLogFile("LanguageToolMenus: notifyContextMenuExecute: execute modified for Writer");
               }
               return ContextMenuInterceptorAction.EXECUTE_MODIFIED;
             }
@@ -778,21 +778,21 @@ public class WtMenus {
 */
         if (debugModeTm) {
           long runTime = System.currentTimeMillis() - startTime;
-          if (runTime > OfficeTools.TIME_TOLERANCE) {
-            MessageHandler.printToLogFile("Time to generate context menu (no grammar error): " + runTime);
+          if (runTime > WtOfficeTools.TIME_TOLERANCE) {
+            WtMessageHandler.printToLogFile("Time to generate context menu (no grammar error): " + runTime);
           }
         }
         isRunning = false;
         if (debugMode) {
-          MessageHandler.printToLogFile("LanguageToolMenus: notifyContextMenuExecute: execute modified for Writer (no grammar error)");
+          WtMessageHandler.printToLogFile("LanguageToolMenus: notifyContextMenuExecute: execute modified for Writer (no grammar error)");
         }
         return ContextMenuInterceptorAction.CONTINUE_MODIFIED;
 
       } catch (Throwable t) {
-        MessageHandler.printException(t);
+        WtMessageHandler.printException(t);
       }
       isRunning = false;
-      MessageHandler.printToLogFile("LanguageToolMenus: notifyContextMenuExecute: no change in Menu");
+      WtMessageHandler.printToLogFile("LanguageToolMenus: notifyContextMenuExecute: no change in Menu");
       return ContextMenuInterceptorAction.IGNORED;
     }
     
@@ -889,7 +889,7 @@ public class WtMenus {
       boolean hasStatisticalStyleRules;
       if (document.getDocumentType() == DocumentType.WRITER &&
           !document.getMultiDocumentsHandler().isBackgroundCheckOff()) {
-        hasStatisticalStyleRules = OfficeTools.hasStatisticalStyleRules(document.getLanguage());
+        hasStatisticalStyleRules = WtOfficeTools.hasStatisticalStyleRules(document.getLanguage());
       } else {
         hasStatisticalStyleRules = false;
       }
@@ -962,7 +962,7 @@ public class WtMenus {
 
       XPropertySet xNewMenuEntry = UnoRuntime.queryInterface(XPropertySet.class,
           xMenuElementFactory.createInstance("com.sun.star.ui.ActionTrigger"));
-      xNewMenuEntry.setPropertyValue("Text", OfficeTools.WT_NAME);
+      xNewMenuEntry.setPropertyValue("Text", WtOfficeTools.WT_NAME);
       xNewMenuEntry.setPropertyValue("CommandURL", LT_LANGUAGETOOL_COMMAND);
       xNewMenuEntry.setPropertyValue("SubContainer", (Object)xSubMenuContainer);
       xContextMenu.insertByIndex(nId, xNewMenuEntry);
@@ -1091,17 +1091,17 @@ public class WtMenus {
         Object selection = xSelectionSupplier.getSelection();
         XIndexAccess xIndexAccess = UnoRuntime.queryInterface(XIndexAccess.class, selection);
         if (xIndexAccess == null) {
-          MessageHandler.printToLogFile("LanguageToolMenus: getSelectedWord: xIndexAccess == null");
+          WtMessageHandler.printToLogFile("LanguageToolMenus: getSelectedWord: xIndexAccess == null");
           return null;
         }
         XTextRange xTextRange = UnoRuntime.queryInterface(XTextRange.class, xIndexAccess.getByIndex(0));
         if (xTextRange == null) {
-          MessageHandler.printToLogFile("LanguageToolMenus: getSelectedWord: xTextRange == null");
+          WtMessageHandler.printToLogFile("LanguageToolMenus: getSelectedWord: xTextRange == null");
           return null;
         }
         return xTextRange.getString();
       } catch (Throwable t) {
-        MessageHandler.printException(t);
+        WtMessageHandler.printException(t);
       }
       return null;
     }
@@ -1112,13 +1112,13 @@ public class WtMenus {
     private void printProperties(XPropertySet props) throws Throwable {
       Property[] propInfo = props.getPropertySetInfo().getProperties();
       for (Property property : propInfo) {
-        MessageHandler.printToLogFile("LanguageToolMenus: Property: Name: " + property.Name + ", Type: " + property.Type);
+        WtMessageHandler.printToLogFile("LanguageToolMenus: Property: Name: " + property.Name + ", Type: " + property.Type);
       }
       if (props.getPropertySetInfo().hasPropertyByName("Text")) {
-        MessageHandler.printToLogFile("LanguageToolMenus: Property: Name: " + props.getPropertyValue("Text"));
+        WtMessageHandler.printToLogFile("LanguageToolMenus: Property: Name: " + props.getPropertyValue("Text"));
       }
       if (props.getPropertySetInfo().hasPropertyByName("CommandURL")) {
-        MessageHandler.printToLogFile("LanguageToolMenus: Property: CommandURL: " + props.getPropertyValue("CommandURL"));
+        WtMessageHandler.printToLogFile("LanguageToolMenus: Property: CommandURL: " + props.getPropertyValue("CommandURL"));
       }
     }
 

@@ -1,5 +1,5 @@
-/* LanguageTool, a natural language style checker
- * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
+/* WritingTool, a LibreOffice Extension based on LanguageTool
+ * Copyright (C) 2024 Fred Kruse (https://fk-es.de)
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
 package org.writingtool;
 
 import org.junit.Test;
-import org.writingtool.TamilDetector;
+import org.writingtool.WtTamilDetector;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -30,7 +30,7 @@ public class TamilDetectorTest {
 
   @Test
   public void testIsThisLanguage() {
-    TamilDetector detector = new TamilDetector();
+    WtTamilDetector detector = new WtTamilDetector();
 
     assertTrue(detector.isThisLanguage("இந்த"));
     assertTrue(detector.isThisLanguage("இ"));
