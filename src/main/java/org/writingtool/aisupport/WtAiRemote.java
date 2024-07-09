@@ -345,7 +345,8 @@ public class WtAiRemote {
     }
     return (instruction);
 */
-    ResourceBundle messages = WtOfficeTools.getMessageBundle(WtDocumentsHandler.getLanguage(locale));
+//    ResourceBundle messages = WtOfficeTools.getMessageBundle(WtDocumentsHandler.getLanguage(locale));
+    ResourceBundle messages = WtOfficeTools.getMessageBundle(WtDocumentsHandler.getLanguage(new Locale("en", "", "")));
     String instruction = messages.getString(mess) + " (language: " + locale.Language + ")"; 
     return instruction;
   }

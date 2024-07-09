@@ -254,7 +254,7 @@ public class WtAiErrorDetection {
       WtLinguisticServices linguServices, Locale locale, ResourceBundle messages, boolean showStylisticHints) {
     try {
       Class<?>[] cArgs = { String.class, List.class, WtLinguisticServices.class, Locale.class, ResourceBundle.class, boolean.class };
-      Class<?> clazz = Class.forName("org.writingtool.aisupport.AiDetectionRule_" + locale.Language);
+      Class<?> clazz = Class.forName("org.writingtool.aisupport.WtAiDetectionRule_" + locale.Language);
       WtMessageHandler.printToLogFile("Use detection rule for: " + locale.Language);
       return (WtAiDetectionRule) clazz.getDeclaredConstructor(cArgs).newInstance(aiResultText, 
           analyzedAiResult, linguServices, locale, messages, showStylisticHints);
