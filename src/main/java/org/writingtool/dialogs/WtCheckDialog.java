@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.writingtool;
+package org.writingtool.dialogs;
 
 import java.awt.Color;
 import java.awt.Container;
@@ -78,12 +78,28 @@ import org.languagetool.Language;
 import org.languagetool.Languages;
 // import org.languagetool.rules.Rule;
 import org.languagetool.rules.Rule;
+import org.writingtool.WtDictionary;
+import org.writingtool.WtDocumentCache;
+import org.writingtool.WtDocumentsHandler;
+import org.writingtool.WtIgnoredMatches;
+import org.writingtool.WtLanguageTool;
+import org.writingtool.WtLinguisticServices;
+import org.writingtool.WtResultCache;
+import org.writingtool.WtSingleCheck;
+import org.writingtool.WtSingleDocument;
 import org.writingtool.WtDocumentCache.TextParagraph;
 import org.writingtool.WtDocumentsHandler.WaitDialogThread;
-import org.writingtool.WtOfficeDrawTools.UndoMarkupContainer;
-import org.writingtool.WtOfficeTools.DocumentType;
-import org.writingtool.WtOfficeTools.LoErrorType;
 import org.writingtool.config.WtConfigTools;
+import org.writingtool.tools.WtDocumentCursorTools;
+import org.writingtool.tools.WtFlatParagraphTools;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeDrawTools;
+import org.writingtool.tools.WtOfficeSpreadsheetTools;
+import org.writingtool.tools.WtOfficeTools;
+import org.writingtool.tools.WtViewCursorTools;
+import org.writingtool.tools.WtOfficeDrawTools.UndoMarkupContainer;
+import org.writingtool.tools.WtOfficeTools.DocumentType;
+import org.writingtool.tools.WtOfficeTools.LoErrorType;
 
 import com.sun.star.beans.PropertyState;
 import com.sun.star.beans.PropertyValue;
@@ -188,7 +204,7 @@ public class WtCheckDialog extends Thread {
   private boolean hasUncheckedParas = false;
   
   
-  WtCheckDialog(XComponentContext xContext, WtDocumentsHandler documents, Language language, WaitDialogThread inf) {
+  public WtCheckDialog(XComponentContext xContext, WtDocumentsHandler documents, Language language, WaitDialogThread inf) {
     debugMode = WtOfficeTools.DEBUG_MODE_CD;
     this.xContext = xContext;
     this.documents = documents;

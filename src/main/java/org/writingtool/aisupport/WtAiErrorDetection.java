@@ -26,14 +26,14 @@ import org.languagetool.AnalyzedSentence;
 import org.languagetool.rules.RuleMatch;
 import org.writingtool.WtDocumentCache;
 import org.writingtool.WtLinguisticServices;
-import org.writingtool.WtMessageHandler;
-import org.writingtool.WtOfficeTools;
 import org.writingtool.WtResultCache;
 import org.writingtool.WtSingleCheck;
 import org.writingtool.WtSingleDocument;
 import org.writingtool.WtLanguageTool;
-import org.writingtool.WtViewCursorTools;
 import org.writingtool.config.WtConfiguration;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeTools;
+import org.writingtool.tools.WtViewCursorTools;
 
 import com.sun.star.lang.Locale;
 import com.sun.star.linguistic2.SingleProofreadingError;

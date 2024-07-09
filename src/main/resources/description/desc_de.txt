@@ -1,2 +1,2 @@
-Grammatik-, Stil- und Rechtschreibprüfung.
-LanguageTool prüft Ihre Texte in mehr als 20 Sprachen.
+WritingTool Ihr Schreibassistent.
+Basierend auf LanguageTool (Grammatik-, Stil- und Rechtschreibprüfung für mehr als 25 Sprachen).

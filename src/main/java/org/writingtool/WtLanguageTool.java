@@ -45,8 +45,10 @@ import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleMatch;
 import org.writingtool.WtDocumentCache.AnalysedText;
 import org.writingtool.WtDocumentCache.TextParagraph;
-import org.writingtool.WtOfficeTools.RemoteCheck;
 import org.writingtool.config.WtConfiguration;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeTools;
+import org.writingtool.tools.WtOfficeTools.RemoteCheck;
 
 /**
  * Class to switch between running LanguageTool in multi or single thread mode

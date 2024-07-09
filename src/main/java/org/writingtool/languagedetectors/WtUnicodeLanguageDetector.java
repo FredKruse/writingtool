@@ -16,18 +16,27 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.writingtool;
+package org.writingtool.languagedetectors;
 
 /**
- * Helps to detect Tamil strings by their Unicode range.
+ * Helps to detect the language of strings by the Unicode range used by the characters.
  * @since 2.7
  */
-@SuppressWarnings("MagicNumber")
-class WtTamilDetector extends WtUnicodeLanguageDetector {
+public abstract class WtUnicodeLanguageDetector {
 
-  @Override
-  protected boolean isInAlphabet(int numericValue) {
-    return numericValue >= 2946 && numericValue <= 3066;
+  private static final int MAX_CHECK_LENGTH = 100;
+
+  protected abstract boolean isInAlphabet(int numericValue);
+
+  public boolean isThisLanguage(String str) {
+    int maxCheckLength = Math.min(str.length(), MAX_CHECK_LENGTH);
+    for (int i = 0; i < maxCheckLength; i++) {
+      int numericValue = str.charAt(i);
+      if (isInAlphabet(numericValue)) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }

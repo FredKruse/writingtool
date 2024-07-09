@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.writingtool;
+package org.writingtool.dialogs;
 
 import java.awt.Color;
 import java.awt.Container;
@@ -42,7 +42,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
@@ -51,8 +50,10 @@ import org.languagetool.Language;
 import org.languagetool.LanguageMaintainedState;
 import org.languagetool.Languages;
 import org.languagetool.language.Contributor;
-import org.writingtool.WtOfficeTools.OfficeProductInfo;
 import org.writingtool.config.WtConfigTools;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeTools;
+import org.writingtool.tools.WtOfficeTools.OfficeProductInfo;
 
 import com.sun.star.uno.XComponentContext;
 
@@ -88,7 +89,7 @@ public class WtAboutDialog {
       headerText.setContentType("text/html");
       headerText.setEditable(false);
       headerText.setOpaque(false);
-      headerText.setText("<html><b>WritingTool</b><br>" + messages.getString("loAboutLtDesc") + "</html>");
+      headerText.setText("<html><FONT SIZE=\"+2\"><b>WritingTool - " + messages.getString("loAboutLtDesc") + "</b></FONT></html>");
       JPanel headerPanel = new JPanel();
       headerPanel.add(headerLabel);
       headerPanel.add(headerText);
@@ -100,11 +101,11 @@ public class WtAboutDialog {
       licensePane.setEditable(false);
       licensePane.setOpaque(false);
       licensePane.setText("<html>"
-          + "<p>Copyright (C) 2024 Fred Kruse.<br>"
-          + "based on LanguageTool<br>  <br>"
-          + "Copyright (C) 2005-2024 the LanguageTool community and Daniel Naber.<br>"
+          + "<p>Copyright (C) 2024 Fred Kruse - "
+          + "<a href=\"https://fk-es.de\">https://fk-es.de</a><br>  <br>"
+          + "based on LanguageTool - "
+          + "Copyright (C) 2005-2024 the LanguageTool community and Daniel Naber.<br>  <br>"
           + "WritingTool and LanguageTool are licensed under the GNU Lesser General Public License.<br>"
-          + "<a href=\"https://fk.es.de\">https://fk.es.de</a><br>"
           + "</html>");
       WtConfigTools.addHyperlinkListener(licensePane);
 

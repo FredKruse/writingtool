@@ -34,8 +34,10 @@ import org.languagetool.rules.spelling.SpellingCheckRule;
 import org.languagetool.rules.spelling.hunspell.HunspellRule;
 import org.languagetool.rules.spelling.morfologik.MorfologikSpellerRule;
 import org.writingtool.WtCacheIO.SpellCache;
-import org.writingtool.WtOfficeTools.OfficeProductInfo;
 import org.writingtool.config.WtConfiguration;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeTools;
+import org.writingtool.tools.WtOfficeTools.OfficeProductInfo;
 
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.lang.IllegalArgumentException;

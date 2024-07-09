@@ -33,9 +33,9 @@ import org.languagetool.JLanguageTool;
 import org.languagetool.rules.AbstractStyleTooOftenUsedWordRule;
 import org.languagetool.rules.ReadabilityRule;
 import org.languagetool.rules.TextLevelRule;
-import org.writingtool.WtMessageHandler;
-import org.writingtool.WtOfficeTools;
 import org.writingtool.WtResultCache;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeTools;
 
 import com.sun.star.linguistic2.SingleProofreadingError;
 

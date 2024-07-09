@@ -16,12 +16,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.writingtool;
+package org.writingtool.tools;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.writingtool.WtOfficeDrawTools.ParagraphContainer;
+import org.writingtool.tools.WtOfficeDrawTools.ParagraphContainer;
 
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.XIndexAccess;

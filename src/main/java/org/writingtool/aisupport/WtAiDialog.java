@@ -54,15 +54,15 @@ import javax.swing.JTextPane;
 import javax.swing.ToolTipManager;
 
 import org.writingtool.WtDocumentCache;
-import org.writingtool.WtMessageHandler;
 import org.writingtool.WtDocumentsHandler;
-import org.writingtool.WtOfficeTools;
 import org.writingtool.WtSingleDocument;
-import org.writingtool.WtViewCursorTools;
 import org.writingtool.WtDocumentCache.TextParagraph;
 import org.writingtool.WtDocumentsHandler.WaitDialogThread;
-import org.writingtool.WtOfficeTools.DocumentType;
 import org.writingtool.config.WtConfiguration;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeTools;
+import org.writingtool.tools.WtViewCursorTools;
+import org.writingtool.tools.WtOfficeTools.DocumentType;
 
 import com.sun.star.lang.Locale;
 import com.sun.star.lang.XComponent;

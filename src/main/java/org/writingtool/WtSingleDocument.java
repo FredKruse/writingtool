@@ -33,10 +33,15 @@ import java.util.Set;
 import org.languagetool.Language;
 import org.writingtool.WtCacheIO.SpellCache;
 import org.writingtool.WtDocumentCache.TextParagraph;
-import org.writingtool.WtOfficeTools.DocumentType;
-import org.writingtool.WtOfficeTools.LoErrorType;
 import org.writingtool.WtTextLevelCheckQueue.QueueEntry;
 import org.writingtool.config.WtConfiguration;
+import org.writingtool.tools.WtDocumentCursorTools;
+import org.writingtool.tools.WtFlatParagraphTools;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeTools;
+import org.writingtool.tools.WtViewCursorTools;
+import org.writingtool.tools.WtOfficeTools.DocumentType;
+import org.writingtool.tools.WtOfficeTools.LoErrorType;
 
 import com.sun.star.awt.MouseButton;
 import com.sun.star.awt.MouseEvent;
@@ -197,7 +202,7 @@ public class WtSingleDocument {
     return getCheckResults(paraText, locale, paRes, propertyValues, docReset, lt, -1, errType);
   }
     
-  ProofreadingResult getCheckResults(String paraText, Locale locale, ProofreadingResult paRes, 
+  public ProofreadingResult getCheckResults(String paraText, Locale locale, ProofreadingResult paRes, 
       PropertyValue[] propertyValues, boolean docReset, WtLanguageTool lt, int nPara, LoErrorType errType) {
     try {
       boolean isIntern = (nPara >= 0);
@@ -759,7 +764,7 @@ public class WtSingleDocument {
   /** 
    * Reset all caches of the document
    */
-  void resetResultCache(boolean withSingleParagraph) {
+  public void resetResultCache(boolean withSingleParagraph) {
     for (int i = withSingleParagraph ? 0 : 1; i < WtOfficeTools.NUMBER_CACHE; i++) {
       paragraphsCache.get(i).removeAll();
     }

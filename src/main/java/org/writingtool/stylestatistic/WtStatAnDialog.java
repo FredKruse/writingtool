@@ -66,15 +66,15 @@ import org.languagetool.rules.ReadabilityRule;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.TextLevelRule;
 import org.writingtool.WtDocumentCache;
-import org.writingtool.WtMessageHandler;
-import org.writingtool.WtOfficeTools;
 import org.writingtool.WtSingleDocument;
-import org.writingtool.WtViewCursorTools;
 import org.writingtool.WtDocumentCache.TextParagraph;
 import org.writingtool.WtDocumentsHandler.WaitDialogThread;
 import org.writingtool.config.WtConfiguration;
 import org.writingtool.stylestatistic.WtStatAnCache.Heading;
 import org.writingtool.stylestatistic.WtStatAnCache.Paragraph;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeTools;
+import org.writingtool.tools.WtViewCursorTools;
 
 import com.sun.star.lang.XComponent;
 

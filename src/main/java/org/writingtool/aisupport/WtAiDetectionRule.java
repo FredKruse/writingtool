@@ -35,8 +35,8 @@ import org.languagetool.rules.ITSIssueType;
 import org.languagetool.rules.RuleMatch;
 import org.languagetool.rules.RuleMatch.Type;
 import org.writingtool.WtLinguisticServices;
-import org.writingtool.WtMessageHandler;
-import org.writingtool.WtOfficeTools;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeTools;
 import org.languagetool.rules.TextLevelRule;
 
 import com.sun.star.lang.Locale;

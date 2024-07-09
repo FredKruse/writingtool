@@ -30,10 +30,16 @@ import org.languagetool.AnalyzedSentence;
 import org.languagetool.AnalyzedToken;
 import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.JLanguageTool;
-import org.writingtool.WtDocumentCursorTools.DocumentText;
-import org.writingtool.WtFlatParagraphTools.FlatParagraphContainer;
-import org.writingtool.WtOfficeDrawTools.ParagraphContainer;
-import org.writingtool.WtOfficeTools.DocumentType;
+import org.writingtool.tools.WtDocumentCursorTools;
+import org.writingtool.tools.WtFlatParagraphTools;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeDrawTools;
+import org.writingtool.tools.WtOfficeSpreadsheetTools;
+import org.writingtool.tools.WtOfficeTools;
+import org.writingtool.tools.WtDocumentCursorTools.DocumentText;
+import org.writingtool.tools.WtFlatParagraphTools.FlatParagraphContainer;
+import org.writingtool.tools.WtOfficeDrawTools.ParagraphContainer;
+import org.writingtool.tools.WtOfficeTools.DocumentType;
 
 import com.sun.star.lang.Locale;
 import com.sun.star.lang.XComponent;
@@ -109,7 +115,7 @@ public class WtDocumentCache implements Serializable {
     refresh(document, fixedLocale, docLocale, xComponent, 0);
   }
 
-  WtDocumentCache(WtDocumentCache in) {
+  public WtDocumentCache(WtDocumentCache in) {
     rwLock.writeLock().lock();
     in.rwLock.readLock().lock();
     try {

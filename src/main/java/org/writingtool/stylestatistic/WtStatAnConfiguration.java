@@ -32,8 +32,8 @@ import org.languagetool.rules.AbstractStatisticSentenceStyleRule;
 import org.languagetool.rules.AbstractStatisticStyleRule;
 import org.languagetool.rules.AbstractStyleTooOftenUsedWordRule;
 import org.languagetool.rules.TextLevelRule;
-import org.writingtool.WtMessageHandler;
-import org.writingtool.WtOfficeTools;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeTools;
 
 /**
  * Statistical Analyzes Configuration 

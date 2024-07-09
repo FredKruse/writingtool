@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.writingtool;
+package org.writingtool.tools;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
+import org.writingtool.WtSingleCheck;
 import org.writingtool.WtSingleCheck.SentenceErrors;
 
 import com.sun.star.beans.Property;
@@ -58,7 +59,7 @@ public class WtFlatParagraphTools {
   private XFlatParagraph lastFlatPara;
   private XComponent xComponent;
   
-  WtFlatParagraphTools(XComponent xComponent) {
+  public WtFlatParagraphTools(XComponent xComponent) {
     debugMode = WtOfficeTools.DEBUG_MODE_FP;
     this.xComponent = xComponent;
     xFlatParaIter = getXFlatParagraphIterator(xComponent);
@@ -77,7 +78,7 @@ public class WtFlatParagraphTools {
   /**
    * is valid initialization of FlatParagraphTools
    */
-  boolean isValid() {
+  public boolean isValid() {
     return xFlatParaIter != null;
   }
 

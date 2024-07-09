@@ -24,14 +24,14 @@ import javax.swing.JOptionPane;
 
 import org.languagetool.JLanguageTool;
 import org.writingtool.WtDocumentCache;
-import org.writingtool.WtMessageHandler;
-import org.writingtool.WtOfficeTools;
 import org.writingtool.WtSingleDocument;
-import org.writingtool.WtViewCursorTools;
 import org.writingtool.WtDocumentCache.TextParagraph;
 import org.writingtool.WtDocumentsHandler.WaitDialogThread;
 import org.writingtool.aisupport.WtAiRemote.AiCommand;
 import org.writingtool.config.WtConfiguration;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeTools;
+import org.writingtool.tools.WtViewCursorTools;
 
 import com.sun.star.frame.XController;
 import com.sun.star.frame.XModel;

@@ -62,6 +62,7 @@
                     <exclude>**/hunspell/*header</exclude>
                     <exclude>**/hunspell/*aff</exclude>
                     <exclude>**/hunspell/*info</exclude>    -->
+                    <exclude>**/*.pom</exclude>
                     <exclude>**/hunspell/*sh</exclude>
                     <exclude>**/hunspell/*README*</exclude>
 <!--                        <exclude>**/spelling/**</exclude>   -->

@@ -30,9 +30,9 @@ import org.languagetool.rules.ReadabilityRule;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleMatch;
 import org.languagetool.rules.TextLevelRule;
-import org.writingtool.WtMessageHandler;
-import org.writingtool.WtOfficeTools;
 import org.writingtool.WtResultCache;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeTools;
 
 /**
  * Adapter between LT Rules and Analyzes Dialog 

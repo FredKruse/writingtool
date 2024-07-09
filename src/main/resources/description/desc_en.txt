@@ -1,2 +1,2 @@
-Grammar, Style and Spell Checker.
-LanguageTool checks your writing in more than 20 languages.
+WritingTool your writing assistant.
+Based on LanguageTool (grammar, style and spelling checker for more than 25 languages).

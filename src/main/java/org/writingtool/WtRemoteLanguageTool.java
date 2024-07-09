@@ -48,8 +48,10 @@ import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleMatch;
 import org.languagetool.rules.RuleOption;
 import org.languagetool.rules.TextLevelRule;
-import org.writingtool.WtOfficeTools.RemoteCheck;
 import org.writingtool.config.WtConfiguration;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeTools;
+import org.writingtool.tools.WtOfficeTools.RemoteCheck;
 
 /**
  * Class to run LanguageTool in LO to use a remote server

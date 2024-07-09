@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.writingtool;
+package org.writingtool.tools;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -767,7 +767,7 @@ public class WtOfficeDrawTools {
     public List<Locale> locales;
     public List<Integer> pageBegins;
     
-    ParagraphContainer(List<String> paragraphs, List<Locale> locales, List<Integer> pageBegins) {
+    public ParagraphContainer(List<String> paragraphs, List<Locale> locales, List<Integer> pageBegins) {
       this.paragraphs = paragraphs;
       this.locales = locales;
       this.pageBegins = pageBegins;
@@ -779,7 +779,7 @@ public class WtOfficeDrawTools {
     int nStart;
     Underline underline[];
     
-    UndoMarkupContainer () {
+    public UndoMarkupContainer () {
     }
     
     UndoMarkupContainer (int nPara, int nStart, Underline[] underline) {

@@ -19,7 +19,7 @@
 package org.writingtool;
 
 import org.junit.Test;
-import org.writingtool.WtTamilDetector;
+import org.writingtool.languagedetectors.WtTamilDetector;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

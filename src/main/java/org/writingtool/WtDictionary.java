@@ -37,6 +37,10 @@ import java.util.ArrayList;
 // import java.util.HashMap;
 // import java.util.HashSet;
 import java.util.List;
+
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeTools;
+
 // import java.util.Map;
 //import java.util.Set;
 /*

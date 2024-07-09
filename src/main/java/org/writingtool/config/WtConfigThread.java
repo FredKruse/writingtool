@@ -24,9 +24,9 @@ import java.util.Set;
 
 import org.languagetool.Language;
 import org.languagetool.rules.Rule;
-import org.writingtool.WtMessageHandler;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeTools;
 import org.writingtool.WtDocumentsHandler;
-import org.writingtool.WtOfficeTools;
 import org.writingtool.WtLanguageTool;
 
 /**

@@ -33,12 +33,16 @@ import org.languagetool.rules.RuleMatch;
 import org.languagetool.rules.RuleMatch.Type;
 import org.languagetool.tools.StringTools;
 import org.writingtool.WtDocumentCache.TextParagraph;
-import org.writingtool.WtOfficeTools.DocumentType;
-import org.writingtool.WtOfficeTools.LoErrorType;
 import org.writingtool.WtResultCache.CacheEntry;
 import org.writingtool.aisupport.WtAiDetectionRule;
 import org.writingtool.aisupport.WtAiErrorDetection;
 import org.writingtool.config.WtConfiguration;
+import org.writingtool.tools.WtDocumentCursorTools;
+import org.writingtool.tools.WtFlatParagraphTools;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeTools;
+import org.writingtool.tools.WtOfficeTools.DocumentType;
+import org.writingtool.tools.WtOfficeTools.LoErrorType;
 
 import com.sun.star.beans.PropertyState;
 import com.sun.star.beans.PropertyValue;
@@ -987,9 +991,9 @@ public class WtSingleCheck {
    * Class of proofreading errors of one sentence
    */
   public static class SentenceErrors {
-    final int sentenceStart;
-    final int sentenceEnd;
-    final SingleProofreadingError[] sentenceErrors;
+    public final int sentenceStart;
+    public final int sentenceEnd;
+    public final SingleProofreadingError[] sentenceErrors;
     
     public SentenceErrors(int start, int end, SingleProofreadingError[] errors) {
       sentenceStart = start;

@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.writingtool;
+package org.writingtool.tools;
 
 import static org.languagetool.JLanguageTool.MESSAGE_BUNDLE;
 
@@ -42,6 +42,7 @@ import org.languagetool.rules.AbstractStatisticStyleRule;
 import org.languagetool.rules.AbstractStyleTooOftenUsedWordRule;
 import org.languagetool.rules.ReadabilityRule;
 import org.languagetool.rules.Rule;
+import org.writingtool.WtDictionary;
 
 import com.sun.star.awt.XMenuBar;
 import com.sun.star.awt.XPopupMenu;
@@ -257,6 +258,7 @@ public class WtOfficeTools {
    * Returns null if it fails
    */
   @Nullable
+  public
   static XSearchableDictionaryList getSearchableDictionaryList(XComponentContext xContext) {
     try {
       if (xContext == null) {
@@ -308,7 +310,7 @@ public class WtOfficeTools {
    * Get the menu bar of LO/OO
    * Returns null if it fails
    */
-  static XMenuBar getMenuBar(XComponent xComponent) {
+  public static XMenuBar getMenuBar(XComponent xComponent) {
     try {
       XModel xModel = UnoRuntime.queryInterface(XModel.class, xComponent);
       if (xModel == null) {
@@ -346,6 +348,7 @@ public class WtOfficeTools {
    * Returns null if it fails
    */
   @Nullable
+  public
   static XPopupMenu getPopupMenu(XComponentContext xContext) {
     try {
       if (xContext == null) {
@@ -443,7 +446,7 @@ public class WtOfficeTools {
   /**
    *  return true if two locales are equal  
    */
-  static boolean isEqualLocale(Locale locale1, Locale locale2) {
+  public static boolean isEqualLocale(Locale locale1, Locale locale2) {
     return (locale1.Language.equals(locale2.Language) && locale1.Country.equals(locale2.Country) 
         && locale1.Variant.equals(locale2.Variant));
   }
@@ -451,7 +454,7 @@ public class WtOfficeTools {
   /**
    *  return true if the list of locales contains the locale
    */
-  static boolean containsLocale(List<Locale> locales, Locale locale) {
+  public static boolean containsLocale(List<Locale> locales, Locale locale) {
     for (Locale loc : locales) {
       if (isEqualLocale(loc, locale)) {
         return true;
@@ -811,7 +814,7 @@ public class WtOfficeTools {
   /**
    * Handle logLevel for debugging and development
    */
-  static void setLogLevel(String logLevel) {
+  public static void setLogLevel(String logLevel) {
     if (logLevel != null) {
       String[] levels = logLevel.split(LOG_DELIMITER);
       for (String level : levels) {

@@ -39,8 +39,10 @@ import java.util.zip.GZIPOutputStream;
 import org.languagetool.JLanguageTool;
 import org.writingtool.WtDocumentCache.SerialLocale;
 import org.writingtool.WtIgnoredMatches.LocaleEntry;
-import org.writingtool.WtOfficeTools.LoErrorType;
 import org.writingtool.config.WtConfiguration;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeTools;
+import org.writingtool.tools.WtOfficeTools.LoErrorType;
 
 import com.sun.star.frame.XModel;
 import com.sun.star.lang.Locale;

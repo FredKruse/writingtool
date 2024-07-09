@@ -16,12 +16,13 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.writingtool;
+package org.writingtool.tools;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
+import org.writingtool.WtDocumentCache;
 import org.writingtool.WtDocumentCache.TextParagraph;
 
 import com.sun.star.beans.XPropertySet;
@@ -236,7 +237,7 @@ public class WtViewCursorTools {
    * Returns text cursor from start of ViewCursor 
    * Returns null if method fails
    */
-  XTextCursor getTextCursorBeginn() {
+  public XTextCursor getTextCursorBeginn() {
     return getTextCursorFromViewCursor(false);
   }
 
@@ -244,7 +245,7 @@ public class WtViewCursorTools {
    * Returns text cursor from end of ViewCursor 
    * Returns null if method fails
    */
-  XTextCursor getTextCursorEnd() {
+  public XTextCursor getTextCursorEnd() {
     return getTextCursorFromViewCursor(true);
   }
   
@@ -252,7 +253,7 @@ public class WtViewCursorTools {
    * Returns a Paragraph cursor from ViewCursor 
    * Returns null if method fails
    */
-  XParagraphCursor getParagraphCursorFromViewCursor() {
+  public XParagraphCursor getParagraphCursorFromViewCursor() {
     isBusy++;
     try {
       XTextCursor xTextCursor = getTextCursorFromViewCursor(false);
@@ -324,7 +325,7 @@ public class WtViewCursorTools {
   /** 
    * Change view cursor selection
    */
-  void setViewCursorSelection(short from, short length) {
+  public void setViewCursorSelection(short from, short length) {
     isBusy++;
     try {
       XParagraphCursor xParagraphCursor = getParagraphCursorFromViewCursor();
@@ -646,7 +647,7 @@ public class WtViewCursorTools {
    * Returns character number in paragraph
    * Returns a negative value if it fails
    */
-  int getViewCursorCharacter() {
+  public int getViewCursorCharacter() {
     isBusy++;
     try {
       XParagraphCursor xParagraphCursor = getParagraphCursorFromViewCursor();

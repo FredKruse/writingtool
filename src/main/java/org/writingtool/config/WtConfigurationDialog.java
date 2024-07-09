@@ -26,8 +26,8 @@ import org.languagetool.Languages;
 import org.languagetool.languagemodel.LuceneLanguageModel;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleOption;
-import org.writingtool.WtMessageHandler;
-import org.writingtool.WtOfficeTools;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeTools;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;

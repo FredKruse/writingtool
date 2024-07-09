@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.writingtool;
+package org.writingtool.dialogs;
 
 import java.awt.Color;
 import java.awt.Container;
@@ -43,6 +43,8 @@ import org.languagetool.rules.Category;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.patterns.FalseFriendPatternRule;
 import org.writingtool.config.WtConfigTools;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeTools;
 
 
 /**

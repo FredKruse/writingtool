@@ -51,19 +51,29 @@ import org.languagetool.rules.CategoryId;
 import org.languagetool.rules.Rule;
 import org.languagetool.tools.Tools;
 import org.writingtool.WtDocumentCache.TextParagraph;
-import org.writingtool.WtOfficeTools.DocumentType;
-import org.writingtool.WtOfficeTools.LoErrorType;
-import org.writingtool.WtOfficeTools.OfficeProductInfo;
 import org.writingtool.WtSingleDocument.RuleDesc;
-import org.writingtool.WtCheckDialog.LtCheckDialog;
 import org.writingtool.aisupport.WtAiCheckQueue;
 import org.writingtool.aisupport.WtAiErrorDetection;
 import org.writingtool.aisupport.WtAiParagraphChanging;
 import org.writingtool.aisupport.WtAiRemote.AiCommand;
 import org.writingtool.config.WtConfiguration;
 import org.writingtool.config.WtConfigurationDialog;
+import org.writingtool.dialogs.WtAboutDialog;
+import org.writingtool.dialogs.WtCheckDialog;
+import org.writingtool.dialogs.WtMoreInfoDialog;
+import org.writingtool.dialogs.WtCheckDialog.LtCheckDialog;
+import org.writingtool.languagedetectors.WtKhmerDetector;
+import org.writingtool.languagedetectors.WtTamilDetector;
 import org.writingtool.config.WtConfigThread;
 import org.writingtool.stylestatistic.WtStatAnDialog;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeDrawTools;
+import org.writingtool.tools.WtOfficeSpreadsheetTools;
+import org.writingtool.tools.WtOfficeTools;
+import org.writingtool.tools.WtViewCursorTools;
+import org.writingtool.tools.WtOfficeTools.DocumentType;
+import org.writingtool.tools.WtOfficeTools.LoErrorType;
+import org.writingtool.tools.WtOfficeTools.OfficeProductInfo;
 
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.XPropertySet;
@@ -394,28 +404,28 @@ public class WtDocumentsHandler {
   /**
    * return true, if a document was found but is not a text document
    */
-  boolean isNotTextDocument() {
+  public boolean isNotTextDocument() {
     return isNotTextDocument;
   }
   
   /**
    * return true, if the LT spell checker is not be used
    */
-  boolean noLtSpeller() {
+  public boolean noLtSpeller() {
     return this.noLtSpeller;
   }
   
   /**
    * return true, if the document to check is an Impress document
    */
-  boolean isCheckImpressDocument() {
+  public boolean isCheckImpressDocument() {
     return checkImpressDocument;
   }
   
   /**
    * set the checkImpressDocument flag
    */
-  void setCheckImpressDocument(boolean checkImpressDocument) {
+  public void setCheckImpressDocument(boolean checkImpressDocument) {
     this.checkImpressDocument = checkImpressDocument;
   }
   
@@ -552,7 +562,7 @@ public class WtDocumentsHandler {
   /**
    *  Remove a rule from disabled rules by spell dialog
    */
-  void removeDisabledRule(String langCode, String ruleId) {
+  public void removeDisabledRule(String langCode, String ruleId) {
     if (disabledRulesUI.containsKey(langCode)) {
       Set<String >rulesIds = disabledRulesUI.get(langCode);
       rulesIds.remove(ruleId);
@@ -598,7 +608,7 @@ public class WtDocumentsHandler {
   /**
    *  get all disabled rules by context menu or spell dialog
    */
-  Map<String, String> getDisabledRulesMap(String langCode) {
+  public Map<String, String> getDisabledRulesMap(String langCode) {
     if (langCode == null) {
       langCode = WtOfficeTools.localeToString(locale);
     }
@@ -824,7 +834,7 @@ public class WtDocumentsHandler {
    * @return true if LT supports the language of a given locale
    * @param locale The Locale to check
    */
-  final static boolean hasLocale(Locale locale) {
+  public final static boolean hasLocale(Locale locale) {
     try {
       for (Language element : Languages.get()) {
         if (locale.Language.equalsIgnoreCase(LIBREOFFICE_SPECIAL_LANGUAGE_TAG)
@@ -1110,7 +1120,7 @@ public class WtDocumentsHandler {
   /**
    * Enable or disable rules as given by configuration file
    */
-  void initCheck(WtLanguageTool lt) throws Throwable {
+  public void initCheck(WtLanguageTool lt) throws Throwable {
     long startTime = 0;
     if (debugModeTm) {
       startTime = System.currentTimeMillis();
@@ -1170,7 +1180,7 @@ public class WtDocumentsHandler {
   /**
    * Initialize single documents, prepare text level rules and start queue
    */
-  void initDocuments(boolean resetCache) throws Throwable {
+  public void initDocuments(boolean resetCache) throws Throwable {
     long startTime = 0;
     if (debugModeTm) {
       startTime = System.currentTimeMillis();
@@ -1823,7 +1833,7 @@ public class WtDocumentsHandler {
    * Inform listener (grammar checking iterator) that options have changed and
    * the doc should be rechecked.
    */
-  void resetDocument() {
+  public void resetDocument() {
     setRecheck();
     resetCheck();
   }

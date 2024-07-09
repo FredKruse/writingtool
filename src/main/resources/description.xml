@@ -9,15 +9,8 @@
 		<src xlink:href="https://languagetool.org/languagetool.update.xml"/>
 	</update-information>
 	<publisher>
-		<name lang="pt" xlink:href="https://languagetool.org/pt">WritingTool</name>
-		<name lang="fr" xlink:href="https://languagetool.org/fr">WritingTool</name>
-		<name lang="ru" xlink:href="https://languagetool.org/ru">WritingTool</name>
-		<name lang="uk" xlink:href="https://languagetool.org/uk">WritingTool</name>
-		<name lang="de" xlink:href="https://languagetool.org/de">WritingTool</name>
-		<name lang="es" xlink:href="https://languagetool.org/es">WritingTool</name>
-		<name lang="en" xlink:href="https://languagetool.org/en">WritingTool</name>
-		<name lang="ca" xlink:href="https://languagetool.org/ca">WritingTool</name>
-		<name lang="pl" xlink:href="https://languagetool.org/pl">WritingTool</name>
+		<name lang="de" xlink:href="https://fk-es.de/de">WritingTool</name>
+		<name lang="en" xlink:href="https://fk-es.de/en">WritingTool</name>
 	</publisher>
 	<release-notes>
 		<src lang="zh-CN" xlink:href=""/>

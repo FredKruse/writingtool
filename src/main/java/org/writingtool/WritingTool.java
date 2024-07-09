@@ -19,6 +19,9 @@
 package org.writingtool;
 
 import com.sun.star.lang.*;
+
+import org.writingtool.tools.WtOfficeTools;
+
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.lib.uno.helper.Factory;
 import com.sun.star.lib.uno.helper.WeakBase;

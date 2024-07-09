@@ -25,8 +25,13 @@ import java.util.Set;
 import org.languagetool.Language;
 import org.writingtool.WtDocumentCache.ChangedRange;
 import org.writingtool.WtDocumentCache.TextParagraph;
-import org.writingtool.WtOfficeTools.DocumentType;
 import org.writingtool.config.WtConfiguration;
+import org.writingtool.tools.WtDocumentCursorTools;
+import org.writingtool.tools.WtFlatParagraphTools;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeTools;
+import org.writingtool.tools.WtViewCursorTools;
+import org.writingtool.tools.WtOfficeTools.DocumentType;
 
 import com.sun.star.lang.Locale;
 import com.sun.star.lang.XComponent;

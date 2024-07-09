@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.writingtool.WtOfficeTools.LoErrorType;
+import org.writingtool.tools.WtOfficeTools.LoErrorType;
 
 import com.sun.star.beans.PropertyState;
 import com.sun.star.beans.PropertyValue;

@@ -44,10 +44,10 @@ import javax.imageio.ImageIO;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.languagetool.JLanguageTool;
-import org.writingtool.WtMessageHandler;
 import org.writingtool.WtDocumentsHandler;
-import org.writingtool.WtOfficeTools;
 import org.writingtool.config.WtConfiguration;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeTools;
 
 import com.sun.star.lang.Locale;
 

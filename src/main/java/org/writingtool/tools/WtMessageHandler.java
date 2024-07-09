@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.writingtool;
+package org.writingtool.tools;
 
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
@@ -33,7 +33,7 @@ import javax.swing.UIManager;
 
 import org.languagetool.JLanguageTool;
 import org.languagetool.tools.Tools;
-import org.writingtool.WtOfficeTools.OfficeProductInfo;
+import org.writingtool.tools.WtOfficeTools.OfficeProductInfo;
 
 import com.sun.star.uno.XComponentContext;
 
@@ -86,7 +86,7 @@ public class WtMessageHandler {
   /**
    * Initialize MessageHandler
    */
-  static void init(XComponentContext xContext) {
+  public static void init(XComponentContext xContext) {
     initLogFile(xContext);
   }
 
@@ -135,7 +135,7 @@ public class WtMessageHandler {
   /**
    * Will throw exception instead of showing errors as dialogs - use only for test cases.
    */
-  static void setTestMode(boolean mode) {
+  public static void setTestMode(boolean mode) {
     testMode = mode;
   }
 
@@ -167,7 +167,7 @@ public class WtMessageHandler {
    * run an information message in a separate thread
    * closing if lost focus
    */
-  static void showClosingInformationDialog(String text) {
+  public static void showClosingInformationDialog(String text) {
     ClosingInformationThread informationDialog = new ClosingInformationThread(text);
     informationDialog.start();
   }

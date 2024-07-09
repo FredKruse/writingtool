@@ -27,6 +27,8 @@ import java.util.Map;
 import org.languagetool.Language;
 import org.languagetool.LinguServices;
 import org.languagetool.rules.Rule;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeTools;
 
 import com.sun.star.beans.Property;
 import com.sun.star.beans.PropertyValue;

@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.writingtool;
+package org.writingtool.tools;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
+import org.writingtool.WtDocumentCache;
 import org.writingtool.WtDocumentCache.TextParagraph;
 
 import com.sun.star.beans.Property;
@@ -66,7 +67,7 @@ public class WtDocumentCursorTools {
   public static int TEXT_TYPE_NORMAL = -1;
   public static int TEXT_TYPE_AUTOMATIC = -2;
   
-  final static String HeaderFooterTypes[] = { "HeaderText", 
+  public final static String HeaderFooterTypes[] = { "HeaderText", 
       "HeaderTextRight",
       "HeaderTextLeft",
       "HeaderTextFirst", 
@@ -86,7 +87,7 @@ public class WtDocumentCursorTools {
   private XTextCursor xTextCursor;
   private XTextDocument curDoc;
   
-  WtDocumentCursorTools(XComponent xComponent) {
+  public WtDocumentCursorTools(XComponent xComponent) {
     isBusy++;
     try {
       if (!isDisposed) {
@@ -182,7 +183,7 @@ public class WtDocumentCursorTools {
    * Returns Number of all Text Paragraphs of Document without footnotes etc.  
    * Returns 0 if it fails
    */
-  int getNumberOfAllTextParagraphs() {
+  public int getNumberOfAllTextParagraphs() {
     isBusy++;
     try {
       if (xPCursor == null) {
@@ -276,6 +277,7 @@ public class WtDocumentCursorTools {
    * Returns null if it fails
    */
   @Nullable
+  public
   DocumentText getAllTextParagraphs(boolean withDeleted) {
     isBusy++;
     try {
@@ -1487,13 +1489,13 @@ public class WtDocumentCursorTools {
    * Class to give back the text and the headings under the specified cursor
    */
   public static class DocumentText {
-    List<String> paragraphs;
-    Map<Integer, Integer> headingNumbers;
-    List<Integer> automaticTextParagraphs;
-    List<Integer> sortedTextIds;
-    List<List<Integer>> deletedCharacters;
+    public List<String> paragraphs;
+    public Map<Integer, Integer> headingNumbers;
+    public List<Integer> automaticTextParagraphs;
+    public List<Integer> sortedTextIds;
+    public List<List<Integer>> deletedCharacters;
     
-    DocumentText() {
+    public DocumentText() {
       this.paragraphs = new ArrayList<String>();
       this.headingNumbers = new HashMap<Integer, Integer>();
       this.automaticTextParagraphs = new ArrayList<Integer>();

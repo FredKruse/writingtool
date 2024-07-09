@@ -19,7 +19,7 @@
 package org.writingtool;
 
 import org.junit.Test;
-import org.writingtool.WtKhmerDetector;
+import org.writingtool.languagedetectors.WtKhmerDetector;
 
 import static org.junit.Assert.*;
 

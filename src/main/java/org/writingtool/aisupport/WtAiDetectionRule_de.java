@@ -5,7 +5,7 @@ import java.util.ResourceBundle;
 
 import org.languagetool.AnalyzedSentence;
 import org.writingtool.WtLinguisticServices;
-import org.writingtool.WtMessageHandler;
+import org.writingtool.tools.WtMessageHandler;
 
 import com.sun.star.lang.Locale;
 

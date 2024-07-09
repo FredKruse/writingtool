@@ -36,6 +36,8 @@ import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
 import org.languagetool.Languages;
 import org.writingtool.WtDocumentCache.TextParagraph;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeTools;
 
 import com.sun.star.lang.Locale;
 

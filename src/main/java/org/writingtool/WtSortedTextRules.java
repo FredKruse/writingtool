@@ -25,6 +25,8 @@ import java.util.Set;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.TextLevelRule;
 import org.writingtool.config.WtConfiguration;
+import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeTools;
 
 /**
  * class to store all text level rules sorted by the minimum to check paragraphs
@@ -32,7 +34,7 @@ import org.writingtool.config.WtConfiguration;
  * @since 5.3
  * @author Fred Kruse
  */
-class WtSortedTextRules { 
+public class WtSortedTextRules { 
 
   private static boolean debugMode = false;   //  should be false except for testing
   
