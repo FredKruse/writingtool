@@ -256,9 +256,7 @@ public class WtAiDetectionRule extends TextLevelRule {
           j = resultTokens.size() - 1;
         }
         suggestion = sugStart >= sugEnd ? "" : aiResultText.substring(sugStart, sugEnd);
-        if (!(j == resultTokens.size() - 1 && QUOTES.matcher(resultTokens.get(j).getToken()).matches())
-            || suggestion.isEmpty() || singleWordToken == null || singleWordToken.isNonWord()
-            || linguServices.isCorrectSpell(suggestion, locale)) {
+        if (!isEndQoute(j, resultTokens) && isCorrectSuggestion(suggestion, singleWordToken)) {
           RuleMatch ruleMatch = new RuleMatch(this, sentence, posStart, posEnd, ruleMessage);
           ruleMatch.addSuggestedReplacement(suggestion);
           ruleMatch.setType(Type.Hint);
@@ -389,7 +387,16 @@ public class WtAiDetectionRule extends TextLevelRule {
     }
     return sentences.get(sentences.size() - 1);
   }
-*/  
+*/
+  private boolean isCorrectSuggestion(String suggestion, WtAiToken singleWordToken) {
+    return (suggestion.isEmpty() || singleWordToken == null || singleWordToken.isNonWord()
+        || linguServices.isCorrectSpell(suggestion, locale));
+  }
+
+  private boolean isEndQoute(int j, List<WtAiToken> resultTokens) {
+    return (j == resultTokens.size() - 1 && QUOTES.matcher(resultTokens.get(j).getToken()).matches());
+  }
+
   private void setType(int nParaTokenStart, int nParaTokenEnd, int nResultTokenStart, int nResultTokenEnd,
       List<WtAiToken> paraTokens, List<WtAiToken> resultTokens, RuleMatch ruleMatch) {
     if (nParaTokenStart == nParaTokenEnd && nResultTokenStart == nResultTokenEnd) {
