@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.languagetool.AnalyzedSentence;
+import org.languagetool.AnalyzedTokenReadings;
+import org.languagetool.JLanguageTool.ParagraphHandling;
 import org.languagetool.rules.RuleMatch;
 import org.writingtool.WtDocumentCache;
 import org.writingtool.WtLinguisticServices;
@@ -33,6 +35,7 @@ import org.writingtool.WtLanguageTool;
 import org.writingtool.config.WtConfiguration;
 import org.writingtool.tools.WtMessageHandler;
 import org.writingtool.tools.WtOfficeTools;
+import org.writingtool.tools.WtOfficeTools.RemoteCheck;
 import org.writingtool.tools.WtViewCursorTools;
 
 import com.sun.star.lang.Locale;
@@ -45,8 +48,10 @@ import com.sun.star.linguistic2.SingleProofreadingError;
  */
 public class WtAiErrorDetection {
   
-  boolean debugModeTm = true;
-  boolean debugMode = WtOfficeTools.DEBUG_MODE_AI;
+  private static final int MIN_WORD = 4;
+  
+  private boolean debugModeTm = true;
+  private boolean debugMode = WtOfficeTools.DEBUG_MODE_AI;
   
   private static final ResourceBundle messages = WtOfficeTools.getMessageBundle();
   private final WtSingleDocument document;
@@ -159,6 +164,22 @@ public class WtAiErrorDetection {
         return null;
       }
     }
+    // Don't analyze a paragraph with less than MIN_WORD words
+    if (analyzedSentences.size() < 2) {
+      if (analyzedSentences.size() == 0) {
+        return new RuleMatch[0];
+      }
+      int n = 0;
+      for (AnalyzedTokenReadings token : analyzedSentences.get(0).getTokensWithoutWhitespace()) {
+        if (!token.isNonWord()) {
+          n++;
+        }
+      }
+      if (n <= MIN_WORD) {
+        return new RuleMatch[0];
+      }
+    }
+    // ---
     return getMatchesByAiRule(nFPara, paraText, analyzedSentences, locale, footnotePos, deletedChars);
   }
     
@@ -182,6 +203,7 @@ public class WtAiErrorDetection {
     WtAiDetectionRule aiRule = getAiDetectionRule(result, analyzedAiResult, 
         document.getMultiDocumentsHandler().getLinguisticServices(), locale , messages, config.aiShowStylisticChanges());
     RuleMatch[] matches = aiRule.match(analyzedSentences);
+    matches = filterRuleMatches(matches, result, analyzedAiResult);
     if (debugModeTm) {
       long runTime = System.currentTimeMillis() - startTime;
       WtMessageHandler.printToLogFile("AiErrorDetection: getMatchesByAiRule: Time to run AI detection rule: " + runTime);
@@ -221,34 +243,47 @@ public class WtAiErrorDetection {
     if (para == null || para.isEmpty()) {
       return "";
     }
-//    String text = CORRECT_COMMAND + ": " + para;
-//    MessageHandler.showMessage("Input is: " + text);
     WtAiRemote aiRemote = new WtAiRemote(config);
     String output = aiRemote.runInstruction(correctCommand, para, locale, true);
-//    String output = aiRemote.runInstruction(AiRemote.CORRECT_INSTRUCTION, para, locale, true);
     return output;
   }
-/*  
-  private void translateCorrectCommand(Locale locale) throws Throwable {
-    if (lastLanguage == null || !lastLanguage.equals(locale.Language)) {
-      lastLanguage = new String(locale.Language);
-      if (lastLanguage.equals("en")) {
-        correctCommand = AiRemote.CORRECT_COMMAND;
-      } else {
-        Language lang = MultiDocumentsHandler.getLanguage(locale);
-        String languageName = lang.getName();
-        String command = AiRemote.TRANSLATE_COMMAND + languageName;
-        MessageHandler.printToLogFile("AiErrorDetection: translateCorrectCommand: command: " + command);
-        AiRemote aiRemote = new AiRemote(config);
-        correctCommand = aiRemote.runInstruction(command, AiRemote.CORRECT_COMMAND, true);
-        if (correctCommand.endsWith(".")) {
-          correctCommand = correctCommand.substring(0, correctCommand.length() - 1);
+  
+  private boolean isCorrectResult(RuleMatch match, List<RuleMatch> resultMatches) {
+    if (resultMatches != null) {
+      for (RuleMatch rMatch : resultMatches) {
+        if (
+            (rMatch.getFromPos() >= match.getFromPos() && rMatch.getFromPos() < match.getToPos()) ||
+            (rMatch.getToPos() >= match.getFromPos() && rMatch.getToPos() <= match.getToPos()) ||
+            (match.getFromPos() >= rMatch.getFromPos() && match.getFromPos() < rMatch.getToPos()) ||
+            (match.getToPos() >= rMatch.getFromPos() && match.getToPos() <= rMatch.getToPos())
+            ) {
+//          if (debugMode) {
+            WtMessageHandler.printToLogFile("WtErrorDetection: filterRuleMatches: incorrect match: suggestion: " +
+              match.getSuggestedReplacements().get(0) + ", reason: " + rMatch.getMessage());
+//            }
+          return false;
         }
-        MessageHandler.printToLogFile("AiErrorDetection: translateCorrectCommand: correctCommand: " + correctCommand);
       }
     }
+    return true;
   }
-*/
+  
+  private RuleMatch[] filterRuleMatches(RuleMatch[] matches, String result, List<AnalyzedSentence> analyzedAiResult) throws Throwable {
+    if (matches == null || matches.length == 0) {
+      return matches;
+    }
+    List<RuleMatch> resultMatches = lt.check(result, analyzedAiResult, ParagraphHandling.ONLYNONPARA, RemoteCheck.ALL);
+    if (resultMatches == null || resultMatches.size() == 0) {
+      return matches;
+    }
+    List<RuleMatch> correctMatches = new ArrayList<>();
+    for (RuleMatch match : matches) {
+      if (isCorrectResult(match, resultMatches)) {
+        correctMatches.add(match);
+      }
+    }
+    return correctMatches.toArray(new RuleMatch[correctMatches.size()]);
+  }
   
   private WtAiDetectionRule getAiDetectionRule(String aiResultText, List<AnalyzedSentence> analyzedAiResult, 
       WtLinguisticServices linguServices, Locale locale, ResourceBundle messages, boolean showStylisticHints) {

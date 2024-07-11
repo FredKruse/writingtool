@@ -286,6 +286,36 @@ public class WtLanguageTool {
       }
     }
   }
+
+  public List<RuleMatch> check(String text, List<AnalyzedSentence> analyzedSentences, 
+      ParagraphHandling paraMode, RemoteCheck checkMode) throws IOException {
+    if (isRemote) {
+      List<RuleMatch> ruleMatches = rlt.check(text, paraMode, checkMode);
+      if (ruleMatches == null) {
+        doReset = true;
+        ruleMatches = new ArrayList<>();
+      }
+      return ruleMatches;
+    } else {
+      Mode mode;
+      if (paraMode == ParagraphHandling.ONLYNONPARA) {
+        mode = Mode.ALL_BUT_TEXTLEVEL_ONLY;
+      } else if (paraMode == ParagraphHandling.ONLYPARA) {
+        mode = Mode.TEXTLEVEL_ONLY;
+      } else {
+        mode = Mode.ALL;
+      }
+      Set<ToneTag> toneTags = config.enableGoalSpecificRules() ? Collections.singleton(ToneTag.ALL_TONE_RULES) : Collections.emptySet();
+      if (isMultiThread) {
+        synchronized(mlt) {
+          return mlt.check(text, analyzedSentences, paraMode, mode, toneTags);
+        }
+      } else {
+        return lt.check(text, analyzedSentences, paraMode, mode, toneTags);
+      }
+    }
+  }
+
   /**
    * Get a list of tokens from a sentence
    * This Method may be used only for local checks
@@ -437,6 +467,18 @@ public class WtLanguageTool {
           Level.PICKY, toneTags, null, sentences, analyzedSentences).getRuleMatches();
     }
 
+    public List<RuleMatch> check(String text, List<AnalyzedSentence> analyzedSentences, 
+        ParagraphHandling paraMode, Mode mode, @NotNull Set<ToneTag> toneTags) throws IOException {
+
+      List<String> sentences;
+      sentences = new ArrayList<>();
+      for (AnalyzedSentence analyzedSentence : analyzedSentences) {
+        sentences.add(analyzedSentence.getText());
+      }
+      return checkInternal(new AnnotatedTextBuilder().addText(text).build(), paraMode, null, mode, 
+          Level.PICKY, toneTags, null, sentences, analyzedSentences).getRuleMatches();
+    }
+
   }
 
   public class MultiThreadedJLanguageToolLo extends MultiThreadedJLanguageTool {
@@ -475,6 +517,18 @@ public class WtLanguageTool {
       List<AnalyzedSentence> analyzedSentences = analysedText.analyzedSentences;
       List<String> sentences = analysedText.sentences;
       String text = analysedText.text;
+      return checkInternal(new AnnotatedTextBuilder().addText(text).build(), paraMode, null, mode, 
+          Level.PICKY, toneTags, null, sentences, analyzedSentences).getRuleMatches();
+    }
+
+    public List<RuleMatch> check(String text, List<AnalyzedSentence> analyzedSentences, 
+        ParagraphHandling paraMode, Mode mode, @NotNull Set<ToneTag> toneTags) throws IOException {
+
+      List<String> sentences;
+      sentences = new ArrayList<>();
+      for (AnalyzedSentence analyzedSentence : analyzedSentences) {
+        sentences.add(analyzedSentence.getText());
+      }
       return checkInternal(new AnnotatedTextBuilder().addText(text).build(), paraMode, null, mode, 
           Level.PICKY, toneTags, null, sentences, analyzedSentences).getRuleMatches();
     }
