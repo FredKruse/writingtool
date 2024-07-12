@@ -96,6 +96,12 @@ public class WtOfficeTools {
     BOTH          //  spell and grammar error
   }
     
+  public static final String AI_GRAMMAR_CATEGORY = "AI_GRAMMAR_CATEGORY";
+  public static final String AI_STYLE_CATEGORY = "AI_STYLE_CATEGORY";
+  public static final String AI_GRAMMAR_RULE_ID = "LO_AI_DETECTION_RULE";
+  public static final String AI_GRAMMAR_HINT_RULE_ID = "LO_AI_DETECTION_RULE_HINT";
+  public static final String AI_GRAMMAR_OTHER_RULE_ID = "LO_AI_DETECTION_RULE_OTHER";
+
   public static final String EXTENSION_MAINTAINER = "Fred Kruse";
   public static final String WT_SERVICE_NAME = "org.writingtool.WritingTool";
   public static final String WT_SPELL_SERVICE_NAME = "org.writingtool.WritingToolSpellChecker";

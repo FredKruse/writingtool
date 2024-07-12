@@ -46,6 +46,7 @@ import org.languagetool.Languages;
 import org.languagetool.rules.ITSIssueType;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleOption;
+import org.writingtool.tools.WtOfficeTools;
 
 /**
  * Configuration like list of disabled rule IDs, server mode etc.
@@ -1048,6 +1049,7 @@ public class WtConfiguration {
         styleLikeCategories.add(rule.getCategory().getName());
       }
     }
+    styleLikeCategories.add(WtOfficeTools.AI_STYLE_CATEGORY);
   }
 
   /**

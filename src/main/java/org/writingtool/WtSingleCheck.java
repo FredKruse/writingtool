@@ -747,8 +747,19 @@ public class WtSingleCheck {
     // LibreOffice since version 6.2 supports the change of underline color (key: "LineColor", value: int (RGB))
     // LibreOffice since version 6.2 supports the change of underline style (key: "LineType", value: short (DASHED = 5))
     // older version will simply ignore the properties
-    Color underlineColor = config.getUnderlineColor(ruleMatch.getRule().getCategory().getName(), ruleMatch.getRule().getId());
-    short underlineType = config.getUnderlineType(ruleMatch.getRule().getCategory().getName(), ruleMatch.getRule().getId());
+    String category = ruleMatch.getRule().getCategory().getName();
+    String ruleId = ruleMatch.getRule().getId();
+    if (ruleMatch.getRule() instanceof WtAiDetectionRule) {
+      if (ruleMatch.getType() == Type.Hint) {
+        category = WtOfficeTools.AI_GRAMMAR_CATEGORY;
+        ruleId = WtOfficeTools.AI_GRAMMAR_HINT_RULE_ID;
+      } else {
+        category = WtOfficeTools.AI_STYLE_CATEGORY;
+        ruleId = WtOfficeTools.AI_GRAMMAR_OTHER_RULE_ID;
+      }
+    }
+    Color underlineColor = config.getUnderlineColor(category, ruleId);
+    short underlineType = config.getUnderlineType(category, ruleId);
     URL url = ruleMatch.getUrl();
     if (url == null) {                      // match URL overrides rule URL 
       url = ruleMatch.getRule().getUrl();
@@ -778,6 +789,7 @@ public class WtSingleCheck {
         int ucolor = Color.red.getRGB() & 0xFFFFFF;
         propertyValues[n] = new PropertyValue("LineColor", -1, ucolor, PropertyState.DIRECT_VALUE);
         n++;
+/*        
       } else if (ruleMatch.getRule() instanceof WtAiDetectionRule) {
         int ucolor;
         if (ruleMatch.getType() == Type.Hint) {
@@ -787,6 +799,7 @@ public class WtSingleCheck {
         }
         propertyValues[n] = new PropertyValue("LineColor", -1, ucolor, PropertyState.DIRECT_VALUE);
         n++;
+*/
       } else {
         if (underlineColor != Color.blue) {
           int ucolor = underlineColor.getRGB() & 0xFFFFFF;

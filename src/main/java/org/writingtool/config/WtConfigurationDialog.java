@@ -26,7 +26,7 @@ import org.languagetool.Languages;
 import org.languagetool.languagemodel.LuceneLanguageModel;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleOption;
-import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.aisupport.WtAiDetectionRule;
 import org.writingtool.tools.WtOfficeTools;
 
 import javax.swing.*;
@@ -57,7 +57,6 @@ public class WtConfigurationDialog implements ActionListener {
   private static final String NO_SELECTED_LANGUAGE = "---";
   private static final String ACTION_COMMAND_OK = "OK";
   private static final String ACTION_COMMAND_CANCEL = "CANCEL";
-  private static final int MAX_PORT = 65536;
 
   private static final int SHIFT1 = 4;
   private static final int SHIFT2 = 20;
@@ -67,7 +66,6 @@ public class WtConfigurationDialog implements ActionListener {
   private final WtConfiguration original;
   private final WtConfiguration config;
   private final Frame owner;
-  private final boolean insideOffice;
   private final Image ltImage;
   private String dialogTitle;
   private boolean configChanged = false;
@@ -76,11 +74,8 @@ public class WtConfigurationDialog implements ActionListener {
   private boolean firstSelection = true;
 
   private JDialog dialog;
-  private JCheckBox serverCheckbox;
-  private JTextField serverPortField;
   private JTree[] configTree;
   private DefaultMutableTreeNode[] rootNode;
-  private JCheckBox serverSettingsCheckbox;
   private JPanel disabledRulesPanel;
   private JPanel enabledRulesPanel;
   private final List<JPanel> extraPanels = new ArrayList<>();
@@ -88,13 +83,12 @@ public class WtConfigurationDialog implements ActionListener {
   private String category;
   private Rule rule;
 
-  public WtConfigurationDialog(Frame owner, boolean insideOffice, WtConfiguration config) {
-    this(owner, insideOffice, null, null, config);
+  public WtConfigurationDialog(Frame owner, WtConfiguration config) {
+    this(owner, null, null, config);
   }
 
-  public WtConfigurationDialog(Frame owner, boolean insideOffice, Image ltImage, String title, WtConfiguration config) {
+  public WtConfigurationDialog(Frame owner, Image ltImage, String title, WtConfiguration config) {
     this.owner = owner;
-    this.insideOffice = insideOffice;
     this.original = config;
     this.config = original.copy(original);
     this.ltImage = ltImage;
@@ -162,10 +156,10 @@ public class WtConfigurationDialog implements ActionListener {
     if ((rule.isDefaultOff() || rule.getCategory().isDefaultOff()) && !config.getEnabledRuleIds().contains(rule.getId())) {
       ret = false;
     }
-    if (insideOffice && rule.isOfficeDefaultOff() && !config.getEnabledRuleIds().contains(rule.getId())) {
+    if (rule.isOfficeDefaultOff() && !config.getEnabledRuleIds().contains(rule.getId())) {
       ret = false;
     }
-    if (insideOffice && rule.isOfficeDefaultOn() && !config.getDisabledRuleIds().contains(rule.getId())) {
+    if (rule.isOfficeDefaultOn() && !config.getDisabledRuleIds().contains(rule.getId())) {
       ret = true;
     }
     if (rule.isDefaultOff() && rule.getCategory().isDefaultOff()
@@ -261,12 +255,7 @@ public class WtConfigurationDialog implements ActionListener {
     cons.anchor = GridBagConstraints.WEST;
     cons.fill = GridBagConstraints.NONE;
     cons.weightx = 0.0f;
-    if (!insideOffice) {
-      createNonOfficeElements(cons, portPanel);
-    }
-    else {
-      createOfficeElements(cons, portPanel);
-    }
+    createOfficeElements(cons, portPanel);
 
     JPanel buttonPanel = new JPanel();
     buttonPanel.setLayout(new GridBagLayout());
@@ -336,14 +325,6 @@ public class WtConfigurationDialog implements ActionListener {
     cons.fill = GridBagConstraints.NONE;
     cons.anchor = GridBagConstraints.NORTHWEST;
 
-    if(!insideOffice) {
-      cons.gridy++;
-      cons.anchor = GridBagConstraints.WEST;
-      jPane.add(getMotherTonguePanel(cons), cons);
-      cons.gridx = 0;
-      cons.gridy++;
-      jPane.add(getNgramPanel(), cons);
-    }
     cons.gridy++;
     cons.anchor = GridBagConstraints.WEST;
     jPane.add(portPanel, cons);
@@ -447,18 +428,16 @@ public class WtConfigurationDialog implements ActionListener {
       tabpane.addTab(specialTabNames[i], jPane);
     }
     
-    if(insideOffice) {
-      //    technical options tab (only office)
-      String label = messages.getString("guiTechnicalSettings");
-      if (label.endsWith(":")) {
-        label = label.substring(0, label.length() - 1);
-      }
-      tabpane.add(label, new JScrollPane(getOfficeTechnicalElements()));
-      
-      //    AI options tab (only office)
-      label = messages.getString("guiAiSupportSettings");
-      tabpane.add(label, new JScrollPane(getOfficeAiElements()));
+    //    technical options tab (only office)
+    String label = messages.getString("guiTechnicalSettings");
+    if (label.endsWith(":")) {
+      label = label.substring(0, label.length() - 1);
     }
+    tabpane.add(label, new JScrollPane(getOfficeTechnicalElements()));
+    
+    //    AI options tab (only office)
+    label = messages.getString("guiAiSupportSettings");
+    tabpane.add(label, new JScrollPane(getOfficeAiElements()));
 
     Container contentPane = dialog.getContentPane();
     contentPane.setLayout(new GridBagLayout());
@@ -494,69 +473,12 @@ public class WtConfigurationDialog implements ActionListener {
       }
     }
     dialog.setAutoRequestFocus(true);
-    
-    if(insideOffice) {
-      dialog.setAlwaysOnTop(true);
-    }
+    dialog.setAlwaysOnTop(true);
     dialog.setVisible(true);
     dialog.toFront();
     return configChanged;
   }
 
-  private void createNonOfficeElements(GridBagConstraints cons, JPanel portPanel) {
-    serverCheckbox = new JCheckBox(WtConfigTools.getLabel(messages.getString("guiRunOnPort")));
-    serverCheckbox.setMnemonic(WtConfigTools.getMnemonic(messages.getString("guiRunOnPort")));
-    serverCheckbox.setSelected(config.getRunServer());
-    portPanel.add(serverCheckbox, cons);
-    serverCheckbox.addActionListener(e -> {
-      serverPortField.setEnabled(serverCheckbox.isSelected());
-      serverSettingsCheckbox.setEnabled(serverCheckbox.isSelected());
-    });
-    serverCheckbox.addItemListener(e -> config.setRunServer(serverCheckbox.isSelected()));
-
-    serverPortField = new JTextField(Integer.toString(config.getServerPort()));
-    serverPortField.setEnabled(serverCheckbox.isSelected());
-    serverSettingsCheckbox = new JCheckBox(WtConfigTools.getLabel(messages.getString("useGUIConfig")));
-    serverPortField.setMinimumSize(new Dimension(100, 25));  // without this the box is just a few pixels small, but why?
-    cons.gridx = 1;
-    portPanel.add(serverPortField, cons);
-    serverPortField.getDocument().addDocumentListener(new DocumentListener() {
-
-      @Override
-      public void insertUpdate(DocumentEvent e) {
-        changedUpdate(e);
-      }
-
-      @Override
-      public void removeUpdate(DocumentEvent e) {
-        changedUpdate(e);
-      }
-
-      @Override
-      public void changedUpdate(DocumentEvent e) {
-        try {
-          int serverPort = Integer.parseInt(serverPortField.getText());
-          if (serverPort > -1 && serverPort < MAX_PORT) {
-            serverPortField.setForeground(null);
-            config.setServerPort(serverPort);
-          } else {
-            serverPortField.setForeground(Color.RED);
-          }
-        } catch (NumberFormatException ex) {
-          serverPortField.setForeground(Color.RED);
-        }
-      }
-    });
-
-    cons.gridx = 0;
-    cons.gridy = 10;
-    serverSettingsCheckbox.setMnemonic(WtConfigTools.getMnemonic(messages.getString("useGUIConfig")));
-    serverSettingsCheckbox.setSelected(config.getUseGUIConfig());
-    serverSettingsCheckbox.setEnabled(config.getRunServer());
-    serverSettingsCheckbox.addItemListener(e -> config.setUseGUIConfig(serverSettingsCheckbox.isSelected()));
-    portPanel.add(serverSettingsCheckbox, cons);
-  }
-  
   private void addOfficeLanguageElements(GridBagConstraints cons, JPanel portPanel) {
     JPanel languagePanel = new JPanel();
     languagePanel.setLayout(new GridBagLayout());
@@ -1590,7 +1512,7 @@ public class WtConfigurationDialog implements ActionListener {
           ((WtSavablePanel) extra).save();
         }
       }
-      if(insideOffice && config.doRemoteCheck() && config.useOtherServer()) {
+      if(config.doRemoteCheck() && config.useOtherServer()) {
         String serverName = config.getServerUrl();
         if(serverName == null || (!serverName.startsWith("http://") && !serverName.startsWith("https://"))
             || serverName.endsWith("/") || serverName.endsWith("/v2")) {
@@ -1838,25 +1760,21 @@ public class WtConfigurationDialog implements ActionListener {
 
       underlineType.add(new JComboBox<>(getUnderlineTypes()));
       JComboBox<String> uLineType = underlineType.get(nCat);
-      if(insideOffice) {
-        uLineType.setSelectedIndex(getUnderlineType(cLabel, null));
-        uLineType.addItemListener(e -> {
-          if (e.getStateChange() == ItemEvent.SELECTED) {
-            setUnderlineType(uLineType.getSelectedIndex(), cLabel, null);
-          }
-        });
-        cons.gridx++;
-        panel.add(uLineType, cons);
-      }
+      uLineType.setSelectedIndex(getUnderlineType(cLabel, null));
+      uLineType.addItemListener(e -> {
+        if (e.getStateChange() == ItemEvent.SELECTED) {
+          setUnderlineType(uLineType.getSelectedIndex(), cLabel, null);
+        }
+      });
+      cons.gridx++;
+      panel.add(uLineType, cons);
       cons.gridx++;
       panel.add(underlineLabel.get(nCat), cons);
 
       changeButton.add(new JButton(messages.getString("guiUColorChange")));
       changeButton.get(nCat).addActionListener(e -> {
         Color oldColor = uLabel.getForeground();
-        if(insideOffice) {
-          dialog.setAlwaysOnTop(false);
-        }
+        dialog.setAlwaysOnTop(false);
         
         JColorChooser colorChooser = new JColorChooser(oldColor);
         ActionListener okActionListener = new ActionListener() {
@@ -1866,24 +1784,18 @@ public class WtConfigurationDialog implements ActionListener {
               uLabel.setForeground(newColor);
               config.setUnderlineColor(cLabel, newColor);
             }
-            if(insideOffice) {
-              dialog.setAlwaysOnTop(true);
-            }
+            dialog.setAlwaysOnTop(true);
           }
         };
         // For cancel selection, change button background to red
         ActionListener cancelActionListener = new ActionListener() {
           public void actionPerformed(ActionEvent actionEvent) {
-            if(insideOffice) {
-              dialog.setAlwaysOnTop(true);
-            }
+            dialog.setAlwaysOnTop(true);
           }
         };
         JDialog colorDialog = JColorChooser.createDialog(dialog, messages.getString("guiUColorDialogHeader"), true,
             colorChooser, okActionListener, cancelActionListener);
-        if(insideOffice) {
-          colorDialog.setAlwaysOnTop(true);
-        }
+        colorDialog.setAlwaysOnTop(true);
         colorDialog.toFront();
         colorDialog.setVisible(true);
 /*
@@ -1904,10 +1816,8 @@ public class WtConfigurationDialog implements ActionListener {
       defaultButton.get(nCat).addActionListener(e -> {
         config.setDefaultUnderlineColor(cLabel);
         uLabel.setForeground(config.getUnderlineColor(cLabel, null));
-        if(insideOffice) {
-          config.setDefaultUnderlineType(cLabel);
-          uLineType.setSelectedIndex(getUnderlineType(cLabel, null));
-        }
+        config.setDefaultUnderlineType(cLabel);
+        uLineType.setSelectedIndex(getUnderlineType(cLabel, null));
       });
       cons.gridx++;
       panel.add(defaultButton.get(nCat), cons);
@@ -1958,25 +1868,21 @@ public class WtConfigurationDialog implements ActionListener {
     JLabel underlineLabel = new JLabel(" \u2588\u2588\u2588 ");  // \u2587 is smaller
 
     JComboBox<String> underlineType = new JComboBox<>(getUnderlineTypes());
-    if(insideOffice) {
-      underlineType.setSelectedIndex(getUnderlineType(category, (rule == null ? null : rule.getId())));
-      underlineType.addItemListener(e -> {
-        if (e.getStateChange() == ItemEvent.SELECTED) {
-          setUnderlineType(underlineType.getSelectedIndex(), category, (rule == null ? null : rule.getId()));
-        }
-      });
-      cons1.gridx++;
-      colorPanel.add(underlineType);
-    }
+    underlineType.setSelectedIndex(getUnderlineType(category, (rule == null ? null : rule.getId())));
+    underlineType.addItemListener(e -> {
+      if (e.getStateChange() == ItemEvent.SELECTED) {
+        setUnderlineType(underlineType.getSelectedIndex(), category, (rule == null ? null : rule.getId()));
+      }
+    });
+    cons1.gridx++;
+    colorPanel.add(underlineType);
     cons1.gridx++;
     colorPanel.add(underlineLabel);
 
     JButton changeButton = new JButton(messages.getString("guiUColorChange"));
     changeButton.addActionListener(e -> {
       Color oldColor = underlineLabel.getForeground();
-      if(insideOffice) {
-        dialog.setAlwaysOnTop(false);
-      }
+      dialog.setAlwaysOnTop(false);
       JColorChooser colorChooser = new JColorChooser(oldColor);
       ActionListener okActionListener = new ActionListener() {
         public void actionPerformed(ActionEvent actionEvent) {
@@ -1989,40 +1895,20 @@ public class WtConfigurationDialog implements ActionListener {
               config.setUnderlineRuleColor(rule.getId(), newColor);
             }
           }
-          if(insideOffice) {
-            dialog.setAlwaysOnTop(true);
-          }
+          dialog.setAlwaysOnTop(true);
         }
       };
       // For cancel selection, change button background to red
       ActionListener cancelActionListener = new ActionListener() {
         public void actionPerformed(ActionEvent actionEvent) {
-          if(insideOffice) {
-            dialog.setAlwaysOnTop(true);
-          }
+          dialog.setAlwaysOnTop(true);
         }
       };
       JDialog colorDialog = JColorChooser.createDialog(dialog, messages.getString("guiUColorDialogHeader"), true,
           colorChooser, okActionListener, cancelActionListener);
-      if(insideOffice) {
-        colorDialog.setAlwaysOnTop(true);
-      }
+      colorDialog.setAlwaysOnTop(true);
       colorDialog.toFront();
       colorDialog.setVisible(true);
-/*      
-      Color newColor = JColorChooser.showDialog( null, messages.getString("guiUColorDialogHeader"), oldColor);
-      if(newColor != null && newColor != oldColor) {
-        underlineLabel.setForeground(newColor);
-        if (rule == null) {
-          config.setUnderlineColor(category, newColor);
-        } else {
-          config.setUnderlineRuleColor(rule.getId(), newColor);
-        }
-      }
-      if(insideOffice) {
-        dialog.setAlwaysOnTop(true);
-      }
-*/
     });
     cons1.gridx++;
     colorPanel.add(changeButton);
@@ -2036,14 +1922,12 @@ public class WtConfigurationDialog implements ActionListener {
         config.setDefaultUnderlineRuleColor(ruleId);
       }
       underlineLabel.setForeground(config.getUnderlineColor(category, ruleId));
-      if(insideOffice) {
-        if ( rule == null) {
-          config.setDefaultUnderlineType(category);
-        } else {
-          config.setDefaultUnderlineRuleType(ruleId);
-        }
-        underlineType.setSelectedIndex(getUnderlineType(category, ruleId));
+      if ( rule == null) {
+        config.setDefaultUnderlineType(category);
+      } else {
+        config.setDefaultUnderlineRuleType(ruleId);
       }
+      underlineType.setSelectedIndex(getUnderlineType(category, ruleId));
       config.removeConfigurableValue(ruleId);
     });
     cons1.gridx++;
@@ -2076,9 +1960,7 @@ public class WtConfigurationDialog implements ActionListener {
           String ruleId = rule.getId();
           underlineLabel.setForeground(config.getUnderlineColor(category, ruleId));
           underlineLabel.setBackground(config.getUnderlineColor(category, ruleId));
-          if(insideOffice) {
-            underlineType.setSelectedIndex(getUnderlineType(category, ruleId));
-          }
+          underlineType.setSelectedIndex(getUnderlineType(category, ruleId));
           colorPanel.setVisible(true);
           RuleOption[] ruleOptions = rule.getRuleOptions();
           if (ruleOptions != null && ruleOptions.length > 0) {
@@ -2230,9 +2112,7 @@ public class WtConfigurationDialog implements ActionListener {
           category = o.getCategory().getName();
           underlineLabel.setForeground(config.getUnderlineColor(category, null));
           underlineLabel.setBackground(config.getUnderlineColor(category, null));
-          if(insideOffice) {
-            underlineType.setSelectedIndex(getUnderlineType(category, null));
-          }
+          underlineType.setSelectedIndex(getUnderlineType(category, null));
           colorPanel.setVisible(true);
           rule = null;
         }
@@ -2240,6 +2120,98 @@ public class WtConfigurationDialog implements ActionListener {
       }
     });
     return ruleOptionsPanel;
+  }
+  
+  private JPanel getColorPanel(String category, String ruleId) {
+    //  Color Panel
+    JPanel colorPanel = new JPanel();
+    colorPanel.setLayout(null);
+    colorPanel.setBounds(0, 0, 120, 10);
+
+    colorPanel.setLayout(new GridBagLayout());
+    GridBagConstraints cons1 = new GridBagConstraints();
+    cons1.insets = new Insets(0, 0, 0, 0);
+    cons1.gridx = 0;
+    cons1.gridy = 0;
+    cons1.weightx = 0.0f;
+    cons1.fill = GridBagConstraints.NONE;
+    cons1.anchor = GridBagConstraints.NORTHWEST;
+
+    JLabel underlineStyle = new JLabel(messages.getString("guiUColorStyleLabel") + " ");
+    colorPanel.add(underlineStyle);
+
+    JLabel underlineLabel = new JLabel(" \u2588\u2588\u2588 ");  // \u2587 is smaller
+
+    JComboBox<String> underlineType = new JComboBox<>(getUnderlineTypes());
+    underlineType.setSelectedIndex(getUnderlineType(category, ruleId));
+    underlineType.addItemListener(e -> {
+      if (e.getStateChange() == ItemEvent.SELECTED) {
+        setUnderlineType(underlineType.getSelectedIndex(), category, ruleId);
+      }
+    });
+    cons1.gridx++;
+    colorPanel.add(underlineType);
+    cons1.gridx++;
+    colorPanel.add(underlineLabel);
+
+    JButton changeButton = new JButton(messages.getString("guiUColorChange"));
+    changeButton.addActionListener(e -> {
+      Color oldColor = underlineLabel.getForeground();
+      dialog.setAlwaysOnTop(false);
+      JColorChooser colorChooser = new JColorChooser(oldColor);
+      ActionListener okActionListener = new ActionListener() {
+        public void actionPerformed(ActionEvent actionEvent) {
+          Color newColor = colorChooser.getColor();
+          if(newColor != null && newColor != oldColor) {
+            underlineLabel.setForeground(newColor);
+            if (ruleId == null) {
+              config.setUnderlineColor(category, newColor);
+            } else {
+              config.setUnderlineRuleColor(ruleId, newColor);
+            }
+          }
+          dialog.setAlwaysOnTop(true);
+        }
+      };
+      // For cancel selection, change button background to red
+      ActionListener cancelActionListener = new ActionListener() {
+        public void actionPerformed(ActionEvent actionEvent) {
+          dialog.setAlwaysOnTop(true);
+        }
+      };
+      JDialog colorDialog = JColorChooser.createDialog(dialog, messages.getString("guiUColorDialogHeader"), true,
+          colorChooser, okActionListener, cancelActionListener);
+      colorDialog.setAlwaysOnTop(true);
+      colorDialog.toFront();
+      colorDialog.setVisible(true);
+    });
+    cons1.gridx++;
+    colorPanel.add(changeButton);
+  
+    JButton defaultButton = new JButton(messages.getString("guiUColorDefault"));
+    defaultButton.addActionListener(e -> {
+      if (ruleId == null) {
+        config.setDefaultUnderlineColor(category);
+      } else {
+        config.setDefaultUnderlineRuleColor(ruleId);
+      }
+      underlineLabel.setForeground(config.getUnderlineColor(category, ruleId));
+      if ( ruleId == null) {
+        config.setDefaultUnderlineType(category);
+      } else {
+        config.setDefaultUnderlineRuleType(ruleId);
+      }
+      underlineType.setSelectedIndex(getUnderlineType(category, ruleId));
+      config.removeConfigurableValue(ruleId);
+    });
+    cons1.gridx++;
+    colorPanel.add(defaultButton);
+    underlineLabel.setForeground(config.getUnderlineColor(category, ruleId));
+    underlineLabel.setBackground(config.getUnderlineColor(category, ruleId));
+    underlineType.setSelectedIndex(getUnderlineType(category, ruleId));
+    colorPanel.setVisible(true);
+    // End of Color Panel
+    return colorPanel;
   }
   
   private JPanel getOfficeAiElements() {
@@ -2373,10 +2345,8 @@ public class WtConfigurationDialog implements ActionListener {
     qualityHint.setForeground(Color.blue);
     cons.gridy++;
     aiOptionPanel.add(qualityHint, cons);
-    JLabel tmp = new JLabel(" ");
+    cons.insets = new Insets(16, SHIFT2, 0, 0);
     cons.gridy++;
-    aiOptionPanel.add(tmp, cons);
-    cons.insets = new Insets(0, SHIFT2, 0, 0);
     aiOptionPanel.add(useAiSupportBox, cons);
     JPanel serverPanel = new JPanel();
     serverPanel.setLayout(new GridBagLayout());
@@ -2399,6 +2369,7 @@ public class WtConfigurationDialog implements ActionListener {
     cons1.gridy++;
     serverPanel.add(apiKeyField, cons1);
 
+    cons.insets = new Insets(0, SHIFT2, 0, 0);
     cons.gridx = 0;
     cons.gridy++;
     aiOptionPanel.add(serverPanel, cons);
@@ -2409,7 +2380,25 @@ public class WtConfigurationDialog implements ActionListener {
     cons.gridy++;
     cons.insets = new Insets(0, SHIFT3, 0, 0);
     aiOptionPanel.add(showStylisticChangesBox, cons);
+
+    cons.insets = new Insets(16, SHIFT2, 0, 0);
+    cons.gridy++;
+    JLabel grammarErrorColor = new JLabel(messages.getString("guiAiGrammarErrorColor") + ":");
+    aiOptionPanel.add(grammarErrorColor, cons);
     
+    cons.insets = new Insets(0, SHIFT2, 0, 0);
+    cons.gridy++;
+    aiOptionPanel.add(getColorPanel(WtOfficeTools.AI_GRAMMAR_CATEGORY, WtOfficeTools.AI_GRAMMAR_HINT_RULE_ID), cons);
+
+    cons.insets = new Insets(12, SHIFT2, 0, 0);
+    cons.gridy++;
+    JLabel stylisticErrorColor = new JLabel(messages.getString("guiAiStylisticErrorColor") + ":");
+    aiOptionPanel.add(stylisticErrorColor, cons);
+    
+    cons.insets = new Insets(0, SHIFT2, 0, 0);
+    cons.gridy++;
+    aiOptionPanel.add(getColorPanel(WtOfficeTools.AI_STYLE_CATEGORY, WtOfficeTools.AI_GRAMMAR_OTHER_RULE_ID), cons);
+
     return aiOptionPanel;
   }
   
