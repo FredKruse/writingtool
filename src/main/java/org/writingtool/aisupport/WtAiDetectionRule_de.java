@@ -26,9 +26,23 @@ public class WtAiDetectionRule_de extends WtAiDetectionRule {
    */
   @Override
   public boolean isHintException(WtAiToken paraToken, WtAiToken resultToken) {
-    WtMessageHandler.printToLogFile("isHintException in: de" 
-        + ", paraToken: " + paraToken.getToken() + ", resultToken: " + resultToken.getToken());
+//    WtMessageHandler.printToLogFile("isHintException in: de" 
+//        + ", paraToken: " + paraToken.getToken() + ", resultToken: " + resultToken.getToken());
     if ("dass".equals(paraToken.getToken())  || "dass".equals(resultToken.getToken())) {
+      return true;
+    }
+    return false;   
+  }
+
+  /**
+   * Set language specific exceptions to handle change as a match
+   */
+  @Override
+  public boolean isMatchException(int nPara, int nResult, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) {
+    if ((resultTokens.get(nResult).getToken().equals(",") && nResult < resultTokens.size() - 1 
+          && (resultTokens.get(nResult + 1).getToken().equals("und") || resultTokens.get(nResult + 1).getToken().equals("oder")))
+        || (resultTokens.get(nResult + 1).getToken().equals(",") && nResult < resultTokens.size() - 2 
+            && (resultTokens.get(nResult + 2).getToken().equals("und") || resultTokens.get(nResult + 2).getToken().equals("oder")))) {
       return true;
     }
     return false;   

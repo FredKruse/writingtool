@@ -256,7 +256,8 @@ public class WtAiDetectionRule extends TextLevelRule {
           j = resultTokens.size() - 1;
         }
         suggestion = sugStart >= sugEnd ? "" : aiResultText.substring(sugStart, sugEnd);
-        if (!isEndQoute(j, resultTokens) && isCorrectSuggestion(suggestion, singleWordToken)) {
+        if (!isEndQoute(j, resultTokens) && isCorrectSuggestion(suggestion, singleWordToken)
+            && !isMatchException(nParaTokenStart, nResultTokenStart, paraTokens, resultTokens)) {
           RuleMatch ruleMatch = new RuleMatch(this, sentence, posStart, posEnd, ruleMessage);
           ruleMatch.addSuggestedReplacement(suggestion);
           ruleMatch.setType(Type.Hint);
@@ -464,10 +465,18 @@ public class WtAiDetectionRule extends TextLevelRule {
   }
   
   /**
-   * Set Exceptions to set Color for specific Languages
+   * Set language specific exceptions to set Color for specific Languages
    */
   public boolean isHintException(WtAiToken paraToken, WtAiToken resultToken) {
-    WtMessageHandler.printToLogFile("isHintException in: general");
+//    WtMessageHandler.printToLogFile("isHintException in: general");
+    return false;   
+  }
+
+  /**
+   * Set language specific exceptions to handle change as a match
+   */
+  public boolean isMatchException(int nPara, int nResult, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) {
+//    WtMessageHandler.printToLogFile("isHintException in: general");
     return false;   
   }
 
