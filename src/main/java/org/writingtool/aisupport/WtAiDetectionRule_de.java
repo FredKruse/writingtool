@@ -39,6 +39,9 @@ public class WtAiDetectionRule_de extends WtAiDetectionRule {
    */
   @Override
   public boolean isMatchException(int nPara, int nResult, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) {
+    if (nResult < 0 || nResult >= resultTokens.size() - 1) {
+      return false;
+    }
     if ((resultTokens.get(nResult).getToken().equals(",") && nResult < resultTokens.size() - 1 
           && (resultTokens.get(nResult + 1).getToken().equals("und") || resultTokens.get(nResult + 1).getToken().equals("oder")))
         || (resultTokens.get(nResult + 1).getToken().equals(",") && nResult < resultTokens.size() - 2 
