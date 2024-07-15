@@ -1272,6 +1272,13 @@ public class WtDocumentsHandler {
   }
   
   /**
+   * Get AI queue
+   */
+  public void setAiCheckQueue(WtAiCheckQueue queue) {
+    aiQueue = queue;
+  }
+  
+  /**
    * true, if LanguageTool is switched off
    */
   public boolean isBackgroundCheckOff() {

@@ -662,7 +662,7 @@ public class WtAiDialog extends Thread implements ActionListener {
       }
       String text = paragraph.getText();
       setAtWorkButtonState(true);
-      WtAiRemote aiRemote = new WtAiRemote(config);
+      WtAiRemote aiRemote = new WtAiRemote(documents, config);
       if (debugMode) {
         WtMessageHandler.printToLogFile("AiParagraphChanging: runInstruction: instruction: " + instructionText + ", text: " + text);
       }

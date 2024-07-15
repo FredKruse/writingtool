@@ -243,7 +243,7 @@ public class WtAiErrorDetection {
     if (para == null || para.isEmpty()) {
       return "";
     }
-    WtAiRemote aiRemote = new WtAiRemote(config);
+    WtAiRemote aiRemote = new WtAiRemote(document.getMultiDocumentsHandler(),config);
     String output = aiRemote.runInstruction(correctCommand, para, locale, true);
     return output;
   }

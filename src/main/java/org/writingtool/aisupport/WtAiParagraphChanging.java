@@ -132,7 +132,7 @@ public class WtAiParagraphChanging extends Thread {
 //      }
       waitDialog = new WaitDialogThread(WAIT_TITLE, WAIT_MESSAGE);
       waitDialog.start();
-      WtAiRemote aiRemote = new WtAiRemote(config);
+      WtAiRemote aiRemote = new WtAiRemote(document.getMultiDocumentsHandler(), config);
       if (debugMode) {
         WtMessageHandler.printToLogFile("AiParagraphChanging: runInstruction: instruction: " + instruction + ", text: " + text);
       }

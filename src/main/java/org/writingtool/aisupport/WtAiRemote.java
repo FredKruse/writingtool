@@ -18,32 +18,21 @@
  */
 package org.writingtool.aisupport;
 
-import java.awt.Image;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import javax.imageio.ImageIO;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.languagetool.JLanguageTool;
 import org.writingtool.WtDocumentsHandler;
 import org.writingtool.config.WtConfiguration;
 import org.writingtool.tools.WtMessageHandler;
@@ -74,18 +63,19 @@ public class WtAiRemote {
 */
   private enum AiType { EDITS, COMPLETIONS, CHAT }
   
-  private final static Map<String, String> commands = new HashMap<>();
-  private static String lastLang = null;
-  
   boolean debugModeTm = true;
   boolean debugMode = WtOfficeTools.DEBUG_MODE_AI;
   
+  private final WtDocumentsHandler documents;
+  private final WtConfiguration config;
   private final String apiKey;
   private final String model;
   private final String url;
   private final AiType aiType;
   
-  public WtAiRemote(WtConfiguration config) {
+  public WtAiRemote(WtDocumentsHandler documents, WtConfiguration config) {
+    this.documents = documents;
+    this.config = config;
     apiKey = config.aiApiKey();
     model = config.aiModel();
     url = config.aiUrl();
@@ -183,6 +173,7 @@ public class WtAiRemote {
       checkUrl = new URL(url);
     } catch (MalformedURLException e) {
       WtMessageHandler.showError(e);
+      stopAiRemote();
       return null;
     }
     if (debugMode) {
@@ -207,14 +198,18 @@ public class WtAiRemote {
       } else {
         try (InputStream inputStream = conn.getErrorStream()) {
           String error = readStream(inputStream, "utf-8");
-          WtMessageHandler.showMessage("Got error: " + error + " - HTTP response code " + conn.getResponseCode());
+          WtMessageHandler.printToLogFile("Got error: " + error + " - HTTP response code " + conn.getResponseCode());
+          stopAiRemote();
+          return null;
         }
       }
     } catch (ConnectException e) {
-      WtMessageHandler.showMessage("Could not connect to server at: " + url);
-      WtMessageHandler.showError(e);
+      WtMessageHandler.printToLogFile("Could not connect to server at: " + url);
+      WtMessageHandler.printException(e);
+      stopAiRemote();
     } catch (Exception e) {
       WtMessageHandler.showError(e);
+      stopAiRemote();
     } finally {
       conn.disconnect();
     }
@@ -362,68 +357,13 @@ public class WtAiRemote {
     return instruction + " (language - " + langName + ")";
   }
   
-  /**
-   * Get Command file if exist - else default
-   *//*
-  private static InputStream getCommandsFileInputStream(Locale locale) {
-    URL url = null;
-    try {
-      return AiRemote.class.getResourceAsStream("/commands/commands_" + locale.Language);
-    } catch (Throwable e) {
+  private void stopAiRemote() {
+    config.setUseAiSupport(false);
+    if (documents.getAiCheckQueue() != null) {
+      documents.getAiCheckQueue().setStop();
+      documents.setAiCheckQueue(null);
     }
-    if (url == null) {
-      try {
-        return AiRemote.class.getResourceAsStream("/commands/commands_en");
-      } catch (Throwable e) {
-        MessageHandler.showError(e);
-      }
-    }
-    return null;
+    WtMessageHandler.showMessage(messages.getString("loAiServerConnectionError"));
   }
   
-  private static void setCommands(Locale locale) {
-    if (lastLang != null && lastLang.equals(locale.Language)) {
-//      MessageHandler.printToLogFile("Last language: " + lastLang + ", locale.Language: " + locale.Language);
-      return;
-    }
-    lastLang = new String(locale.Language);
-    InputStream input = getCommandsFileInputStream(locale);
-    if (input == null) {
-      MessageHandler.printToLogFile("commands file input == null");
-      return;
-    }
-    commands.clear();
-    BufferedReader in = null;
-//    MessageHandler.printToLogFile("commands file: " + fileName);
-    try {
-//      in = new BufferedReader(new FileReader(fileName));
-      in = new BufferedReader(new InputStreamReader(input));
-      String row = null;
-      while ((row = in.readLine()) != null) {
-//        MessageHandler.printToLogFile("read row: " + row);
-        String splitted[] = row.split("=");
-        if (splitted.length == 2) {
-//          MessageHandler.printToLogFile("add key: " + splitted[0] + ", command: " + splitted[1]);
-          commands.put(splitted[0].trim(), splitted[1].trim());
-        }
-      }
-    } catch (IOException e) {
-      MessageHandler.showError(e);
-    } finally {
-      if (in != null)
-        try {
-          in.close();
-        } catch (IOException e) {
-        }
-    }
-  }
-*/  
-/*  
-  public static String parseInstruction (String instruction, Locale locale) {
-    String lang = (locale == null || locale.Language == null || locale.Language.isEmpty()) ? "en" : locale.Language;
-    Locale langLocale = new Locale(lang, "", "");
-    String languageName = MultiDocumentsHandler.getLanguage(langLocale).getName();
-    return instruction.replace("{}", languageName);
-  }
-*/
 }
