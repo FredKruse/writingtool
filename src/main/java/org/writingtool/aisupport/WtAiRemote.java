@@ -110,7 +110,7 @@ public class WtAiRemote {
     }
   }
 
-  public String runInstruction(String instruction, String text, Locale locale, boolean onlyOneParagraph) {
+  public String runInstruction(String instruction, String text, float temperature, Locale locale, boolean onlyOneParagraph) {
     if (instruction == null || text == null) {
       return null;
     }
@@ -150,20 +150,20 @@ public class WtAiRemote {
           + "\"messages\": [ { \"role\": \"user\", "
           + "\"content\": \"" + instruction + (text == null ? "" : ": {" + text + "}") + "\" } ], "
           + "\"seed\": 1, "
-          + "\"temperature\": 0.7}";
+          + "\"temperature\": " + temperature + "}";
     } else if (aiType == AiType.EDITS) {
       urlParameters = "{\"model\": \"" + model + "\", " 
 //          + "\"response_format\": { \"type\": \"json_object\" },"
           + "\"instruction\": \"" + instruction + "\","
           + "\"input\": \"" + text + "\", "
 //          + "\"seed\": 1, "
-          + "\"temperature\": 0.7}";
+          + "\"temperature\": " + temperature + "}";
     } else {
       urlParameters = "{\"model\": \"" + model + "\", " 
 //          + "\"response_format\": { \"type\": \"json_object\" },"
           + "\"prompt\": \"" + instruction + ": {" + text + "}\", "
 //          + "\"seed\": 1, "
-          + "\"temperature\": 0.7}";
+          + "\"temperature\": " + temperature + "}";
     }
 
     byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
@@ -241,8 +241,12 @@ public class WtAiRemote {
       if (out.contains(":") && (!org.contains(":") || out.trim().startsWith(inst[0].trim()))) {
         parts = out.split(":");
         if (parts.length > 1) {
-          out = parts[1];
-          for (int i = 2; i < parts.length; i++) {
+          int n = 1;
+          if (parts.length > 2 && out.trim().startsWith(instruction.trim())) {
+            n = 2;
+          }
+          out = parts[n];
+          for (int i = n + 1; i < parts.length; i++) {
             out += ":" + parts[i];
           }
           out = removeSurroundingBrackets(out.trim(), org);

@@ -74,6 +74,7 @@ import com.sun.star.lang.XComponent;
  */
 public class WtAiDialog extends Thread implements ActionListener {
   
+  private final static float TEMPERATURE = 0.7f;
   private final static String AI_INSTRUCTION_FILE_NAME = "LT_AI_Instructions.dat";
   private final static int MAX_INSTRUCTIONS = 40;
   private final static int dialogWidth = 640;
@@ -105,12 +106,10 @@ public class WtAiDialog extends Thread implements ActionListener {
   
   private WtSingleDocument currentDocument;
   private WtDocumentsHandler documents;
-  private WtViewCursorTools viewCursor;
   private WtConfiguration config;
   
   private int dialogX = -1;
   private int dialogY = -1;
-  private String docId = null;
   private List<String> instructionList = new ArrayList<>();
   private String saveText;
   private String saveResult;
@@ -137,7 +136,6 @@ public class WtAiDialog extends Thread implements ActionListener {
     }
     
     currentDocument = document;
-    docId = document.getDocID();
     
     dialog = new JDialog();
     contentPane = dialog.getContentPane();
@@ -579,7 +577,6 @@ public class WtAiDialog extends Thread implements ActionListener {
     dialog.setLocation(dialogX, dialogY);
     dialog.setAutoRequestFocus(true);
     dialog.setVisible(true);
-    docId = currentDocument.getDocID();
     setText();
   }
 
@@ -666,7 +663,7 @@ public class WtAiDialog extends Thread implements ActionListener {
       if (debugMode) {
         WtMessageHandler.printToLogFile("AiParagraphChanging: runInstruction: instruction: " + instructionText + ", text: " + text);
       }
-      String output = aiRemote.runInstruction(instructionText, text, locale, false);
+      String output = aiRemote.runInstruction(instructionText, text, TEMPERATURE, locale, false);
       if (debugMode) {
         WtMessageHandler.printToLogFile("AiParagraphChanging: runAiChangeOnParagraph: output: " + output);
       }
