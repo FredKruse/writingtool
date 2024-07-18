@@ -136,7 +136,7 @@ public class WtAiParagraphChanging extends Thread {
       if (debugMode) {
         WtMessageHandler.printToLogFile("AiParagraphChanging: runInstruction: instruction: " + instruction + ", text: " + text);
       }
-      String output = aiRemote.runInstruction(instruction, text, 0, locale, onlyPara);
+      String output = aiRemote.runInstruction(instruction, text, 0, 1, locale, onlyPara);
       if (debugMode) {
         WtMessageHandler.printToLogFile("AiParagraphChanging: runAiChangeOnParagraph: output: " + output);
       }

@@ -40,6 +40,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -50,8 +51,11 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
+import javax.swing.JSlider;
 import javax.swing.JTextPane;
 import javax.swing.ToolTipManager;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.writingtool.WtDocumentCache;
 import org.writingtool.WtDocumentsHandler;
@@ -77,6 +81,7 @@ public class WtAiDialog extends Thread implements ActionListener {
   private final static float TEMPERATURE = 0.7f;
   private final static String AI_INSTRUCTION_FILE_NAME = "LT_AI_Instructions.dat";
   private final static int MAX_INSTRUCTIONS = 40;
+  private final static int SHIFT1 = 14;
   private final static int dialogWidth = 640;
   private final static int dialogHeight = 600;
 
@@ -92,6 +97,8 @@ public class WtAiDialog extends Thread implements ActionListener {
   private final JTextPane paragraph;
   private final JLabel resultLabel;
   private final JTextPane result;
+  private final JLabel temperatureLabel;
+  private final JSlider temperatureSlider;
   private final JButton execute; 
   private final JButton copyResult; 
   private final JButton reset; 
@@ -118,6 +125,7 @@ public class WtAiDialog extends Thread implements ActionListener {
   private Locale locale;
   private boolean atWork;
   private boolean focusLost;
+  private float temperature = TEMPERATURE;
 
   /**
    * the constructor of the class creates all elements of the dialog
@@ -139,11 +147,11 @@ public class WtAiDialog extends Thread implements ActionListener {
     
     dialog = new JDialog();
     contentPane = dialog.getContentPane();
-    instructionLabel = new JLabel(messages.getString("loAiDialogInstructionLabel"));
+    instructionLabel = new JLabel(messages.getString("loAiDialogInstructionLabel") + ":");
     instruction = new JComboBox<String>();
-    paragraphLabel = new JLabel(messages.getString("loAiDialogParagraphLabel"));
+    paragraphLabel = new JLabel(messages.getString("loAiDialogParagraphLabel") + ":");
     paragraph = new JTextPane();
-    resultLabel = new JLabel(messages.getString("loAiDialogResultLabel"));
+    resultLabel = new JLabel(messages.getString("loAiDialogResultLabel") + ":");
     result = new JTextPane();
     execute = new JButton (messages.getString("loAiDialogExecuteButton")); 
     copyResult = new JButton (messages.getString("loAiDialogcopyResultButton")); 
@@ -157,6 +165,16 @@ public class WtAiDialog extends Thread implements ActionListener {
     
     checkProgress = new JProgressBar(0, 100);
 
+    temperatureLabel = new JLabel(messages.getString("loAiDialogCreativityLabel") + ":");
+    
+    temperatureSlider = new JSlider(0, 100, (int)(TEMPERATURE*100));
+    temperatureSlider.setMajorTickSpacing(10);
+    temperatureSlider.setMinorTickSpacing(5);
+    temperatureSlider.setPaintTicks(true);
+    temperatureSlider.setSnapToTicks(true);
+    
+    checkProgress.setStringPainted(true);
+    checkProgress.setIndeterminate(false);
     try {
       if (debugMode) {
         WtMessageHandler.printToLogFile("CheckDialog: LtCheckDialog: LtCheckDialog called");
@@ -209,6 +227,27 @@ public class WtAiDialog extends Thread implements ActionListener {
 
       resultLabel.setFont(dialogFont);
       result.setFont(dialogFont);
+      
+      temperatureLabel.setFont(dialogFont);
+      temperatureSlider.setMajorTickSpacing(10);
+      temperatureSlider.setMinorTickSpacing(5);
+      temperatureSlider.setPaintTicks(true);
+      temperatureSlider.setSnapToTicks(true);
+      temperatureSlider.addChangeListener(new ChangeListener( ) {
+        @Override
+        public void stateChanged(ChangeEvent e) {
+          int value = temperatureSlider.getValue();
+          temperature = (float) (value / 100.);
+        }
+      });
+/*
+      Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
+      for (int i = 0; i <= 10; i++) {
+        labelTable.put(i * 10, new JLabel(String.format("%.1f", i/10.)));
+      }
+      temperatureSlider.setLabelTable(labelTable);
+      temperatureSlider.setPaintLabels(true);
+*/
 /*      
       result.getDocument().addDocumentListener(new DocumentListener() {
         @Override
@@ -354,8 +393,6 @@ public class WtAiDialog extends Thread implements ActionListener {
         }
       });
       
-      checkProgress.setStringPainted(true);
-      checkProgress.setIndeterminate(false);
 /*
       //  set selection background color to get compatible layout to LO
       Color selectionColor = UIManager.getLookAndFeelDefaults().getColor("ProgressBar.selectionBackground");
@@ -419,7 +456,7 @@ public class WtAiDialog extends Thread implements ActionListener {
       JPanel mainPanel = new JPanel();
       mainPanel.setLayout(new GridBagLayout());
       GridBagConstraints cons1 = new GridBagConstraints();
-      cons1.insets = new Insets(4, 4, 4, 4);
+      cons1.insets = new Insets(SHIFT1, 4, 4, 4);
       cons1.gridx = 0;
       cons1.gridy = 0;
       cons1.anchor = GridBagConstraints.NORTHWEST;
@@ -427,16 +464,19 @@ public class WtAiDialog extends Thread implements ActionListener {
       cons1.weightx = 1.0f;
       cons1.weighty = 0.0f;
       mainPanel.add(instructionLabel, cons1);
+      cons1.insets = new Insets(4, 4, 4, 4);
       cons1.gridy++;
       mainPanel.add(instruction, cons1);
       cons1.weightx = 0.0f;
       cons1.gridx++;
       mainPanel.add(execute, cons1);
+      cons1.insets = new Insets(SHIFT1, 4, 4, 4);
       cons1.gridx = 0;
       cons1.gridy++;
       cons1.weightx = 1.0f;
       cons1.weighty = 0.0f;
       mainPanel.add(paragraphLabel, cons1);
+      cons1.insets = new Insets(4, 4, 4, 4);
       cons1.gridy++;
       cons1.weighty = 2.0f;
       mainPanel.add(paragraphPane, cons1);
@@ -444,10 +484,12 @@ public class WtAiDialog extends Thread implements ActionListener {
       cons1.weightx = 0.0f;
       cons1.weighty = 0.0f;
       mainPanel.add(rightPanel1, cons1);
+      cons1.insets = new Insets(SHIFT1, 4, 4, 4);
       cons1.gridx = 0;
       cons1.gridy++;
       cons1.weightx = 1.0f;
       mainPanel.add(resultLabel, cons1);
+      cons1.insets = new Insets(4, 4, 4, 4);
       cons1.gridy++;
       cons1.weighty = 2.0f;
       mainPanel.add(resultPane, cons1);
@@ -455,6 +497,14 @@ public class WtAiDialog extends Thread implements ActionListener {
       cons1.weightx = 0.0f;
       cons1.weighty = 0.0f;
       mainPanel.add(rightPanel2, cons1);
+      cons1.insets = new Insets(SHIFT1, 4, 4, 4);
+      cons1.gridx = 0;
+      cons1.gridy++;
+      mainPanel.add(temperatureLabel, cons1);
+      cons1.insets = new Insets(4, 4, 4, 4);
+      cons1.gridy++;
+      mainPanel.add(temperatureSlider, cons1);
+      
 
       //  Define general button panel
       JPanel generalButtonPanel = new JPanel();
@@ -463,11 +513,12 @@ public class WtAiDialog extends Thread implements ActionListener {
       cons3.insets = new Insets(4, 4, 4, 4);
       cons3.gridx = 0;
       cons3.gridy = 0;
-      cons3.anchor = GridBagConstraints.SOUTHEAST;
-      cons3.fill = GridBagConstraints.HORIZONTAL;
+      cons3.anchor = GridBagConstraints.WEST;
+//      cons3.fill = GridBagConstraints.HORIZONTAL;
       cons3.weightx = 1.0f;
       cons3.weighty = 0.0f;
       generalButtonPanel.add(help, cons3);
+      cons3.anchor = GridBagConstraints.EAST;
       cons3.gridx++;
       generalButtonPanel.add(close, cons3);
       
@@ -663,7 +714,7 @@ public class WtAiDialog extends Thread implements ActionListener {
       if (debugMode) {
         WtMessageHandler.printToLogFile("AiParagraphChanging: runInstruction: instruction: " + instructionText + ", text: " + text);
       }
-      String output = aiRemote.runInstruction(instructionText, text, TEMPERATURE, locale, false);
+      String output = aiRemote.runInstruction(instructionText, text, TEMPERATURE, 0, locale, false);
       if (debugMode) {
         WtMessageHandler.printToLogFile("AiParagraphChanging: runAiChangeOnParagraph: output: " + output);
       }

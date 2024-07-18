@@ -244,7 +244,7 @@ public class WtAiErrorDetection {
       return "";
     }
     WtAiRemote aiRemote = new WtAiRemote(document.getMultiDocumentsHandler(),config);
-    String output = aiRemote.runInstruction(correctCommand, para, 0, locale, true);
+    String output = aiRemote.runInstruction(correctCommand, para, 0, 1, locale, true);
     return output;
   }
   

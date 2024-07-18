@@ -110,7 +110,7 @@ public class WtAiRemote {
     }
   }
 
-  public String runInstruction(String instruction, String text, float temperature, Locale locale, boolean onlyOneParagraph) {
+  public String runInstruction(String instruction, String text, float temperature, int seed, Locale locale, boolean onlyOneParagraph) {
     if (instruction == null || text == null) {
       return null;
     }
@@ -149,7 +149,7 @@ public class WtAiRemote {
           + "\"language\": \"" + langName + "\", "
           + "\"messages\": [ { \"role\": \"user\", "
           + "\"content\": \"" + instruction + (text == null ? "" : ": {" + text + "}") + "\" } ], "
-          + "\"seed\": 1, "
+          + (seed > 0 ? "\"seed\": " + seed + ", " : "")
           + "\"temperature\": " + temperature + "}";
     } else if (aiType == AiType.EDITS) {
       urlParameters = "{\"model\": \"" + model + "\", " 
