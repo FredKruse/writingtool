@@ -71,6 +71,9 @@ public class WtAiRemote {
   private final String apiKey;
   private final String model;
   private final String url;
+  private final String imgApiKey;
+  private final String imgModel;
+  private final String imgUrl;
   private final AiType aiType;
   
   public WtAiRemote(WtDocumentsHandler documents, WtConfiguration config) {
@@ -79,6 +82,9 @@ public class WtAiRemote {
     apiKey = config.aiApiKey();
     model = config.aiModel();
     url = config.aiUrl();
+    imgApiKey = config.aiImgApiKey();
+    imgModel = config.aiImgModel();
+    imgUrl = config.aiImgUrl();
     if (url.endsWith("/edits/") || url.endsWith("/edits")) {
       aiType = AiType.EDITS;
     } else if (url.endsWith("/chat/completions/") || url.endsWith("/chat/completions")) {
@@ -90,7 +96,7 @@ public class WtAiRemote {
     }
   }
   
-  HttpURLConnection getConnection(byte[] postData, URL url) throws RuntimeException {
+  HttpURLConnection getConnection(byte[] postData, URL url, String apiKey) throws RuntimeException {
     try {
       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
       conn.setDoOutput(true);
@@ -179,7 +185,7 @@ public class WtAiRemote {
     if (debugMode) {
       WtMessageHandler.printToLogFile("AiRemote: runInstruction: postData: " + urlParameters);
     }
-    HttpURLConnection conn = getConnection(postData, checkUrl);
+    HttpURLConnection conn = getConnection(postData, checkUrl, apiKey);
     try {
       if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
         try (InputStream inputStream = conn.getInputStream()) {
@@ -194,6 +200,75 @@ public class WtAiRemote {
             WtMessageHandler.printToLogFile("AiRemote: runInstruction: Time to generate Answer: " + runTime);
           }
           return out;
+        }
+      } else {
+        try (InputStream inputStream = conn.getErrorStream()) {
+          String error = readStream(inputStream, "utf-8");
+          WtMessageHandler.printToLogFile("Got error: " + error + " - HTTP response code " + conn.getResponseCode());
+          stopAiRemote();
+          return null;
+        }
+      }
+    } catch (ConnectException e) {
+      WtMessageHandler.printToLogFile("Could not connect to server at: " + url);
+      WtMessageHandler.printException(e);
+      stopAiRemote();
+    } catch (Exception e) {
+      WtMessageHandler.showError(e);
+      stopAiRemote();
+    } finally {
+      conn.disconnect();
+    }
+    return null;
+  }
+  
+  public String runImgInstruction(String instruction, String exclude, int step, int seed, int size) {
+    if (instruction == null || exclude == null) {
+      return null;
+    }
+    instruction = instruction.trim();
+    if (instruction.isEmpty()) {
+      return "";
+    }
+    exclude = exclude.trim();
+    if (!exclude.isEmpty()) {
+      instruction += "|" + exclude;
+    }
+    if (size != 128 && size != 256 && size != 512) {
+      size = 256;
+    }
+    long startTime = 0;
+    if (debugModeTm) {
+      startTime = System.currentTimeMillis();
+    }
+    if (debugMode) {
+      WtMessageHandler.printToLogFile("AiRemote: runInstruction: Ask AI started! URL: " + url);
+    }
+    String urlParameters = "{\"model\": \"" + imgModel + "\", " 
+        + "\"prompt\": \"" + instruction + "\", "
+        + (seed > 0 ? "\"seed\": " + seed + ", " : "")
+        + "\"size\": \"" + size + "x" + size + "\", "
+        + "\"step\": " + step + "}";
+    
+    byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+    
+    URL checkUrl;
+    try {
+      checkUrl = new URL(imgUrl);
+    } catch (MalformedURLException e) {
+      WtMessageHandler.showError(e);
+      stopAiRemote();
+      return null;
+    }
+    if (debugMode) {
+      WtMessageHandler.printToLogFile("AiRemote: runInstruction: postData: " + urlParameters);
+    }
+    HttpURLConnection conn = getConnection(postData, checkUrl, imgApiKey);
+    try {
+      if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+        try (InputStream inputStream = conn.getInputStream()) {
+          String out = readStream(inputStream, "utf-8");
+          return parseJasonImgOutput(out);
         }
       } else {
         try (InputStream inputStream = conn.getErrorStream()) {
@@ -315,6 +390,31 @@ public class WtAiRemote {
         return content;
       }
       return content;
+    } catch (Throwable t) {
+      WtMessageHandler.showError(t);
+      WtMessageHandler.showMessage(text);
+      return null;
+    }
+  }
+  
+  String parseJasonImgOutput(String text) {
+    try {
+      JSONObject jsonObject = new JSONObject(text);
+      JSONArray data;
+      try {
+        data = jsonObject.getJSONArray("data");
+      } catch (Throwable t) {
+        String error = jsonObject.getString("error");
+        WtMessageHandler.showMessage(error);
+        return null;
+      }
+      JSONObject choice = data.getJSONObject(0);
+      String url = choice.getString("url");
+      if (debugMode) {
+        WtMessageHandler.printToLogFile("AiRemote: parseJasonOutput: text: " + text);
+        WtMessageHandler.printToLogFile("AiRemote: parseJasonOutput: url: " + url);
+      }
+      return url;
     } catch (Throwable t) {
       WtMessageHandler.showError(t);
       WtMessageHandler.showMessage(text);

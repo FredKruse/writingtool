@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.writingtool.config;
+package org.writingtool.dialogs;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -27,6 +27,13 @@ import org.languagetool.languagemodel.LuceneLanguageModel;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleOption;
 import org.writingtool.aisupport.WtAiDetectionRule;
+import org.writingtool.config.WtCategoryNode;
+import org.writingtool.config.WtCheckBoxTreeCellRenderer;
+import org.writingtool.config.WtConfigTools;
+import org.writingtool.config.WtConfiguration;
+import org.writingtool.config.WtRuleNode;
+import org.writingtool.config.WtSavablePanel;
+import org.writingtool.config.WtTreeListener;
 import org.writingtool.tools.WtOfficeTools;
 
 import javax.swing.*;
@@ -2214,7 +2221,7 @@ public class WtConfigurationDialog implements ActionListener {
     return colorPanel;
   }
   
-  private JPanel getOfficeAiElements() {
+  private JPanel getOfficeAiTextElements() {
     JPanel aiOptionPanel = new JPanel();
     aiOptionPanel.setLayout(new GridBagLayout());
     GridBagConstraints cons = new GridBagConstraints();
@@ -2400,6 +2407,159 @@ public class WtConfigurationDialog implements ActionListener {
     aiOptionPanel.add(getColorPanel(WtOfficeTools.AI_STYLE_CATEGORY, WtOfficeTools.AI_GRAMMAR_OTHER_RULE_ID), cons);
 
     return aiOptionPanel;
+  }
+  
+  private JPanel getOfficeAiImgElements() {
+    JPanel aiOptionPanel = new JPanel();
+    aiOptionPanel.setLayout(new GridBagLayout());
+    GridBagConstraints cons = new GridBagConstraints();
+    cons.insets = new Insets(6, 6, 6, 6);
+    cons.gridx = 0;
+    cons.gridy = 0;
+    cons.anchor = GridBagConstraints.NORTHWEST;
+    cons.fill = GridBagConstraints.BOTH;
+    cons.weightx = 0.0f;
+    cons.weighty = 0.0f;
+    
+    JLabel otherUrlLabel = new JLabel(messages.getString("guiAiUrl") + ":");
+
+    JTextField aiUrlField = new JTextField(config.aiImgUrl() ==  null ? "" : config.aiImgUrl(), 25);
+    aiUrlField.setMinimumSize(new Dimension(100, 25));
+    aiUrlField.getDocument().addDocumentListener(new DocumentListener() {
+      @Override
+      public void insertUpdate(DocumentEvent e) {
+        changedUpdate(e);
+      }
+      @Override
+      public void removeUpdate(DocumentEvent e) {
+        changedUpdate(e);
+      }
+      @Override
+      public void changedUpdate(DocumentEvent e) {
+        String serverName = aiUrlField.getText();
+        serverName = serverName.trim();
+        if(serverName.isEmpty()) {
+          serverName = null;
+        }
+        if (config.isValidAiServerUrl(serverName)) {
+          aiUrlField.setForeground(Color.BLACK);
+          config.setAiImgUrl(serverName);;
+        } else {
+          aiUrlField.setForeground(Color.RED);
+        }
+      }
+    });
+
+    JLabel modelLabel = new JLabel(messages.getString("guiAiModel") + ":");
+
+    JTextField modelField = new JTextField(config.aiImgModel() ==  null ? "" : config.aiImgModel(), 25);
+    modelField.setMinimumSize(new Dimension(100, 25));
+    modelField.getDocument().addDocumentListener(new DocumentListener() {
+      @Override
+      public void insertUpdate(DocumentEvent e) {
+        changedUpdate(e);
+      }
+      @Override
+      public void removeUpdate(DocumentEvent e) {
+        changedUpdate(e);
+      }
+      @Override
+      public void changedUpdate(DocumentEvent e) {
+        String model = modelField.getText();
+        model = model.trim();
+        if(model.isEmpty()) {
+          model = null;
+        }
+        if (model != null) {
+          config.setAiImgModel(model);
+        }
+      }
+    });
+
+    JLabel apiKeyLabel = new JLabel(messages.getString("guiAiApiKey") + ":");
+
+    JTextField apiKeyField = new JTextField(config.aiImgApiKey() ==  null ? "" : config.aiImgApiKey(), 25);
+    apiKeyField.setMinimumSize(new Dimension(100, 25));
+    apiKeyField.getDocument().addDocumentListener(new DocumentListener() {
+      @Override
+      public void insertUpdate(DocumentEvent e) {
+        changedUpdate(e);
+      }
+      @Override
+      public void removeUpdate(DocumentEvent e) {
+        changedUpdate(e);
+      }
+      @Override
+      public void changedUpdate(DocumentEvent e) {
+        String apiKey = apiKeyField.getText();
+        apiKey = apiKey.trim();
+        if(apiKey.isEmpty()) {
+          apiKey = null;
+        }
+        if (apiKey != null) {
+          config.setAiImgApiKey(apiKey);
+        }
+      }
+    });
+    
+    JCheckBox useAiSupportBox = new JCheckBox(messages.getString("guiUseAiSupport"));
+    useAiSupportBox.setSelected(config.useAiImgSupport());
+    useAiSupportBox.addItemListener(e -> {
+      config.setUseAiSupport(useAiSupportBox.isSelected());
+      aiUrlField.setEnabled(useAiSupportBox.isSelected());
+      modelField.setEnabled(useAiSupportBox.isSelected());
+      apiKeyField.setEnabled(useAiSupportBox.isSelected());
+    });
+    
+    aiUrlField.setEnabled(config.useAiImgSupport());
+    modelField.setEnabled(config.useAiImgSupport());
+    apiKeyField.setEnabled(config.useAiImgSupport());
+
+    JLabel experimentalHint = new JLabel(messages.getString("guiAiExperimentalHint"));
+    experimentalHint.setForeground(Color.red);
+    cons.gridy++;
+    aiOptionPanel.add(experimentalHint, cons);
+    JLabel qualityHint = new JLabel(messages.getString("guiAiQualityHint"));
+    qualityHint.setForeground(Color.blue);
+    cons.gridy++;
+    aiOptionPanel.add(qualityHint, cons);
+    cons.insets = new Insets(16, SHIFT2, 0, 0);
+    cons.gridy++;
+    aiOptionPanel.add(useAiSupportBox, cons);
+    JPanel serverPanel = new JPanel();
+    serverPanel.setLayout(new GridBagLayout());
+    GridBagConstraints cons1 = new GridBagConstraints();
+    cons1.insets = new Insets(0, SHIFT2, 0, 0);
+    cons1.gridx = 0;
+    cons1.gridy = 0;
+    cons1.anchor = GridBagConstraints.WEST;
+    cons1.fill = GridBagConstraints.NONE;
+    cons1.weightx = 0.0f;
+    serverPanel.add(otherUrlLabel, cons1);
+    cons1.gridy++;
+    serverPanel.add(aiUrlField, cons1);
+    cons1.gridy++;
+    serverPanel.add(modelLabel, cons1);
+    cons1.gridy++;
+    serverPanel.add(modelField, cons1);
+    cons1.gridy++;
+    serverPanel.add(apiKeyLabel, cons1);
+    cons1.gridy++;
+    serverPanel.add(apiKeyField, cons1);
+
+    cons.insets = new Insets(0, SHIFT2, 0, 0);
+    cons.gridx = 0;
+    cons.gridy++;
+    aiOptionPanel.add(serverPanel, cons);
+    
+    return aiOptionPanel;
+  }
+  
+  private JTabbedPane getOfficeAiElements() {
+    JTabbedPane tabbedpane = new JTabbedPane();
+    tabbedpane.add(messages.getString("guiAiText"), getOfficeAiTextElements());
+    tabbedpane.add(messages.getString("guiAiImages"), getOfficeAiImgElements());
+    return tabbedpane;
   }
   
 }

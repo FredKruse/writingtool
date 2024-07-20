@@ -38,9 +38,9 @@ import javax.swing.tree.TreePath;
  * @author Panagiotis Minos
  * @since 2.6
  */
-class WtTreeListener implements KeyListener, MouseListener, TreeWillExpandListener {
+public class WtTreeListener implements KeyListener, MouseListener, TreeWillExpandListener {
 
-  static void install(JTree tree) {
+  public static void install(JTree tree) {
     WtTreeListener listener = new WtTreeListener(tree);
     tree.addMouseListener(listener);
     tree.addKeyListener(listener);

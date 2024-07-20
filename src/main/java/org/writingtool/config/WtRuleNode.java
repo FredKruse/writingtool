@@ -25,22 +25,22 @@ import org.languagetool.rules.Rule;
  * @author Panagiotis Minos
  * @since 2.6
  */
-class WtRuleNode extends DefaultMutableTreeNode {
+public class WtRuleNode extends DefaultMutableTreeNode {
 
   private final Rule rule;
   private boolean enabled;
 
-  WtRuleNode(Rule rule, boolean enabled) {
+  public WtRuleNode(Rule rule, boolean enabled) {
     super(rule);
     this.rule = rule;
     this.enabled = enabled;
   }
 
-  Rule getRule() {
+  public Rule getRule() {
     return rule;
   }
 
-  boolean isEnabled() {
+  public boolean isEnabled() {
     return enabled;
   }
 

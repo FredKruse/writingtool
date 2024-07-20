@@ -110,13 +110,17 @@ public class WtDocumentCursorTools {
     curDoc = null;
     isDisposed = true;
   }
+  
+  public XTextDocument getTextDocument() {
+    return curDoc;
+  }
 
   /** 
    * Returns the text cursor (if any)
    * Returns null if it fails
    */
   @Nullable
-  private XTextCursor getCursor(XComponent xComponent) {
+  public XTextCursor getCursor(XComponent xComponent) {
     isBusy++;
     try {
       if (curDoc == null) {

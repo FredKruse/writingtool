@@ -26,26 +26,26 @@ import org.languagetool.rules.Category;
  * @author Panagiotis Minos
  * @since 2.6
  */
-class WtCategoryNode extends DefaultMutableTreeNode {
+public class WtCategoryNode extends DefaultMutableTreeNode {
 
   private final Category category;
   private boolean enabled;
 
-  WtCategoryNode(Category category, boolean enabled) {
+  public WtCategoryNode(Category category, boolean enabled) {
     super(category);
     this.category = category;
     this.enabled = enabled;
   }
 
-  Category getCategory() {
+  public Category getCategory() {
     return category;
   }
 
-  boolean isEnabled() {
+  public boolean isEnabled() {
     return enabled;
   }
 
-  void setEnabled(boolean enabled) {
+  public void setEnabled(boolean enabled) {
     this.enabled = enabled;
   }
 

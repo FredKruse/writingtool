@@ -16,12 +16,13 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.writingtool.aisupport;
+package org.writingtool.dialogs;
 
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
@@ -33,25 +34,36 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.awt.event.WindowListener;
+import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.ToolTipManager;
 import javax.swing.event.ChangeEvent;
@@ -62,14 +74,20 @@ import org.writingtool.WtDocumentsHandler;
 import org.writingtool.WtSingleDocument;
 import org.writingtool.WtDocumentCache.TextParagraph;
 import org.writingtool.WtDocumentsHandler.WaitDialogThread;
+import org.writingtool.aisupport.WtAiParagraphChanging;
+import org.writingtool.aisupport.WtAiRemote;
 import org.writingtool.config.WtConfiguration;
+import org.writingtool.tools.WtDocumentCursorTools;
 import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeGraphicTools;
 import org.writingtool.tools.WtOfficeTools;
 import org.writingtool.tools.WtViewCursorTools;
 import org.writingtool.tools.WtOfficeTools.DocumentType;
 
 import com.sun.star.lang.Locale;
 import com.sun.star.lang.XComponent;
+import com.sun.star.text.XTextCursor;
+import com.sun.star.text.XTextDocument;
 
 /**
  * Dialog to change paragraphs by AI
@@ -78,12 +96,16 @@ import com.sun.star.lang.XComponent;
  */
 public class WtAiDialog extends Thread implements ActionListener {
   
-  private final static float TEMPERATURE = 0.7f;
+  private final static float DEFAULT_TEMPERATURE = 0.7f;
+  private final static int DEFAULT_STEP = 30;
+  private final static String TEMP_IMAGE_FILE_NAME = "tmpImage";
   private final static String AI_INSTRUCTION_FILE_NAME = "LT_AI_Instructions.dat";
   private final static int MAX_INSTRUCTIONS = 40;
   private final static int SHIFT1 = 14;
   private final static int dialogWidth = 640;
   private final static int dialogHeight = 600;
+  private final static int imageWidth = 512;
+//  private final static int imageHeight = 256;
 
   private boolean debugMode = true;
   private boolean debugModeTm = true;
@@ -91,6 +113,11 @@ public class WtAiDialog extends Thread implements ActionListener {
   private final ResourceBundle messages;
   private final JDialog dialog;
   private final Container contentPane;
+  private final JButton help; 
+  private final JButton close;
+  private JProgressBar checkProgress;
+  private final Image ltImage;
+  
   private final JLabel instructionLabel;
   private final JComboBox<String> instruction;
   private final JLabel paragraphLabel;
@@ -105,11 +132,22 @@ public class WtAiDialog extends Thread implements ActionListener {
   private final JButton clear; 
   private final JButton undo;
   private final JButton overrideParagraph; 
-  private final JButton addToParagraph; 
-  private final JButton help; 
-  private final JButton close;
-  private JProgressBar checkProgress;
-  private final Image ltImage;
+  private final JButton addToParagraph;
+  
+  private final JTextField imgInstruction;
+  private final JLabel excludeLabel;
+  private final JTextField exclude;
+  private final JLabel imageLabel;
+//  private final JFrame imageFrame;
+  private final JLabel imageFrame;
+  private final JLabel stepLabel;
+  private final JSlider stepSlider;
+  
+  private final JButton changeImage;
+  private final JButton newImage;
+  private final JButton removeImage;
+  private final JButton saveImage;
+  private final JButton insertImage;
   
   private WtSingleDocument currentDocument;
   private WtDocumentsHandler documents;
@@ -125,7 +163,11 @@ public class WtAiDialog extends Thread implements ActionListener {
   private Locale locale;
   private boolean atWork;
   private boolean focusLost;
-  private float temperature = TEMPERATURE;
+  private float temperature = DEFAULT_TEMPERATURE;
+  private int seed = randomInteger();
+  private int step = DEFAULT_STEP;
+  private BufferedImage image;
+  private String urlString;
 
   /**
    * the constructor of the class creates all elements of the dialog
@@ -163,15 +205,31 @@ public class WtAiDialog extends Thread implements ActionListener {
     help = new JButton (messages.getString("loAiDialogHelpButton")); 
     close = new JButton (messages.getString("loAiDialogCloseButton")); 
     
+    imgInstruction = new JTextField();
+    excludeLabel = new JLabel(messages.getString("loAiDialogImgExcludeLabel") + ":");
+    exclude = new JTextField();
+    imageLabel = new JLabel(messages.getString("loAiDialogImgImageLabel") + ":");
+    imageFrame = new JLabel();
+    imageFrame.setSize(imageWidth, imageWidth);
+//    imageFrame = new JFrame();
+//    imageFrame.setSize(imageWidth, imageHeight);
+//    imageFrame.add(image);
+    
+    changeImage = new JButton (messages.getString("loAiDialogImgChangeImageButton"));
+    newImage = new JButton (messages.getString("loAiDialogImgNewImageButton"));
+    removeImage = new JButton (messages.getString("loAiDialogImgRemoveButton"));
+    saveImage = new JButton (messages.getString("loAiDialogImgSaveButton"));
+    insertImage = new JButton (messages.getString("loAiDialogImgInsertButton"));
+    
     checkProgress = new JProgressBar(0, 100);
 
     temperatureLabel = new JLabel(messages.getString("loAiDialogCreativityLabel") + ":");
     
-    temperatureSlider = new JSlider(0, 100, (int)(TEMPERATURE*100));
-    temperatureSlider.setMajorTickSpacing(10);
-    temperatureSlider.setMinorTickSpacing(5);
-    temperatureSlider.setPaintTicks(true);
-    temperatureSlider.setSnapToTicks(true);
+    temperatureSlider = new JSlider(0, 100, (int)(DEFAULT_TEMPERATURE*100));
+
+    stepLabel = new JLabel(messages.getString("loAiDialogImgStepLabel") + ":");
+    
+    stepSlider = new JSlider(0, 100, DEFAULT_STEP);
     
     checkProgress.setStringPainted(true);
     checkProgress.setIndeterminate(false);
@@ -199,21 +257,9 @@ public class WtAiDialog extends Thread implements ActionListener {
       for (String instr : instructionList) {
         instruction.addItem(instr);
       }
-/*
-      instruction.addItemListener(e -> {
-        if (e.getStateChange() == ItemEvent.SELECTED) {
-          String selectedLang = (String) language.getSelectedItem();
-          if (!lastLang.equals(selectedLang)) {
-            changeLanguage.setEnabled(true);
-          }
-        }
-      });
-*/
       if (debugModeTm) {
         long runTime = System.currentTimeMillis() - startTime;
-//        if (runTime > OfficeTools.TIME_TOLERANCE) {
           WtMessageHandler.printToLogFile("CheckDialog: Time to initialise Languages: " + runTime);
-//        }
           startTime = System.currentTimeMillis();
       }
       if (inf.canceled()) {
@@ -240,48 +286,24 @@ public class WtAiDialog extends Thread implements ActionListener {
           temperature = (float) (value / 100.);
         }
       });
-/*
-      Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
-      for (int i = 0; i <= 10; i++) {
-        labelTable.put(i * 10, new JLabel(String.format("%.1f", i/10.)));
-      }
-      temperatureSlider.setLabelTable(labelTable);
-      temperatureSlider.setPaintLabels(true);
-*/
-/*      
-      result.getDocument().addDocumentListener(new DocumentListener() {
+
+      stepLabel.setFont(dialogFont);
+      stepSlider.setMajorTickSpacing(10);
+      stepSlider.setMinorTickSpacing(5);
+      stepSlider.setPaintTicks(true);
+      stepSlider.addChangeListener(new ChangeListener( ) {
         @Override
-        public void changedUpdate(DocumentEvent e) {
-          if (!blockSentenceError) {
-            if (!change.isEnabled()) {
-              change.setEnabled(true);
-            }
-            if (changeAll.isEnabled()) {
-              changeAll.setEnabled(false);
-            }
-            if (autoCorrect.isEnabled()) {
-              autoCorrect.setEnabled(false);
-            }
-          }
-        }
-        @Override
-        public void insertUpdate(DocumentEvent e) {
-          changedUpdate(e);
-        }
-        @Override
-        public void removeUpdate(DocumentEvent e) {
-          changedUpdate(e);
+        public void stateChanged(ChangeEvent e) {
+          step = stepSlider.getValue();
         }
       });
-*/
+
       JScrollPane resultPane = new JScrollPane(result);
       resultPane.setMinimumSize(new Dimension(0, 30));
       
       if (debugModeTm) {
         long runTime = System.currentTimeMillis() - startTime;
-//        if (runTime > OfficeTools.TIME_TOLERANCE) {
           WtMessageHandler.printToLogFile("CheckDialog: Time to initialise suggestions, etc.: " + runTime);
-//        }
           startTime = System.currentTimeMillis();
       }
       if (inf.canceled()) {
@@ -324,7 +346,27 @@ public class WtAiDialog extends Thread implements ActionListener {
       close.addActionListener(this);
       close.setActionCommand("close");
 
-      dialog.addWindowFocusListener(new WindowFocusListener() {
+      changeImage.setFont(dialogFont);
+      changeImage.addActionListener(this);
+      changeImage.setActionCommand("changeImage");
+      
+      newImage.setFont(dialogFont);
+      newImage.addActionListener(this);
+      newImage.setActionCommand("newImage");
+      
+      removeImage.setFont(dialogFont);
+      removeImage.addActionListener(this);
+      removeImage.setActionCommand("removeImage");
+      
+      saveImage.setFont(dialogFont);
+      saveImage.addActionListener(this);
+      saveImage.setActionCommand("saveImage");
+      
+      insertImage.setFont(dialogFont);
+      insertImage.addActionListener(this);
+      insertImage.setActionCommand("insertImage");
+      
+     dialog.addWindowFocusListener(new WindowFocusListener() {
         @Override
         public void windowGainedFocus(WindowEvent e) {
           if (focusLost) {
@@ -393,27 +435,16 @@ public class WtAiDialog extends Thread implements ActionListener {
         }
       });
       
-/*
-      //  set selection background color to get compatible layout to LO
-      Color selectionColor = UIManager.getLookAndFeelDefaults().getColor("ProgressBar.selectionBackground");
-      suggestions.setSelectionBackground(selectionColor);
-      setJComboSelectionBackground(language, selectionColor);
-      setJComboSelectionBackground(changeLanguage, selectionColor);
-      setJComboSelectionBackground(addToDictionary, selectionColor);
-      setJComboSelectionBackground(activateRule, selectionColor);
-*/
       if (debugModeTm) {
         long runTime = System.currentTimeMillis() - startTime;
-//        if (runTime > OfficeTools.TIME_TOLERANCE) {
           WtMessageHandler.printToLogFile("CheckDialog: Time to initialise Buttons: " + runTime);
-//        }
           startTime = System.currentTimeMillis();
       }
       if (inf.canceled()) {
         return;
       }
       
-      //  Define panels
+      //  Define Text panels
 
       //  Define 1. right panel
       JPanel rightPanel1 = new JPanel();
@@ -453,8 +484,8 @@ public class WtAiDialog extends Thread implements ActionListener {
       rightPanel2.add(overrideParagraph, cons22);
       
       //  Define main panel
-      JPanel mainPanel = new JPanel();
-      mainPanel.setLayout(new GridBagLayout());
+      JPanel mainTextPanel = new JPanel();
+      mainTextPanel.setLayout(new GridBagLayout());
       GridBagConstraints cons1 = new GridBagConstraints();
       cons1.insets = new Insets(SHIFT1, 4, 4, 4);
       cons1.gridx = 0;
@@ -463,47 +494,149 @@ public class WtAiDialog extends Thread implements ActionListener {
       cons1.fill = GridBagConstraints.BOTH;
       cons1.weightx = 1.0f;
       cons1.weighty = 0.0f;
-      mainPanel.add(instructionLabel, cons1);
+      mainTextPanel.add(instructionLabel, cons1);
       cons1.insets = new Insets(4, 4, 4, 4);
       cons1.gridy++;
-      mainPanel.add(instruction, cons1);
+      mainTextPanel.add(instruction, cons1);
       cons1.weightx = 0.0f;
       cons1.gridx++;
-      mainPanel.add(execute, cons1);
+      mainTextPanel.add(execute, cons1);
       cons1.insets = new Insets(SHIFT1, 4, 4, 4);
       cons1.gridx = 0;
       cons1.gridy++;
       cons1.weightx = 1.0f;
       cons1.weighty = 0.0f;
-      mainPanel.add(paragraphLabel, cons1);
+      mainTextPanel.add(paragraphLabel, cons1);
       cons1.insets = new Insets(4, 4, 4, 4);
       cons1.gridy++;
       cons1.weighty = 2.0f;
-      mainPanel.add(paragraphPane, cons1);
+      mainTextPanel.add(paragraphPane, cons1);
       cons1.gridx++;
       cons1.weightx = 0.0f;
       cons1.weighty = 0.0f;
-      mainPanel.add(rightPanel1, cons1);
+      mainTextPanel.add(rightPanel1, cons1);
       cons1.insets = new Insets(SHIFT1, 4, 4, 4);
       cons1.gridx = 0;
       cons1.gridy++;
       cons1.weightx = 1.0f;
-      mainPanel.add(resultLabel, cons1);
+      mainTextPanel.add(resultLabel, cons1);
       cons1.insets = new Insets(4, 4, 4, 4);
       cons1.gridy++;
       cons1.weighty = 2.0f;
-      mainPanel.add(resultPane, cons1);
+      mainTextPanel.add(resultPane, cons1);
       cons1.gridx++;
       cons1.weightx = 0.0f;
       cons1.weighty = 0.0f;
-      mainPanel.add(rightPanel2, cons1);
+      mainTextPanel.add(rightPanel2, cons1);
       cons1.insets = new Insets(SHIFT1, 4, 4, 4);
       cons1.gridx = 0;
       cons1.gridy++;
-      mainPanel.add(temperatureLabel, cons1);
+      mainTextPanel.add(temperatureLabel, cons1);
       cons1.insets = new Insets(4, 4, 4, 4);
       cons1.gridy++;
-      mainPanel.add(temperatureSlider, cons1);
+      mainTextPanel.add(temperatureSlider, cons1);
+      
+      //  Define Image panels
+
+      //  Define 1. left panel
+      JPanel leftPanel1 = new JPanel();
+      leftPanel1.setLayout(new GridBagLayout());
+      GridBagConstraints cons11 = new GridBagConstraints();
+      cons11.gridx = 0;
+      cons11.gridy = 0;
+      cons11.anchor = GridBagConstraints.NORTHWEST;
+      cons11.fill = GridBagConstraints.BOTH;
+      cons11.weightx = 1.0f;
+      cons11.weighty = 0.0f;
+      cons11.insets = new Insets(SHIFT1, 0, 4, 0);
+      cons11.gridy++;
+      leftPanel1.add(instructionLabel, cons11);
+      cons11.insets = new Insets(4, 0, 4, 0);
+      cons11.gridy++;
+      leftPanel1.add(imgInstruction, cons11);
+      cons11.insets = new Insets(SHIFT1, 0, 4, 0);
+      cons11.gridy++;
+      leftPanel1.add(excludeLabel, cons11);
+      cons11.insets = new Insets(4, 0, 4, 0);
+      cons11.gridy++;
+      leftPanel1.add(exclude, cons11);
+
+      //  Define 1. right panel
+      rightPanel1 = new JPanel();
+      rightPanel1.setLayout(new GridBagLayout());
+      cons21 = new GridBagConstraints();
+      cons21.insets = new Insets(2, 0, 2, 0);
+      cons21.gridx = 0;
+      cons21.gridy = 0;
+      cons21.anchor = GridBagConstraints.NORTHWEST;
+      cons21.fill = GridBagConstraints.BOTH;
+      cons21.weightx = 1.0f;
+      cons21.weighty = 0.0f;
+      cons21.gridy++;
+      rightPanel1.add(changeImage, cons21);
+      cons21.gridy++;
+      rightPanel1.add(newImage, cons21);
+
+      //  Define 2. right panel
+      rightPanel2 = new JPanel();
+      rightPanel2.setLayout(new GridBagLayout());
+      cons22 = new GridBagConstraints();
+      cons22.insets = new Insets(2, 0, 2, 0);
+      cons22.gridx = 0;
+      cons22.gridy = 0;
+      cons22.anchor = GridBagConstraints.NORTHWEST;
+      cons22.fill = GridBagConstraints.BOTH;
+      cons22.weightx = 1.0f;
+      cons22.weighty = 0.0f;
+      cons22.gridy++;
+      cons22.gridy++;
+      rightPanel2.add(removeImage, cons22);
+      cons22.gridy++;
+      rightPanel2.add(saveImage, cons22);
+      cons22.gridy++;
+      rightPanel2.add(insertImage, cons22);
+      
+      //  Define main panel
+      JPanel mainImagePanel = new JPanel();
+      mainImagePanel.setLayout(new GridBagLayout());
+      cons1 = new GridBagConstraints();
+      cons1.insets = new Insets(4, 4, 4, 4);
+      cons1.gridx = 0;
+      cons1.gridy = 0;
+      cons1.anchor = GridBagConstraints.NORTHWEST;
+      cons1.fill = GridBagConstraints.BOTH;
+      cons1.weightx = 1.0f;
+      cons1.weighty = 0.0f;
+      mainImagePanel.add(leftPanel1, cons1);
+      cons1.gridx++;
+      cons1.weightx = 0.0f;
+      cons1.weighty = 0.0f;
+      mainImagePanel.add(rightPanel1, cons1);
+      cons1.insets = new Insets(SHIFT1, 4, 4, 4);
+      cons1.gridx = 0;
+      cons1.gridy++;
+      cons1.weightx = 1.0f;
+      mainImagePanel.add(imageLabel, cons1);
+      cons1.insets = new Insets(4, 4, 4, 4);
+      cons1.gridy++;
+      cons1.weighty = 2.0f;
+      mainImagePanel.add(new JScrollPane(imageFrame), cons1);
+      cons1.gridx++;
+      cons1.weightx = 0.0f;
+      cons1.weighty = 0.0f;
+      mainImagePanel.add(rightPanel2, cons1);
+      cons1.insets = new Insets(SHIFT1, 4, 4, 4);
+      cons1.gridx = 0;
+      cons1.gridy++;
+      mainImagePanel.add(stepLabel, cons1);
+      cons1.insets = new Insets(4, 4, 4, 4);
+      cons1.gridy++;
+      mainImagePanel.add(stepSlider, cons1);
+      
+      //  Define tabbed main pane
+      JTabbedPane mainPanel = new JTabbedPane();
+      mainPanel.add(messages.getString("guiAiText"), mainTextPanel);
+      mainPanel.add(messages.getString("guiAiImages"), mainImagePanel);
       
 
       //  Define general button panel
@@ -680,6 +813,16 @@ public class WtAiDialog extends Thread implements ActionListener {
     addToParagraph.setEnabled(resultText == null ? false : !work);
     help.setEnabled(!work);
     close.setEnabled(true);
+
+    imgInstruction.setEnabled(!work);
+    exclude.setEnabled(!work);
+    imageFrame.setEnabled(!work);
+    changeImage.setEnabled(!work);
+    newImage.setEnabled(!work);
+    removeImage.setEnabled(!work);
+    saveImage.setEnabled(!work);
+    insertImage.setEnabled(!work);
+    
     contentPane.revalidate();
     contentPane.repaint();
     dialog.setEnabled(!work);
@@ -714,13 +857,48 @@ public class WtAiDialog extends Thread implements ActionListener {
       if (debugMode) {
         WtMessageHandler.printToLogFile("AiParagraphChanging: runInstruction: instruction: " + instructionText + ", text: " + text);
       }
-      String output = aiRemote.runInstruction(instructionText, text, TEMPERATURE, 0, locale, false);
+      String output = aiRemote.runInstruction(instructionText, text, temperature, 0, locale, false);
       if (debugMode) {
         WtMessageHandler.printToLogFile("AiParagraphChanging: runAiChangeOnParagraph: output: " + output);
       }
       result.setEnabled(true);
       result.setText(output);
       resultText = output;
+    } catch (Throwable t) {
+      WtMessageHandler.showError(t);
+      closeDialog();
+    }
+    setAtWorkButtonState(false);
+  }
+
+  /**
+   * execute AI request
+   */
+  private void createImage() {
+    try {
+      if (!documents.isEnoughHeapSpace()) {
+        closeDialog();
+        return;
+      }
+      if (debugMode) {
+        WtMessageHandler.printToLogFile("AiDialog: execute image: start AI request");
+      }
+      String instructionText = imgInstruction.getText();
+      String excludeText = exclude.getText();
+      if (excludeText == null) {
+        excludeText = "";
+      }
+      setAtWorkButtonState(true);
+      WtAiRemote aiRemote = new WtAiRemote(documents, config);
+      if (debugMode) {
+        WtMessageHandler.printToLogFile("AiParagraphChanging: runInstruction: instruction: " + instructionText + ", exclude: " + excludeText);
+      }
+      urlString = aiRemote.runImgInstruction(instructionText, excludeText, step, seed, imageWidth);
+      if (debugMode) {
+        WtMessageHandler.printToLogFile("AiParagraphChanging: runAiChangeOnParagraph: url: " + urlString);
+      }
+      image = getImageFromUrl(urlString);
+      imageFrame.setIcon(new ImageIcon(image));
     } catch (Throwable t) {
       WtMessageHandler.showError(t);
       closeDialog();
@@ -756,6 +934,17 @@ public class WtAiDialog extends Thread implements ActionListener {
           writeToParagraph(true);
         } else if (action.getActionCommand().equals("addToParagraph")) {
           writeToParagraph(false);
+        } else if (action.getActionCommand().equals("changeImage")) {
+          createImage();
+        } else if (action.getActionCommand().equals("newImage")) {
+          seed = randomInteger();
+          createImage();
+        } else if (action.getActionCommand().equals("removeImage")) {
+          removeImage();
+        } else if (action.getActionCommand().equals("saveImage")) {
+          saveImage();
+//        } else if (action.getActionCommand().equals("insertImage")) {
+//          insertImage();
         } else {
           WtMessageHandler.showMessage("Action '" + action.getActionCommand() + "' not supported");
         }
@@ -863,5 +1052,88 @@ public class WtAiDialog extends Thread implements ActionListener {
     atWork = false;
   }
   
+  private BufferedImage getImageFromUrl(String urlString) {
+    try {
+      URL url = new URL(urlString);
+      return ImageIO.read(url);
+    } catch (Throwable e) {
+      WtMessageHandler.showError(e);
+      return null;
+    }
+    
+  }
+  
+  private static int randomInteger() {
+    return (int) (Math.random() * Integer.MAX_VALUE);
+  }
+  
+  private void saveImage() {
+    JFileChooser fileChooser = new JFileChooser();
+    fileChooser.setDialogTitle(messages.getString("loAiDialogImgSaveTitle"));   
+     
+    int userSelection = fileChooser.showSaveDialog(dialog);
+     
+    if (userSelection == JFileChooser.APPROVE_OPTION) {
+      File fileToSave = fileChooser.getSelectedFile();
+      saveImage(fileToSave);
+    }
+  }
+  
+  private void saveImage(File file) {
+    try {
+      String name = file.getName();
+      String extension = name.substring(name.lastIndexOf('.') + 1);
+      if (!extension.equals("png") && !extension.equals("jpg") && !extension.equals("gif")) {
+        WtMessageHandler.showMessage(messages.getString("loAiDialogImgSaveErrorMsg"));
+        return;
+      }
+      ImageIO.write(image, extension, file);
+    } catch (IOException e) {
+      WtMessageHandler.showError(e);
+    }
+  }
+  
+  private void insertImage() {
+    if (urlString == null) {
+      return;
+    }
+    String extension = urlString.substring(urlString.lastIndexOf('.') + 1);
+    if (!extension.equals("png") && !extension.equals("jpg") && !extension.equals("gif")) {
+      return;
+    }
+    File dir = WtOfficeTools.getCacheDir();
+    File tmpFile = new File(dir, TEMP_IMAGE_FILE_NAME + "." + extension);
+    saveImage(tmpFile);
+    WtDocumentCursorTools docCursor = currentDocument.getDocumentCursorTools();
+    XTextDocument doc = docCursor.getTextDocument();
+    XTextCursor cursor = docCursor.getTextCursor();
+    WtOfficeGraphicTools.addImageShape(doc, cursor, tmpFile.getAbsolutePath(), 128, 128, 
+        currentDocument.getXComponent(), documents.getContext());
+  }
+  
+  
+  private void removeImage() {
+    image = null;
+    imageFrame.setIcon(null);
+  }
 
+  
+/*  
+  public class ImageComponent extends JFrame {
+    private final BufferedImage img;
+
+    public ImageComponent(URL url) throws IOException {
+      img = ImageIO.read(url);
+      setPreferredSize(new Dimension(img.getWidth(), img.getHeight()));
+
+    }
+
+    @Override
+    public void paint(Graphics g) {
+      super.paint(g);
+      g.drawImage(img, 0, 0, img.getWidth(), img.getHeight(), this);
+    }
+
+  }
+*/
 }

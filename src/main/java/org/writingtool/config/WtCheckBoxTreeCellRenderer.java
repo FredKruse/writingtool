@@ -31,14 +31,14 @@ import javax.swing.tree.TreeCellRenderer;
  * @author Panagiotis Minos
  * @since 2.6
  */
-class WtCheckBoxTreeCellRenderer extends JPanel implements TreeCellRenderer {
+public class WtCheckBoxTreeCellRenderer extends JPanel implements TreeCellRenderer {
 
   private final DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
   private final JCheckBox checkBox = new JCheckBox();
   
   private Component defaultComponent;
 
-  WtCheckBoxTreeCellRenderer() {
+  public WtCheckBoxTreeCellRenderer() {
     setLayout(new BorderLayout());
     setOpaque(false);
     checkBox.setOpaque(false);

@@ -18,6 +18,8 @@
  */
 package org.writingtool.config;
 
+import org.writingtool.dialogs.WtConfigurationDialog;
+
 /**
  * Interface for JPanel that can persist its state.
  * <P>
@@ -26,7 +28,7 @@ package org.writingtool.config;
  * @author Panagiotis Minos
  * @since 3.4
  */
-interface WtSavablePanel {
+public interface WtSavablePanel {
 
     /**
      * Called when {@link WtConfigurationDialog} is about to be shown.

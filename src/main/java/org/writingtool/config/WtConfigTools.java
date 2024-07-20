@@ -54,7 +54,7 @@ public final class WtConfigTools {
    * Show a file chooser dialog and return the file selected by the user or
    * <code>null</code>.
    */
-  static File openFileDialog(Frame frame, FileFilter fileFilter) {
+  public static File openFileDialog(Frame frame, FileFilter fileFilter) {
     return openFileDialog(frame, fileFilter, null);
   }
 
@@ -66,7 +66,7 @@ public final class WtConfigTools {
    * @return the selected file
    * @since 2.6
    */
-  static File openFileDialog(Frame frame, FileFilter fileFilter, File initialDir) {
+  public static File openFileDialog(Frame frame, FileFilter fileFilter, File initialDir) {
     return openFileDialog(frame, fileFilter, initialDir, JFileChooser.FILES_ONLY);
   }
 
@@ -77,7 +77,7 @@ public final class WtConfigTools {
    * @return the selected file
    * @since 3.0
    */
-  static File openDirectoryDialog(Frame frame, File initialDir) {
+  public static File openDirectoryDialog(Frame frame, File initialDir) {
     return openFileDialog(frame, null, initialDir, JFileChooser.DIRECTORIES_ONLY);
   }
 
@@ -93,7 +93,7 @@ public final class WtConfigTools {
   /**
    * Show the exception (with stacktrace) in a dialog and print it to STDERR.
    */
-  static void showError(Exception e) {
+  public static void showError(Exception e) {
     String stackTrace = org.languagetool.tools.Tools.getFullStackTrace(e);
     String msg = "<html><p style='width: 600px;'>" + StringTools.escapeHTML(stackTrace);
     JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
@@ -104,7 +104,7 @@ public final class WtConfigTools {
    * Show the exception (message without stacktrace) in a dialog and print the
    * stacktrace to STDERR.
    */
-  static void showErrorMessage(Exception e, Component parent) {
+  public static void showErrorMessage(Exception e, Component parent) {
     String msg = e.getMessage();
     JOptionPane.showMessageDialog(parent, msg, "Error", JOptionPane.ERROR_MESSAGE);
     e.printStackTrace();
@@ -114,7 +114,7 @@ public final class WtConfigTools {
    * Show the exception (message without stacktrace) in a dialog and print the
    * stacktrace to STDERR.
    */
-  static void showErrorMessage(Exception e) {
+  public static void showErrorMessage(Exception e) {
     showErrorMessage(e, null);
   }
 
@@ -249,7 +249,7 @@ public final class WtConfigTools {
    * @param url the URL to be displayed
    * @since 4.1
    */
-  static void openURL(URL url) {
+  public static void openURL(URL url) {
     if (Desktop.isDesktopSupported() 
         && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
       try {
@@ -268,7 +268,7 @@ public final class WtConfigTools {
     }
   }
 
-  static void showRuleInfoDialog(Component parent, String title, String message, Rule rule, URL matchUrl, ResourceBundle messages, String lang) {
+  public static void showRuleInfoDialog(Component parent, String title, String message, Rule rule, URL matchUrl, ResourceBundle messages, String lang) {
     int dialogWidth = 320;
     JTextPane textPane = new JTextPane();
     textPane.setEditable(false);

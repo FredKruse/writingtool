@@ -29,6 +29,7 @@ import org.writingtool.WtDocumentCache.TextParagraph;
 import org.writingtool.WtDocumentsHandler.WaitDialogThread;
 import org.writingtool.aisupport.WtAiRemote.AiCommand;
 import org.writingtool.config.WtConfiguration;
+import org.writingtool.dialogs.WtAiDialog;
 import org.writingtool.tools.WtMessageHandler;
 import org.writingtool.tools.WtOfficeTools;
 import org.writingtool.tools.WtViewCursorTools;

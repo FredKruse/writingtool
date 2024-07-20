@@ -82,12 +82,16 @@ public class WtConfiguration {
   static final boolean DEFAULT_FILTER_OVERLAPPING_MATCHES = true;
   static final boolean DEFAULT_SAVE_LO_CACHE = true;
   static final boolean DEFAULT_USE_AI_SUPPORT = false;
+  static final boolean DEFAULT_USE_AI_IMG_SUPPORT = false;
   static final boolean DEFAULT_AI_AUTO_CORRECT = false;
   static final boolean DEFAULT_AI_SHOW_STYLISTIC_CHANGES = false;
   
   static final String DEFAULT_AI_MODEL = "gpt-4";
   static final String DEFAULT_AI_URL = "http://localhost:8080/v1/chat/completions/";
   static final String DEFAULT_AI_APIKEY = "1234567";
+  static final String DEFAULT_AI_IMG_MODEL = "stablediffusion";
+  static final String DEFAULT_AI_IMG_URL = "http://localhost:8080/v1/images/generations/";
+  static final String DEFAULT_AI_IMG_APIKEY = "1234567";
 
   static final Color STYLE_COLOR = new Color(0, 100, 0);
 
@@ -151,6 +155,10 @@ public class WtConfiguration {
   private static final String AI_USE_AI_SUPPORT_KEY = "useAiSupport";
   private static final String AI_AUTO_CORRECT_KEY = "aiAutoCorrect";
   private static final String AI_SHOW_STYLISTIC_CHANGES_KEY = "aiShowStylisticChanges";
+  private static final String AI_IMG_URL_KEY = "aiImgUrl";
+  private static final String AI_IMG_APIKEY_KEY = "aiImgApiKey";
+  private static final String AI_IMG_MODEL_KEY = "aiImgModel";
+  private static final String AI_USE_AI_IMG_SUPPORT_KEY = "useAiImgSupport";
 
   private static final String DELIMITER = ",";
   // find all comma followed by zero or more white space characters that are preceded by ":" AND a valid 6-digit hex code
@@ -238,6 +246,10 @@ public class WtConfiguration {
   private boolean useAiSupport = DEFAULT_USE_AI_SUPPORT;
   private boolean aiAutoCorrect = DEFAULT_AI_AUTO_CORRECT;
   private boolean aiShowStylisticChanges = DEFAULT_AI_SHOW_STYLISTIC_CHANGES;
+  private String aiImgUrl = DEFAULT_AI_IMG_URL;
+  private String aiImgApiKey = DEFAULT_AI_IMG_APIKEY;
+  private String aiImgModel = DEFAULT_AI_IMG_MODEL;
+  private boolean useAiImgSupport = DEFAULT_USE_AI_IMG_SUPPORT;
   
   /**
    * Uses the configuration file from the default location.
@@ -327,6 +339,10 @@ public class WtConfiguration {
     useAiSupport = DEFAULT_USE_AI_SUPPORT;
     aiAutoCorrect = DEFAULT_AI_AUTO_CORRECT;
     aiShowStylisticChanges = DEFAULT_AI_SHOW_STYLISTIC_CHANGES;
+    aiImgUrl = DEFAULT_AI_IMG_URL;
+    aiImgApiKey = DEFAULT_AI_IMG_APIKEY;
+    aiImgModel = DEFAULT_AI_IMG_MODEL;
+    useAiImgSupport = DEFAULT_USE_AI_IMG_SUPPORT;
     externalRuleDirectory = null;
     lookAndFeelName = null;
     currentProfile = null;
@@ -341,7 +357,7 @@ public class WtConfiguration {
    * @param configuration the object to copy.
    * @since 2.6
    */
-  WtConfiguration copy(WtConfiguration configuration) {
+  public WtConfiguration copy(WtConfiguration configuration) {
     WtConfiguration copy = new WtConfiguration();
     copy.restoreState(configuration);
     return copy;
@@ -352,7 +368,7 @@ public class WtConfiguration {
    * @param configuration the object from which we will read the state
    * @since 2.6
    */
-  void restoreState(WtConfiguration configuration) {
+  public void restoreState(WtConfiguration configuration) {
     this.configFile = configuration.configFile;
     this.language = configuration.language;
     this.lang = configuration.lang;
@@ -400,6 +416,10 @@ public class WtConfiguration {
     this.useAiSupport = configuration.useAiSupport;
     this.aiAutoCorrect = configuration.aiAutoCorrect;
     this.aiShowStylisticChanges = configuration.aiShowStylisticChanges;
+    this.aiImgUrl = configuration.aiImgUrl;
+    this.aiImgApiKey = configuration.aiImgApiKey;
+    this.aiImgModel = configuration.aiImgModel;
+    this.useAiImgSupport = configuration.useAiImgSupport;
     
     this.disabledRuleIds.clear();
     this.disabledRuleIds.addAll(configuration.disabledRuleIds);
@@ -651,6 +671,38 @@ public class WtConfiguration {
 
   public void setAiShowStylisticChanges(boolean aiShowStylisticChanges) {
     this.aiShowStylisticChanges = aiShowStylisticChanges;
+  }
+
+  public String aiImgUrl() {
+    return aiImgUrl;
+  }
+
+  public void setAiImgUrl(String aiImgUrl) {
+    this.aiImgUrl = aiImgUrl;
+  }
+
+  public String aiImgModel() {
+    return aiImgModel;
+  }
+
+  public void setAiImgModel(String aiImgModel) {
+    this.aiImgModel = aiImgModel;
+  }
+
+  public String aiImgApiKey() {
+    return aiImgApiKey;
+  }
+
+  public void setAiImgApiKey(String aiImgApiKey) {
+    this.aiImgApiKey = aiImgApiKey;
+  }
+
+  public boolean useAiImgSupport() {
+    return useAiImgSupport;
+  }
+
+  public void setUseAiImgSupport(boolean useAiImgSupport) {
+    this.useAiImgSupport = useAiImgSupport;
   }
 
   public String getRemoteApiKey() {
@@ -1549,6 +1601,26 @@ public class WtConfiguration {
     }
     
     
+    aiString = (String) props.get(prefix + AI_IMG_URL_KEY);
+    if (aiString != null) {
+      aiImgUrl = aiString;
+    }
+    
+    aiString = (String) props.get(prefix + AI_IMG_MODEL_KEY);
+    if (aiString != null) {
+      aiImgModel = aiString;
+    }
+    
+    aiString = (String) props.get(prefix + AI_IMG_APIKEY_KEY);
+    if (aiString != null) {
+      aiImgApiKey = aiString;
+    }
+    
+    aiString = (String) props.get(prefix + AI_USE_AI_IMG_SUPPORT_KEY);
+    if (aiString != null) {
+      useAiImgSupport = Boolean.parseBoolean(aiString);
+    }
+    
     String rulesValuesString = (String) props.get(prefix + CONFIGURABLE_RULE_VALUES_KEY + qualifier);
     if (rulesValuesString == null) {
       rulesValuesString = (String) props.get(prefix + CONFIGURABLE_RULE_VALUES_KEY);
@@ -1788,6 +1860,10 @@ public class WtConfiguration {
     allProfileKeys.add(AI_USE_AI_SUPPORT_KEY);
     allProfileKeys.add(AI_AUTO_CORRECT_KEY);
     allProfileKeys.add(AI_SHOW_STYLISTIC_CHANGES_KEY);
+    allProfileKeys.add(AI_IMG_URL_KEY);
+    allProfileKeys.add(AI_IMG_APIKEY_KEY);
+    allProfileKeys.add(AI_IMG_MODEL_KEY);
+    allProfileKeys.add(AI_USE_AI_IMG_SUPPORT_KEY);
 
     allProfileLangKeys.add(DISABLED_RULES_KEY);
     allProfileLangKeys.add(ENABLED_RULES_KEY);
@@ -1936,6 +2012,18 @@ public class WtConfiguration {
     }
     if (this.aiShowStylisticChanges != DEFAULT_AI_SHOW_STYLISTIC_CHANGES) {
       props.setProperty(prefix + AI_SHOW_STYLISTIC_CHANGES_KEY, Boolean.toString(aiShowStylisticChanges));
+    }
+    if (aiImgUrl != null) {
+      props.setProperty(prefix + AI_IMG_URL_KEY, aiImgUrl);
+    }
+    if (aiImgModel != null) {
+      props.setProperty(prefix + AI_IMG_MODEL_KEY, aiImgModel);
+    }
+    if (aiImgApiKey != null) {
+      props.setProperty(prefix + AI_IMG_APIKEY_KEY, aiImgApiKey);
+    }
+    if (useAiImgSupport != DEFAULT_USE_AI_IMG_SUPPORT) {
+      props.setProperty(prefix + AI_USE_AI_IMG_SUPPORT_KEY, Boolean.toString(useAiImgSupport));
     }
     if (fontName != null) {
       props.setProperty(prefix + FONT_NAME_KEY, fontName);

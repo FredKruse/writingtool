@@ -28,6 +28,7 @@ import org.writingtool.tools.WtMessageHandler;
 import org.writingtool.tools.WtOfficeTools;
 import org.writingtool.WtDocumentsHandler;
 import org.writingtool.WtLanguageTool;
+import org.writingtool.dialogs.WtConfigurationDialog;
 
 /**
  * A thread that shows the configuration dialog which lets the
