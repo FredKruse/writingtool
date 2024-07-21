@@ -22,7 +22,6 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
-import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
@@ -31,21 +30,20 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -53,10 +51,8 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -77,7 +73,6 @@ import org.writingtool.WtDocumentsHandler.WaitDialogThread;
 import org.writingtool.aisupport.WtAiParagraphChanging;
 import org.writingtool.aisupport.WtAiRemote;
 import org.writingtool.config.WtConfiguration;
-import org.writingtool.tools.WtDocumentCursorTools;
 import org.writingtool.tools.WtMessageHandler;
 import org.writingtool.tools.WtOfficeGraphicTools;
 import org.writingtool.tools.WtOfficeTools;
@@ -86,8 +81,6 @@ import org.writingtool.tools.WtOfficeTools.DocumentType;
 
 import com.sun.star.lang.Locale;
 import com.sun.star.lang.XComponent;
-import com.sun.star.text.XTextCursor;
-import com.sun.star.text.XTextDocument;
 
 /**
  * Dialog to change paragraphs by AI
@@ -98,12 +91,12 @@ public class WtAiDialog extends Thread implements ActionListener {
   
   private final static float DEFAULT_TEMPERATURE = 0.7f;
   private final static int DEFAULT_STEP = 30;
-  private final static String TEMP_IMAGE_FILE_NAME = "tmpImage";
+  private final static String TEMP_IMAGE_FILE_NAME = "tmpImage.jpg";
   private final static String AI_INSTRUCTION_FILE_NAME = "LT_AI_Instructions.dat";
   private final static int MAX_INSTRUCTIONS = 40;
   private final static int SHIFT1 = 14;
-  private final static int dialogWidth = 640;
-  private final static int dialogHeight = 600;
+  private final static int dialogWidth = 700;
+  private final static int dialogHeight = 750;
   private final static int imageWidth = 512;
 //  private final static int imageHeight = 256;
 
@@ -309,6 +302,36 @@ public class WtAiDialog extends Thread implements ActionListener {
       if (inf.canceled()) {
         return;
       }
+      
+      imgInstruction.addKeyListener(new KeyListener() {
+        @Override
+        public void keyPressed(KeyEvent e) {
+          if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+            createImage();
+          }
+        }
+        @Override
+        public void keyReleased(KeyEvent e) {
+        }
+        @Override
+        public void keyTyped(KeyEvent e) {
+        }
+      });
+      
+      instruction.addKeyListener(new KeyListener() {
+        @Override
+        public void keyPressed(KeyEvent e) {
+          if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+            execute();
+          }
+        }
+        @Override
+        public void keyReleased(KeyEvent e) {
+        }
+        @Override
+        public void keyTyped(KeyEvent e) {
+        }
+      });
       
       execute.setFont(dialogFont);
       execute.addActionListener(this);
@@ -727,21 +750,6 @@ public class WtAiDialog extends Thread implements ActionListener {
   }
 
   /**
-   * Set the selection color to a combo box
-   *//*
-  private void setJComboSelectionBackground(JComboBox<String> comboBox, Color color) {
-    Object context = comboBox.getAccessibleContext().getAccessibleChild(0);
-    BasicComboPopup popup = (BasicComboPopup)context;
-    JList<Object> list = popup.getList();
-    list.setSelectionBackground(color);
-  }
-*/
-  private void errorReturn() {
-    WtMessageHandler.showMessage(messages.getString("loBusyMessage"));
-    closeDialog();
-  }
-
-  /**
    * show the dialog
    * @throws Throwable 
    */
@@ -943,8 +951,8 @@ public class WtAiDialog extends Thread implements ActionListener {
           removeImage();
         } else if (action.getActionCommand().equals("saveImage")) {
           saveImage();
-//        } else if (action.getActionCommand().equals("insertImage")) {
-//          insertImage();
+        } else if (action.getActionCommand().equals("insertImage")) {
+          insertImage();
         } else {
           WtMessageHandler.showMessage("Action '" + action.getActionCommand() + "' not supported");
         }
@@ -1102,38 +1110,15 @@ public class WtAiDialog extends Thread implements ActionListener {
       return;
     }
     File dir = WtOfficeTools.getCacheDir();
-    File tmpFile = new File(dir, TEMP_IMAGE_FILE_NAME + "." + extension);
+    File tmpFile = new File(dir, TEMP_IMAGE_FILE_NAME);
     saveImage(tmpFile);
-    WtDocumentCursorTools docCursor = currentDocument.getDocumentCursorTools();
-    XTextDocument doc = docCursor.getTextDocument();
-    XTextCursor cursor = docCursor.getTextCursor();
-    WtOfficeGraphicTools.addImageShape(doc, cursor, tmpFile.getAbsolutePath(), 128, 128, 
+    WtOfficeGraphicTools.insertGraphic(tmpFile.getAbsolutePath(), imageWidth, 
         currentDocument.getXComponent(), documents.getContext());
   }
-  
   
   private void removeImage() {
     image = null;
     imageFrame.setIcon(null);
   }
 
-  
-/*  
-  public class ImageComponent extends JFrame {
-    private final BufferedImage img;
-
-    public ImageComponent(URL url) throws IOException {
-      img = ImageIO.read(url);
-      setPreferredSize(new Dimension(img.getWidth(), img.getHeight()));
-
-    }
-
-    @Override
-    public void paint(Graphics g) {
-      super.paint(g);
-      g.drawImage(img, 0, 0, img.getWidth(), img.getHeight(), this);
-    }
-
-  }
-*/
 }

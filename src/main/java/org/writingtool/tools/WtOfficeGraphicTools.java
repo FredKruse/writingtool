@@ -18,21 +18,13 @@
  */
 package org.writingtool.tools;
 
-import java.io.File;
-
-import com.sun.star.awt.Size;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.XPropertySet;
-import com.sun.star.container.XNameContainer;
-import com.sun.star.drawing.XShape;
 import com.sun.star.graphic.XGraphic;
 import com.sun.star.graphic.XGraphicProvider;
-import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.XComponent;
 import com.sun.star.lang.XMultiComponentFactory;
 import com.sun.star.lang.XMultiServiceFactory;
-import com.sun.star.text.ControlCharacter;
-import com.sun.star.text.TextContentAnchorType;
 import com.sun.star.text.XText;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
@@ -46,236 +38,97 @@ import com.sun.star.uno.XComponentContext;
  * @author Fred Kruse
  */
 public class WtOfficeGraphicTools {
+  
+  private final static int SIZE_FACTOR = 20;
 
-  public static void addImageLink(XTextDocument doc, XTextCursor cursor, String fnm, XComponentContext xContext) {
-    addImageLink(doc, cursor, fnm, 0, 0, xContext);  // 0, 0 means use image's size as width & height
-  }
-
-
-  public static void addImageLink(XTextDocument doc, XTextCursor cursor, String fnm, int width, int height, XComponentContext xContext) { 
+  public static void insertGraphic(String strUrl, int size, XComponent xComp, XComponentContext xContext) {
     try {
+      // get the remote office service manager
+      XMultiComponentFactory xMCF = xContext.getServiceManager();
 
-      // create TextContent for graphic
-      if (xContext == null) {
-        return;
-      }
-      XMultiComponentFactory xMCF = UnoRuntime.queryInterface(XMultiComponentFactory.class, xContext.getServiceManager());
-      if (xMCF == null) {
-        return;
-      }
-      Object cont = xMCF.createInstanceWithContext("com.sun.star.text.TextGraphicObject", xContext);
-      if (cont == null) {
-        return;
-      }
-      XTextContent tgo = UnoRuntime.queryInterface(XTextContent.class, cont);
-      if (tgo == null) {
-        WtMessageHandler.printToLogFile("Could not create a text graphic object");
-        return;
-      }
+      // Querying for the interface XTextDocument on the xcomponent
+      XTextDocument xTextDoc = UnoRuntime.queryInterface(XTextDocument.class, xComp);
 
-      // set anchor and URL properties
-      String urlString = fnmToURL(fnm);
-      XPropertySet props = UnoRuntime.queryInterface(XPropertySet.class, tgo);
-      props.setPropertyValue("AnchorType", TextContentAnchorType.AS_CHARACTER);
-      props.setPropertyValue("GraphicURL", urlString);
+      // Querying for the interface XMultiServiceFactory on the xtextdocument
+      XMultiServiceFactory xMSFDoc = UnoRuntime.queryInterface(XMultiServiceFactory.class, xTextDoc);
 
-      // optionally set the width and height
-      if ((width > 0) && (height > 0)) {
-        props.setPropertyValue("Width", width);
-        props.setPropertyValue("Height", height);
+      Object oGraphic = null;
+      try {
+          // Creating the service GraphicObject
+          oGraphic =xMSFDoc.createInstance("com.sun.star.text.TextGraphicObject");
+      } catch (Exception e) {
+          WtMessageHandler.printToLogFile("Could not create instance");
+          WtMessageHandler.printException(e);
       }
 
-      // append image to document, followed by a newline
-        append(cursor, tgo);
-        endLine(cursor);
-    } catch (Throwable e) {
+      // Getting the text
+      XText xText = xTextDoc.getText();
+
+      // Getting the cursor on the document (current position)
+//      com.sun.star.text.XTextCursor xTextCursor = xText.createTextCursor();
+      WtViewCursorTools vCursor = new WtViewCursorTools(xComp);
+      XTextCursor xTextCursor = vCursor.getTextCursorBeginn();
+
+      // Querying for the interface XTextContent on the GraphicObject
+      XTextContent xTextContent = UnoRuntime.queryInterface(XTextContent.class, oGraphic);
+
+      // Printing information to the log file
+      WtMessageHandler.printToLogFile("inserting graphic");
+      try {
+        // Inserting the content
+        xText.insertTextContent(xTextCursor, xTextContent, true);
+      } catch (Exception e) {
+        WtMessageHandler.printToLogFile("Could not insert Content");
+        WtMessageHandler.printException(e);
+      }
+
+      // Printing information to the log file
+      WtMessageHandler.printToLogFile("adding graphic");
+
+      // Querying for the interface XPropertySet on GraphicObject
+     XPropertySet xPropSet = UnoRuntime.queryInterface(XPropertySet.class, oGraphic);
+      try {
+        // Creating a string for the graphic url
+        java.io.File sourceFile = new java.io.File(strUrl);
+        StringBuffer sUrl = new StringBuffer("file:///");
+        sUrl.append(sourceFile.getCanonicalPath().replace('\\', '/'));
+        WtMessageHandler.printToLogFile("insert graphic \"" + sUrl + "\"");
+
+        XGraphicProvider xGraphicProvider = UnoRuntime.queryInterface(XGraphicProvider.class,
+                xMCF.createInstanceWithContext("com.sun.star.graphic.GraphicProvider", xContext));
+
+        PropertyValue[] aMediaProps = new PropertyValue[] { new PropertyValue() };
+        aMediaProps[0].Name = "URL";
+        aMediaProps[0].Value = sUrl.toString();
+
+        XGraphic xGraphic = UnoRuntime.queryInterface(XGraphic.class, xGraphicProvider.queryGraphic(aMediaProps));
+        
+        // Setting the anchor type
+        xPropSet.setPropertyValue("AnchorType",
+                   com.sun.star.text.TextContentAnchorType.AT_PARAGRAPH );
+
+        // Setting the graphic url
+        xPropSet.setPropertyValue( "Graphic", xGraphic );
+
+        // Setting the horizontal position
+//        xPropSet.setPropertyValue( "HoriOrientPosition", Integer.valueOf( 5500 ) );
+
+        // Setting the vertical position
+//        xPropSet.setPropertyValue( "VertOrientPosition", Integer.valueOf( 4200 ) );
+
+        // Setting the width
+        xPropSet.setPropertyValue("Width", size * SIZE_FACTOR);
+
+        // Setting the height
+        xPropSet.setPropertyValue("Height", size * SIZE_FACTOR);
+      } catch (Exception e) {
+        WtMessageHandler.printToLogFile("Couldn't set property 'GraphicURL'");
+        WtMessageHandler.printException(e);
+      }
+    }
+    catch( Exception e ) {
       WtMessageHandler.printException(e);
     }
-  }  // end of addImageLink()
-  
-  public static void addImageShape(XTextDocument doc, XTextCursor cursor, String fnm, XComponent xComponent, XComponentContext xContext) {
-    addImageShape(doc, cursor, fnm, 0, 0, xComponent, xContext);  /* 0, 0 means that the method must calculate the image's size */
-  }
-
-  public static void addImageShape(XTextDocument doc, XTextCursor cursor, String fnm, int width, int height, 
-      XComponent xComponent, XComponentContext xContext) {
-    try {
-      WtMessageHandler.printToLogFile("addImageShape: " + fnm);
-      Size imSize;
-      if ((width > 0) && (height > 0))
-        imSize = new Size(width, height);
-      else {
-        imSize = getSize100mm(fnm, xContext);
-      if (imSize == null)
-        WtMessageHandler.printToLogFile("image size == null");
-        return;
-      }
-      WtMessageHandler.printToLogFile("image size: (" + imSize.Width + "/" + imSize.Height + ")");
-
-      // create TextContent for the graphic shape
-      if (xContext == null) {
-        WtMessageHandler.printToLogFile("xContext == null");
-        return;
-      }
-      XMultiServiceFactory xMSF = UnoRuntime.queryInterface(XMultiServiceFactory.class, xComponent);
-      if (xMSF == null) {
-        WtMessageHandler.printToLogFile("XMultiServiceFactory == null");
-        return;
-      }
-      Object o = xMSF.createInstance("com.sun.star.drawing.GraphicObjectShape");
-      XTextContent gos = UnoRuntime.queryInterface(XTextContent.class, o);
-      if (gos == null) {
-        WtMessageHandler.printToLogFile("Could not create a graphic shape");
-        return;
-      }
-      
-      // store the image's bitmap in the "GraphicURL" property
-      String bitmap = getBitmap(fnm, xComponent);
-      WtMessageHandler.printToLogFile("Bitmap size: " + bitmap.length());
-      
-      XPropertySet propSet =  UnoRuntime.queryInterface(XPropertySet.class, gos);
-      propSet.setPropertyValue("GraphicURL", bitmap);
-      
-      // set the shape's size
-      XShape xDrawShape = UnoRuntime.queryInterface(XShape.class, gos);
-      xDrawShape.setSize(imSize);  // must be set, or image is tiny
-      
-      // insert image shape into the document, followed by newline
-      append(cursor, gos);
-      endLine(cursor);
-    } catch(Throwable e) {
-      WtMessageHandler.printToLogFile("Insert of \"" + fnm + "\" failed: " + e);
-    }
-  }  // end of addImageShape()
-  
-  public static XGraphic loadGraphicFile(String imFnm, XComponentContext xContext)
-  {
-    try {
-      if (xContext == null) {
-        WtMessageHandler.printToLogFile("xContext == null");
-        return null;
-      }
-      XMultiComponentFactory xMCF = UnoRuntime.queryInterface(XMultiComponentFactory.class, xContext.getServiceManager());
-      if (xMCF == null) {
-        WtMessageHandler.printToLogFile("xMCF == null");
-        return null;
-      }
-      Object provider = xMCF.createInstanceWithContext("com.sun.star.graphic.GraphicProvider", xContext);
-      if (provider == null) {
-        WtMessageHandler.printToLogFile("provider == null");
-        return null;
-      }
-      XGraphicProvider gProvider = UnoRuntime.queryInterface(XGraphicProvider.class, provider);
-      if (gProvider == null) {
-        WtMessageHandler.printToLogFile("Graphic Provider could not be found");
-        return null;
-      }
-  
-      PropertyValue[] fileProps =  makeProps("URL", fnmToURL(imFnm));
-      return gProvider.queryGraphic(fileProps);
-    } catch(Throwable t) {
-      WtMessageHandler.printException(t);
-      return null;  
-    }
-  }  // end of loadGraphicFile()
-
-  private static Size getSize100mm(String imFnm, XComponentContext xContext) throws Throwable
-  {
-    XGraphic graphic = loadGraphicFile(imFnm, xContext);
-    if (graphic == null) {
-      WtMessageHandler.printToLogFile("graphic == null");
-      return null;
-    }
-    XPropertySet propSet =  UnoRuntime.queryInterface(XPropertySet.class, graphic);
-    return (Size) propSet.getPropertyValue("Size100thMM");
-  }  // end of getSize100mm()
-
-  private static String fnmToURL(String fnm)
-  // convert a file path to URL format
-  {
-     try {
-       StringBuffer sb = null;
-       String path = new File(fnm).getCanonicalPath();
-       sb = new StringBuffer("file:///");
-       sb.append(path.replace('\\', '/'));
-       return sb.toString();
-     }
-     catch (Throwable e) {
-       WtMessageHandler.printToLogFile("Could not access: " + fnm);
-       WtMessageHandler.printException(e);
-       return null;
-     }
-  } // end of fnmToURL()
-  
-  private static PropertyValue[] makeProps(String oName, Object oValue) throws Throwable
-  {
-    PropertyValue[] props = new PropertyValue[1];
-    props[0] = new PropertyValue();
-    props[0].Name = oName;
-    props[0].Value = oValue;
-    return props;
-  }  // end of makeProps()
-
-  private static String getBitmap(String fnm, XComponent xComponent)
-  // load the graphic as a bitmap, and return it as a string
-  {
-    try {
-      XMultiServiceFactory xMSF = UnoRuntime.queryInterface(XMultiServiceFactory.class, xComponent);
-      if (xMSF == null) {
-        WtMessageHandler.printToLogFile("XMultiServiceFactory == null");
-        return null;
-      }
-      Object o = xMSF.createInstance("com.sun.star.drawing.BitmapTable");
-      XNameContainer bitmapContainer =  UnoRuntime.queryInterface(XNameContainer.class, o);
-      if (bitmapContainer == null) {
-        WtMessageHandler.printToLogFile("Could not create bitmap container");
-        return null;
-      }
-      // insert image into container
-      File f = new File(fnm);
-      if (!f.exists() || !f.isFile() || !f.canRead()) {
-        WtMessageHandler.printToLogFile("Can' t open file: " + fnm);
-        return null;
-      }
-      String picURL = fnmToURL(fnm);
-      if (picURL == null) {
-        WtMessageHandler.printToLogFile("Url is null for: " + fnm);
-        return null;
-      }
-      bitmapContainer.insertByName(fnm, picURL);
-              // use the filename as the name of the bitmap
-
-      // return the bitmap as a string
-      return new String((String) bitmapContainer.getByName(fnm));
-    } catch(Throwable e) {
-      WtMessageHandler.printToLogFile("Could not create a bitmap container for " + fnm);
-      WtMessageHandler.printException(e);
-      return null;
-    }
-  }  // end of getBitmap()
-
-  private static int append(XTextCursor cursor, XTextContent textContent) throws IllegalArgumentException
-  {
-    XText xText = cursor.getText();
-    xText.insertTextContent(cursor, textContent, false);
-    cursor.gotoEnd(false);
-    return getPosition(cursor);
-  }
-  
-  public static int append(XTextCursor cursor, short ctrlChar) throws IllegalArgumentException
-  {
-    XText xText = cursor.getText();
-    xText.insertControlCharacter(cursor, ctrlChar, false);
-    cursor.gotoEnd(false);
-    return getPosition(cursor);
-  }
-
-  public static int getPosition(XTextCursor cursor) {
-    return (cursor.getText().getString()).length();
-  }
-
-  public static void endLine(XTextCursor cursor) throws IllegalArgumentException {
-    append(cursor, ControlCharacter.LINE_BREAK);
   }
 
 }
