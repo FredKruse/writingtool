@@ -658,9 +658,12 @@ public class WtAiDialog extends Thread implements ActionListener {
       
       //  Define tabbed main pane
       JTabbedPane mainPanel = new JTabbedPane();
-      mainPanel.add(messages.getString("guiAiText"), mainTextPanel);
-      mainPanel.add(messages.getString("guiAiImages"), mainImagePanel);
-      
+      if (config.useAiSupport()) {
+        mainPanel.add(messages.getString("guiAiText"), mainTextPanel);
+      }
+      if (config.useAiImgSupport()) {
+        mainPanel.add(messages.getString("guiAiImages"), mainImagePanel);
+      }
 
       //  Define general button panel
       JPanel generalButtonPanel = new JPanel();

@@ -24,11 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
 import org.writingtool.aisupport.WtAiErrorDetection;
 import org.writingtool.aisupport.WtAiParagraphChanging;
-import org.writingtool.aisupport.WtAiRemote;
 import org.writingtool.aisupport.WtAiRemote.AiCommand;
 import org.writingtool.config.WtConfiguration;
 import org.writingtool.stylestatistic.WtStatAnDialog;
@@ -188,7 +186,7 @@ public class WtMenus {
     private XPopupMenu toolsMenu = null;
     private XPopupMenu xProfileMenu = null;
     private XPopupMenu xActivateRuleMenu = null;
-    private XPopupMenu xAiSupportMenu = null;
+//    private XPopupMenu xAiSupportMenu = null;
     private List<String> definedProfiles = null;
     private String currentProfile = null;
     
@@ -312,13 +310,13 @@ public class WtMenus {
       } else if ((!config.useAiSupport() || config.aiAutoCorrect()) && aiAutoPos > 0) {
         ltMenu.removeItem(aiAutoPos, (short)1);
       }
-      if (config.useAiSupport() && aiPos < 1) {
+      if ((config.useAiSupport() || config.useAiImgSupport()) && aiPos < 1) {
 //        setAIMenu((short)(switchOffPos + 3), SUBMENU_ID_AI, (short)(SUBMENU_ID_AI + 1));
         nId++;
         ltMenu.insertItem(nId, MESSAGES.getString("loMenuAiGeneralCommand"), (short) 0, nPos);
         ltMenu.setCommand(nId, LT_AI_GENERAL_COMMAND);
         ltMenu.enableItem(nId , true);
-      } else if (!config.useAiSupport() && aiPos > 0) {
+      } else if ((!config.useAiSupport() && !config.useAiImgSupport()) && aiPos > 0) {
         ltMenu.removeItem(aiPos, (short)1);
       }
     }
@@ -767,7 +765,7 @@ public class WtMenus {
         nId++;
 
         addLTMenuEntry(nId, xContextMenu, xMenuElementFactory, true);
-        if (config.useAiSupport()) {
+        if (config.useAiSupport() || config.useAiImgSupport()) {
           nId++;
           addAIMenuEntry(nId, xContextMenu, xMenuElementFactory);
         }
@@ -971,12 +969,12 @@ public class WtMenus {
     }
     
     private void addAIMenuEntry(int nId, XIndexContainer xContextMenu, XMultiServiceFactory xMenuElementFactory) throws Throwable {
-      if (!config.useAiSupport()) {
+      if (!config.useAiSupport() && !config.useAiImgSupport()) {
         return;
       }
       XPropertySet xNewMenuEntry;
       int j = nId;
-      if (!config.aiAutoCorrect()) {
+      if (config.useAiSupport() && !config.aiAutoCorrect()) {
         xNewMenuEntry = UnoRuntime.queryInterface(XPropertySet.class,
             xMenuElementFactory.createInstance("com.sun.star.ui.ActionTrigger"));
         xNewMenuEntry.setPropertyValue("Text", MESSAGES.getString("loMenuAiAddErrorMarks"));

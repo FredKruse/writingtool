@@ -26,7 +26,6 @@ import org.languagetool.Languages;
 import org.languagetool.languagemodel.LuceneLanguageModel;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleOption;
-import org.writingtool.aisupport.WtAiDetectionRule;
 import org.writingtool.config.WtCategoryNode;
 import org.writingtool.config.WtCheckBoxTreeCellRenderer;
 import org.writingtool.config.WtConfigTools;
@@ -2505,7 +2504,7 @@ public class WtConfigurationDialog implements ActionListener {
     JCheckBox useAiSupportBox = new JCheckBox(messages.getString("guiUseAiSupport"));
     useAiSupportBox.setSelected(config.useAiImgSupport());
     useAiSupportBox.addItemListener(e -> {
-      config.setUseAiSupport(useAiSupportBox.isSelected());
+      config.setUseAiImgSupport(useAiSupportBox.isSelected());
       aiUrlField.setEnabled(useAiSupportBox.isSelected());
       modelField.setEnabled(useAiSupportBox.isSelected());
       apiKeyField.setEnabled(useAiSupportBox.isSelected());
