@@ -257,7 +257,7 @@ public class WtAiRemote {
       checkUrl = new URL(imgUrl);
     } catch (MalformedURLException e) {
       WtMessageHandler.showError(e);
-      stopAiRemote();
+      stopAiImgRemote();
       return null;
     }
     if (debugMode) {
@@ -274,7 +274,7 @@ public class WtAiRemote {
         try (InputStream inputStream = conn.getErrorStream()) {
           String error = readStream(inputStream, "utf-8");
           WtMessageHandler.printToLogFile("Got error: " + error + " - HTTP response code " + conn.getResponseCode());
-          stopAiRemote();
+          stopAiImgRemote();
           return null;
         }
       }
@@ -284,7 +284,7 @@ public class WtAiRemote {
       stopAiRemote();
     } catch (Exception e) {
       WtMessageHandler.showError(e);
-      stopAiRemote();
+      stopAiImgRemote();
     } finally {
       conn.disconnect();
     }
@@ -467,6 +467,11 @@ public class WtAiRemote {
       documents.getAiCheckQueue().setStop();
       documents.setAiCheckQueue(null);
     }
+    WtMessageHandler.showMessage(messages.getString("loAiServerConnectionError"));
+  }
+  
+  private void stopAiImgRemote() {
+    config.setUseAiImgSupport(false);
     WtMessageHandler.showMessage(messages.getString("loAiServerConnectionError"));
   }
   
