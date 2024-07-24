@@ -43,7 +43,6 @@ import javax.swing.UIManager;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
-import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
 import org.languagetool.Languages;
 import org.languagetool.UserConfig;
@@ -133,16 +132,16 @@ public class WtDocumentsHandler {
   private WtSortedTextRules sortedTextRules;
   private Map<String, Set<String>> disabledRulesUI; //  Rules disabled by context menu or spell dialog
   private final List<Rule> extraRemoteRules;        //  store of rules supported by remote server but not locally
-  private LtCheckDialog ltDialog = null;            //  LT spelling and grammar check dialog
-  private WtConfigurationDialog cfgDialog = null;     //  configuration dialog (show only one configuration panel)
-  private static WtAboutDialog aboutDialog = null;    //  about dialog (show only one about panel)
-  private static WtMoreInfoDialog infoDialog = null;  //  more info about a rule dialog (show only one info panel)
+  private LtCheckDialog ltDialog = null;            //  WT spelling and grammar check dialog
+  private WtConfigurationDialog cfgDialog = null;   //  configuration dialog (show only one configuration panel)
+  private static WtAboutDialog aboutDialog = null;  //  about dialog (show only one about panel)
+  private static WtMoreInfoDialog infoDialog = null;//  more info about a rule dialog (show only one info panel)
   private boolean dialogIsRunning = false;          //  The dialog was started
   private WaitDialogThread waitDialog = null;
 
   
   private XComponentContext xContext;               //  The context of the document
-  private final List<WtSingleDocument> documents;     //  The List of LO documents to be checked
+  private final List<WtSingleDocument> documents;   //  The List of LO documents to be checked
   private boolean isDisposed = false;
   private boolean recheck = true;                   //  if true: recheck the whole document at next iteration
   private int docNum;                               //  number of the current document
@@ -155,8 +154,8 @@ public class WtDocumentsHandler {
   private boolean noLtSpeller = false;              //  true if LT spell checker can't be used
 
   private String menuDocId = null;                    //  Id of document at which context menu was called 
-  private WtTextLevelCheckQueue textLevelQueue = null;  // Queue to check text level rules
-  private WtAiCheckQueue aiQueue = null;                // Queue to check by AI support
+  private WtTextLevelCheckQueue textLevelQueue = null;// Queue to check text level rules
+  private WtAiCheckQueue aiQueue = null;              // Queue to check by AI support
   private ShapeChangeCheck shapeChangeCheck = null;   // Thread for test changes in shape texts
   private boolean doShapeCheck = false;               // do the test for changes in shape texts
   

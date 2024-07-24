@@ -141,7 +141,8 @@ public class WtAiDialog extends Thread implements ActionListener {
   private final JButton removeImage;
   private final JButton saveImage;
   private final JButton insertImage;
-  
+
+  private final WtAiParagraphChanging aiParent;
   private WtSingleDocument currentDocument;
   private WtDocumentsHandler documents;
   private WtConfiguration config;
@@ -165,8 +166,10 @@ public class WtAiDialog extends Thread implements ActionListener {
   /**
    * the constructor of the class creates all elements of the dialog
    */
-  public WtAiDialog(WtSingleDocument document, WaitDialogThread inf, ResourceBundle messages) {
+  public WtAiDialog(WtSingleDocument document, WaitDialogThread inf, 
+      ResourceBundle messages, WtAiParagraphChanging aiParent) {
     this.messages = messages;
+    this.aiParent = aiParent;
     documents = document.getMultiDocumentsHandler();
     config = documents.getConfiguration();
     long startTime = 0;
@@ -290,6 +293,21 @@ public class WtAiDialog extends Thread implements ActionListener {
           step = stepSlider.getValue();
         }
       });
+      stepSlider.addKeyListener(new KeyListener() {
+        @Override
+        public void keyPressed(KeyEvent e) {
+          if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+            createImage();
+          }
+        }
+        @Override
+        public void keyReleased(KeyEvent e) {
+        }
+        @Override
+        public void keyTyped(KeyEvent e) {
+        }
+      });
+      
 
       JScrollPane resultPane = new JScrollPane(result);
       resultPane.setMinimumSize(new Dimension(0, 30));
@@ -304,6 +322,21 @@ public class WtAiDialog extends Thread implements ActionListener {
       }
       
       imgInstruction.addKeyListener(new KeyListener() {
+        @Override
+        public void keyPressed(KeyEvent e) {
+          if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+            createImage();
+          }
+        }
+        @Override
+        public void keyReleased(KeyEvent e) {
+        }
+        @Override
+        public void keyTyped(KeyEvent e) {
+        }
+      });
+      
+      exclude.addKeyListener(new KeyListener() {
         @Override
         public void keyPressed(KeyEvent e) {
           if(e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -774,6 +807,11 @@ public class WtAiDialog extends Thread implements ActionListener {
     dialog.setVisible(true);
     setText();
   }
+  
+  public void toFront() {
+    dialog.setVisible(true);
+    dialog.toFront();
+  }
 
   /**
    * Get the current document
@@ -1057,6 +1095,7 @@ public class WtAiDialog extends Thread implements ActionListener {
    */
   public void closeDialog() {
     dialog.setVisible(false);
+    aiParent.setCloseAiDialog();
     if (debugMode) {
       WtMessageHandler.printToLogFile("AiDialog: closeDialog: Close AI Dialog");
     }

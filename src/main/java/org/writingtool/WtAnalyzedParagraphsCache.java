@@ -61,7 +61,7 @@ public class WtAnalyzedParagraphsCache {
       return;
     }
     Locale tmpLocale = docCache.getFlatParagraphLocale(0);
-    if (tmpLocale == null || !mDocHandler.hasLocale(tmpLocale)) {
+    if (tmpLocale == null || !WtDocumentsHandler.hasLocale(tmpLocale)) {
       locale = null;
       return;
     }

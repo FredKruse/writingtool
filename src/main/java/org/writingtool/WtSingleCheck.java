@@ -35,7 +35,6 @@ import org.languagetool.tools.StringTools;
 import org.writingtool.WtDocumentCache.TextParagraph;
 import org.writingtool.WtResultCache.CacheEntry;
 import org.writingtool.aisupport.WtAiDetectionRule;
-import org.writingtool.aisupport.WtAiErrorDetection;
 import org.writingtool.config.WtConfiguration;
 import org.writingtool.tools.WtDocumentCursorTools;
 import org.writingtool.tools.WtFlatParagraphTools;
@@ -92,11 +91,6 @@ public class WtSingleCheck {
   private final boolean useQueue;                   //  true: use queue to check text level rules (will be overridden by config)
   private final Language docLanguage;               //  docLanguage (usually the Language of the first paragraph)
   private final Language fixedLanguage;             //  fixed language (by configuration); if null: use language of document (given by LO/OO)
-  private final boolean runAiQueue;                 //  AI queue has to be filled
-//  private final IgnoredMatches ignoredMatches;      //  Map of matches (number of paragraph, number of character) that should be ignored after ignoreOnce was called
-//  private final IgnoredMatches permanentIgnoredMatches; //  Map of matches (number of paragraph, number of character) that should be ignored permanent
-//  private DocumentCursorTools docCursor;            //  Save document cursor for the single document
-//  private FlatParagraphTools flatPara;              //  Save information for flat paragraphs (including iterator and iterator provider) for the single document
 
   private int changeFrom = 0;                       //  Change result cache from paragraph
   private int changeTo = 0;                         //  Change result cache to paragraph
@@ -106,21 +100,16 @@ public class WtSingleCheck {
   
   WtSingleCheck(WtSingleDocument singleDocument, List<WtResultCache> paragraphsCache,
       Language fixedLanguage, Language docLanguage, 
-//      IgnoredMatches ignoredMatches, IgnoredMatches permanentIgnoredMatches, 
       int numParasToCheck, boolean isDialogRequest, boolean isMouseRequest, boolean isIntern) {
     debugMode = WtOfficeTools.DEBUG_MODE_SC;
     this.singleDocument = singleDocument;
     this.paragraphsCache = paragraphsCache;
-//    this.docCursor = docCursor;
-//    this.flatPara = flatPara;
     this.numParasToCheck = numParasToCheck;
     this.isDialogRequest = isDialogRequest;
     this.isMouseRequest = isMouseRequest;
     this.isIntern = isIntern;
     this.docLanguage = docLanguage;
     this.fixedLanguage = fixedLanguage;
-//    this.ignoredMatches = ignoredMatches;
-//    this.permanentIgnoredMatches = permanentIgnoredMatches;
     mDocHandler = singleDocument.getMultiDocumentsHandler();
     xComponent = singleDocument.getXComponent();
     docCache = singleDocument.getDocumentCache();
@@ -129,7 +118,6 @@ public class WtSingleCheck {
     useQueue = numParasToCheck != 0 && !isDialogRequest && !mDocHandler.isTestMode() && config.useTextLevelQueue();
     minToCheckPara = mDocHandler.getNumMinToCheckParas();
     changedParas = new ArrayList<>();
-    runAiQueue = (config.useAiSupport() && config.aiAutoCorrect()) ? true : false;
   }
   
   /**

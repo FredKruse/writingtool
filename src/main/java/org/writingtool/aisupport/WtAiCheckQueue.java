@@ -20,18 +20,14 @@ package org.writingtool.aisupport;
 
 import java.util.List;
 
-import org.languagetool.Language;
 import org.writingtool.WtDocumentCache;
 import org.writingtool.WtDocumentsHandler;
 import org.writingtool.WtSingleDocument;
 import org.writingtool.WtLanguageTool;
 import org.writingtool.WtTextLevelCheckQueue;
 import org.writingtool.WtDocumentCache.TextParagraph;
-import org.writingtool.tools.WtDocumentCursorTools;
-import org.writingtool.tools.WtFlatParagraphTools;
 import org.writingtool.tools.WtMessageHandler;
 import org.writingtool.tools.WtOfficeTools;
-import org.writingtool.tools.WtViewCursorTools;
 import org.writingtool.tools.WtOfficeTools.DocumentType;
 
 /**

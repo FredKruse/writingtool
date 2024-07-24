@@ -18,7 +18,6 @@
  */
 package org.writingtool.aisupport;
 
-import java.awt.Color;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,9 +49,6 @@ public class WtAiDetectionRule extends TextLevelRule {
 
   public static final int STYLE_HINT_LIMIT = 25;  //  Limit of changed tokens in a sentence in percent (after that a style hint is assumed)
   
-//  public static final String RULE_ID = "LO_AI_DETECTION_RULE";
-//  public static final Color RULE_HINT_COLOR = new Color(90, 0, 255);
-//  public static final Color RULE_OTHER_COLOR = new Color(150, 150, 0);
   private static final Pattern QUOTES = Pattern.compile("[\"“”“„»«]");
   private static final Pattern SINGLE_QUOTES = Pattern.compile("[‚‘’'›‹]");
   private static final Pattern PUNCTUATION = Pattern.compile("[,.!?:]");

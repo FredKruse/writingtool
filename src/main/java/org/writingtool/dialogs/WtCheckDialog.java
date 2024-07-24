@@ -73,7 +73,6 @@ import javax.swing.text.StyledDocument;
 
 import org.languagetool.AnalyzedSentence;
 import org.languagetool.AnalyzedTokenReadings;
-import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
 import org.languagetool.Languages;
 // import org.languagetool.rules.Rule;

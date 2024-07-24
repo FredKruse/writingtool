@@ -22,7 +22,6 @@ import java.util.ResourceBundle;
 
 import javax.swing.JOptionPane;
 
-import org.languagetool.JLanguageTool;
 import org.writingtool.WtDocumentCache;
 import org.writingtool.WtSingleDocument;
 import org.writingtool.WtDocumentCache.TextParagraph;
@@ -77,6 +76,7 @@ public class WtAiParagraphChanging extends Thread {
   private final WtConfiguration config;
   private final AiCommand commandId;
   
+  private static WtAiDialog aiDialog = null;
   private WaitDialogThread waitDialog = null;
   
   public WtAiParagraphChanging(WtSingleDocument document, WtConfiguration config, AiCommand commandId) {
@@ -90,12 +90,20 @@ public class WtAiParagraphChanging extends Thread {
     runAiChangeOnParagraph();
   }
   
+  public void setCloseAiDialog() {
+    aiDialog = null;
+  }
+  
   private void runAiChangeOnParagraph() {
     try {
       if (commandId == AiCommand.GeneralAi) {
-        waitDialog = new WaitDialogThread(WAIT_TITLE, WAIT_MESSAGE);
-        WtAiDialog aiDialog = new WtAiDialog(document, waitDialog, messages);
-        aiDialog.start();
+        if (aiDialog == null) {
+          waitDialog = new WaitDialogThread(WAIT_TITLE, WAIT_MESSAGE);
+          aiDialog = new WtAiDialog(document, waitDialog, messages, this);
+          aiDialog.start();
+        } else {
+          aiDialog.toFront();
+        }
         return;
       }
       if (debugMode) {
