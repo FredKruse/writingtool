@@ -203,7 +203,7 @@ public class WtAiErrorDetection {
     WtAiDetectionRule aiRule = getAiDetectionRule(result, analyzedAiResult, 
         document.getMultiDocumentsHandler().getLinguisticServices(), locale , messages, config.aiShowStylisticChanges());
     RuleMatch[] matches = aiRule.match(analyzedSentences);
-    matches = filterRuleMatches(matches, result, analyzedAiResult);
+    matches = filterRuleMatches(matches, result, locale, analyzedAiResult);
     if (debugModeTm) {
       long runTime = System.currentTimeMillis() - startTime;
       WtMessageHandler.printToLogFile("AiErrorDetection: getMatchesByAiRule: Time to run AI detection rule: " + runTime);
@@ -268,12 +268,25 @@ public class WtAiErrorDetection {
     return true;
   }
   
-  private RuleMatch[] filterRuleMatches(RuleMatch[] matches, String result, List<AnalyzedSentence> analyzedAiResult) throws Throwable {
+  private RuleMatch[] filterRuleMatches(RuleMatch[] matches, String result, Locale locale,
+      List<AnalyzedSentence> analyzedAiResult) throws Throwable {
     if (matches == null || matches.length == 0) {
       return matches;
     }
     List<RuleMatch> resultMatches = lt.check(result, analyzedAiResult, ParagraphHandling.ONLYNONPARA, RemoteCheck.ALL);
-    if (resultMatches == null || resultMatches.size() == 0) {
+    if (resultMatches == null) {
+      return matches;
+    }
+    for (int i = resultMatches.size() - 1; i >= 0; i--) {
+      if (resultMatches.get(i).getRule().isDictionaryBasedSpellingRule()) {
+        WtLinguisticServices linguServices = document.getMultiDocumentsHandler().getLinguisticServices();
+        String word = result.substring(resultMatches.get(i).getFromPos(), resultMatches.get(i).getToPos());
+        if(linguServices.isCorrectSpell(word, locale)) {
+          resultMatches.remove(i);
+        }
+      }
+    }
+    if (resultMatches.size() == 0) {
       return matches;
     }
     List<RuleMatch> correctMatches = new ArrayList<>();

@@ -114,7 +114,7 @@ public class WtAiDetectionRule extends TextLevelRule {
     return false;
   }
 
-  private boolean isQuote(String token) {
+  public boolean isQuote(String token) {
     return (QUOTES.matcher(token).matches() || SINGLE_QUOTES.matcher(token).matches());
   }
 
@@ -253,7 +253,7 @@ public class WtAiDetectionRule extends TextLevelRule {
         }
         suggestion = sugStart >= sugEnd ? "" : aiResultText.substring(sugStart, sugEnd);
         if (!isEndQoute(j, resultTokens) && isCorrectSuggestion(suggestion, singleWordToken)
-            && !isMatchException(nParaTokenStart, nResultTokenStart, paraTokens, resultTokens)) {
+            && !isMatchException(nParaTokenStart, nParaTokenEnd, nResultTokenStart, nResultTokenEnd, paraTokens, resultTokens)) {
           RuleMatch ruleMatch = new RuleMatch(this, sentence, posStart, posEnd, ruleMessage);
           ruleMatch.addSuggestedReplacement(suggestion);
           ruleMatch.setType(Type.Hint);
@@ -279,7 +279,7 @@ public class WtAiDetectionRule extends TextLevelRule {
         if (nSenTokens > 0) {
           int allSenTokens = nSentence == 0 ? sentenceEnds.get(nSentence) : sentenceEnds.get(nSentence) - sentenceEnds.get(nSentence - 1);
           if (mergeSentences || styleHintAssumed(nSenTokens, allSenTokens, tmpMatches, paraTokens, resultTokens)) {
-            if (showStylisticHints) {
+            if (showStylisticHints && !tmpMatches.isEmpty()) {
               int startPos = tmpMatches.get(0).ruleMatch.getFromPos();
               int endPos = tmpMatches.get(tmpMatches.size() - 1).ruleMatch.getToPos();
               RuleMatch ruleMatch = new RuleMatch(this, null, startPos, endPos, ruleMessage);
@@ -464,15 +464,14 @@ public class WtAiDetectionRule extends TextLevelRule {
    * Set language specific exceptions to set Color for specific Languages
    */
   public boolean isHintException(WtAiToken paraToken, WtAiToken resultToken) {
-//    WtMessageHandler.printToLogFile("isHintException in: general");
     return false;   
   }
 
   /**
    * Set language specific exceptions to handle change as a match
    */
-  public boolean isMatchException(int nPara, int nResult, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) {
-//    WtMessageHandler.printToLogFile("isHintException in: general");
+  public boolean isMatchException(int nParaStart, int nParaEnd, 
+      int nResultStart, int nResultEnd, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) {
     return false;   
   }
 

@@ -33,17 +33,37 @@ public class WtAiDetectionRule_de extends WtAiDetectionRule {
   }
 
   /**
+   * If tokens (from start to end) contains sToken return true 
+   * else false
+   */
+  private boolean containToken(String sToken, int start, int end, List<WtAiToken> tokens) {
+    for (int i = start; i <= end; i++) {
+      if (sToken.equals(tokens.get(i).getToken())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * Set language specific exceptions to handle change as a match
    */
   @Override
-  public boolean isMatchException(int nPara, int nResult, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) {
-    if (nResult < 0 || nResult >= resultTokens.size() - 1) {
+  public boolean isMatchException(int nParaStart, int nParaEnd,
+      int nResultStart, int nResultEnd, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) {
+    if (nResultStart < 0 || nResultStart >= resultTokens.size() - 1) {
       return false;
     }
-    if ((resultTokens.get(nResult).getToken().equals(",") && nResult < resultTokens.size() - 1 
-          && (resultTokens.get(nResult + 1).getToken().equals("und") || resultTokens.get(nResult + 1).getToken().equals("oder")))
-        || (resultTokens.get(nResult + 1).getToken().equals(",") && nResult < resultTokens.size() - 2 
-            && (resultTokens.get(nResult + 2).getToken().equals("und") || resultTokens.get(nResult + 2).getToken().equals("oder")))) {
+    if ((resultTokens.get(nResultStart).getToken().equals(",") && nResultStart < resultTokens.size() - 1 
+          && (resultTokens.get(nResultStart + 1).getToken().equals("und") || resultTokens.get(nResultStart + 1).getToken().equals("oder")))
+        || (resultTokens.get(nResultStart + 1).getToken().equals(",") && nResultStart < resultTokens.size() - 2 
+            && (resultTokens.get(nResultStart + 2).getToken().equals("und") 
+                || resultTokens.get(nResultStart + 2).getToken().equals("oder")))) {
+      return true;
+    }
+    if (isQuote(paraTokens.get(nParaStart).getToken()) 
+        && ",".equals(paraTokens.get(nParaStart + 1).getToken())
+        && !containToken(paraTokens.get(nParaStart).getToken(), nResultStart, nResultEnd, resultTokens)) {
       return true;
     }
     return false;   
