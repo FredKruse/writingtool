@@ -309,9 +309,12 @@ public class WtAiDetectionRule extends TextLevelRule {
         lastResultStart = j;
       }
     }
-    if (tmpMatches.size() > 0 || (j < resultTokens.size() && (!paraTokens.get(i - 1).getToken().equals(resultTokens.get(j - 1).getToken())
-        || (!"}".equals(resultTokens.get(j).getToken()) && !QUOTES.matcher(resultTokens.get(j).getToken()).matches() 
-            && !OPENING_BRACKETS.matcher(resultTokens.get(j).getToken()).matches())))) {
+    if (tmpMatches.size() > 0 || (j < resultTokens.size() 
+            && (!paraTokens.get(i - 1).getToken().equals(resultTokens.get(j - 1).getToken())
+                || (resultTokens.get(j).isNonWord() && !PUNCTUATION.matcher(resultTokens.get(j).getToken()).matches())
+        ))) {
+//        || (!"}".equals(resultTokens.get(j).getToken()) && !QUOTES.matcher(resultTokens.get(j).getToken()).matches() 
+//            && !OPENING_BRACKETS.matcher(resultTokens.get(j).getToken()).matches())))) {
       nSenTokens++;
       if (nSentence > 0) {
         nSentence--;

@@ -837,7 +837,7 @@ class WtCheckRequestAnalysis {
       }
   //    boolean checkOnlyPara = (docCache.getFlatParagraph(nPara).isEmpty() ? false : true);
       docCache.setFlatParagraph(nPara, chPara, locale);
-      WtMessageHandler.printToLogFile("setFlatParagraph: " + nPara + ", locale: " + WtOfficeTools.localeToString(locale));
+//      WtMessageHandler.printToLogFile("setFlatParagraph: " + nPara + ", locale: " + WtOfficeTools.localeToString(locale));
       docCache.setFlatParagraphFootnotes(nPara, footnotePos);
       docCache.setFlatParagraphDeletedCharacters(nPara, deletedChars);
   //    mDocHandler.handleLtDictionary(chPara, locale);

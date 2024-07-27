@@ -100,8 +100,8 @@ public class WtAiDialog extends Thread implements ActionListener {
   private final static int imageWidth = 512;
 //  private final static int imageHeight = 256;
 
-  private boolean debugMode = true;
-  private boolean debugModeTm = true;
+  private boolean debugMode = false;
+  private boolean debugModeTm = false;
   
   private final ResourceBundle messages;
   private final JDialog dialog;

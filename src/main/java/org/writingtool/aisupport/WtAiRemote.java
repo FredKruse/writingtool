@@ -48,6 +48,8 @@ import com.sun.star.lang.Locale;
  */
 public class WtAiRemote {
   
+  private final static int REMOTE_TRIALS = 5;
+  
   private static final ResourceBundle messages = WtOfficeTools.getMessageBundle();
   public final static String TRANSLATE_INSTRUCTION = "loAiTranslateInstruction";
   public final static String CORRECT_INSTRUCTION = "loAiCorrectInstruction";
@@ -97,26 +99,34 @@ public class WtAiRemote {
   }
   
   HttpURLConnection getConnection(byte[] postData, URL url, String apiKey) throws RuntimeException {
-    try {
-      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-      conn.setDoOutput(true);
-      conn.setInstanceFollowRedirects(false);
-      conn.setRequestMethod("POST");
-      conn.setRequestProperty("Content-Type", "application/json");
-      conn.setRequestProperty("charset", "utf-8");
-      conn.setRequestProperty("Authorization", apiKey);
-      conn.setRequestProperty("Content-Length", Integer.toString(postData.length));
-      
-      try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream())) {
-        wr.write(postData);
+    int trials = 0;
+    while (trials < REMOTE_TRIALS) {
+      trials++;
+      try {
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setDoOutput(true);
+        conn.setInstanceFollowRedirects(false);
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "application/json");
+        conn.setRequestProperty("charset", "utf-8");
+        conn.setRequestProperty("Authorization", apiKey);
+        conn.setRequestProperty("Content-Length", Integer.toString(postData.length));
+        
+        try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream())) {
+          wr.write(postData);
+        }
+        return conn;
+      } catch (Exception e) {
+        if (trials >= REMOTE_TRIALS) {
+          throw new RuntimeException(e);
+        }
       }
-      return conn;
-    } catch (Exception e) {
-      throw new RuntimeException(e);
     }
+    return null;
   }
 
-  public String runInstruction(String instruction, String text, float temperature, int seed, Locale locale, boolean onlyOneParagraph) {
+  public String runInstruction(String instruction, String text, float temperature, 
+      int seed, Locale locale, boolean onlyOneParagraph) {
     if (instruction == null || text == null) {
       return null;
     }
@@ -185,39 +195,54 @@ public class WtAiRemote {
     if (debugMode) {
       WtMessageHandler.printToLogFile("AiRemote: runInstruction: postData: " + urlParameters);
     }
-    HttpURLConnection conn = getConnection(postData, checkUrl, apiKey);
+    HttpURLConnection conn = null;
     try {
-      if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-        try (InputStream inputStream = conn.getInputStream()) {
-          String out = readStream(inputStream, "utf-8");
-          out = parseJasonOutput(out);
-          if (out == null) {
-            return null;
-          }
-          out = filterOutput (out, org, instruction, onlyOneParagraph);
-          if (debugModeTm) {
-            long runTime = System.currentTimeMillis() - startTime;
-            WtMessageHandler.printToLogFile("AiRemote: runInstruction: Time to generate Answer: " + runTime);
-          }
-          return out;
-        }
-      } else {
-        try (InputStream inputStream = conn.getErrorStream()) {
-          String error = readStream(inputStream, "utf-8");
-          WtMessageHandler.printToLogFile("Got error: " + error + " - HTTP response code " + conn.getResponseCode());
-          stopAiRemote();
-          return null;
-        }
-      }
-    } catch (ConnectException e) {
-      WtMessageHandler.printToLogFile("Could not connect to server at: " + url);
-      WtMessageHandler.printException(e);
-      stopAiRemote();
-    } catch (Exception e) {
+      conn = getConnection(postData, checkUrl, apiKey);
+    } catch (RuntimeException e) {
       WtMessageHandler.showError(e);
       stopAiRemote();
-    } finally {
-      conn.disconnect();
+      return null;
+    }
+    int trials = 0;
+    while (trials < REMOTE_TRIALS) {
+      trials++;
+      try {
+        if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+          try (InputStream inputStream = conn.getInputStream()) {
+            String out = readStream(inputStream, "utf-8");
+            out = parseJasonOutput(out);
+            if (out == null) {
+              return null;
+            }
+            out = filterOutput (out, org, instruction, onlyOneParagraph);
+            if (debugModeTm) {
+              long runTime = System.currentTimeMillis() - startTime;
+              WtMessageHandler.printToLogFile("AiRemote: runInstruction: Time to generate Answer: " + runTime);
+            }
+            return out;
+          }
+        } else {
+          try (InputStream inputStream = conn.getErrorStream()) {
+            String error = readStream(inputStream, "utf-8");
+            WtMessageHandler.printToLogFile("Got error: " + error + " - HTTP response code " + conn.getResponseCode());
+            stopAiRemote();
+            return null;
+          }
+        }
+      } catch (ConnectException e) {
+        if (trials >= REMOTE_TRIALS) {
+          WtMessageHandler.printToLogFile("Could not connect to server at: " + url);
+          WtMessageHandler.printException(e);
+          stopAiRemote();
+        }
+      } catch (Exception e) {
+        if (trials >= REMOTE_TRIALS) {
+          WtMessageHandler.showError(e);
+          stopAiRemote();
+        }
+      } finally {
+        conn.disconnect();
+      }
     }
     return null;
   }
