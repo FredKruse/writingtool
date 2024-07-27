@@ -155,7 +155,7 @@ public class WtAiRemote {
     String langName = locale.Language;
     String org = text == null ? instruction : text;
     if (text != null) {
-      text = text.replace("\n", "\r").replace("\r", " ").replace("\"", "\\\"");
+      text = text.replace("\n", "\r").replace("\r", " ").replace("\"", "\\\"").replace("\t", " ");
     }
     String urlParameters;
 //    instruction = addLanguageName(instruction, locale);
@@ -225,6 +225,7 @@ public class WtAiRemote {
           try (InputStream inputStream = conn.getErrorStream()) {
             String error = readStream(inputStream, "utf-8");
             WtMessageHandler.printToLogFile("Got error: " + error + " - HTTP response code " + conn.getResponseCode());
+            WtMessageHandler.printToLogFile("urlParameters: " + urlParameters);
             stopAiRemote();
             return null;
           }
