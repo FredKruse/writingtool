@@ -74,6 +74,7 @@ import org.writingtool.aisupport.WtAiParagraphChanging;
 import org.writingtool.aisupport.WtAiRemote;
 import org.writingtool.config.WtConfiguration;
 import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeDrawTools;
 import org.writingtool.tools.WtOfficeGraphicTools;
 import org.writingtool.tools.WtOfficeTools;
 import org.writingtool.tools.WtViewCursorTools;
@@ -146,6 +147,7 @@ public class WtAiDialog extends Thread implements ActionListener {
   private WtSingleDocument currentDocument;
   private WtDocumentsHandler documents;
   private WtConfiguration config;
+  private DocumentType documentType;
   
   private int dialogX = -1;
   private int dialogY = -1;
@@ -160,6 +162,7 @@ public class WtAiDialog extends Thread implements ActionListener {
   private float temperature = DEFAULT_TEMPERATURE;
   private int seed = randomInteger();
   private int step = DEFAULT_STEP;
+//  private int nPara = 0;
   private BufferedImage image;
   private String urlString;
 
@@ -182,6 +185,7 @@ public class WtAiDialog extends Thread implements ActionListener {
     }
     
     currentDocument = document;
+    documentType = document.getDocumentType();
     
     dialog = new JDialog();
     contentPane = dialog.getContentPane();
@@ -433,7 +437,7 @@ public class WtAiDialog extends Thread implements ActionListener {
               if (debugMode) {
                 WtMessageHandler.printToLogFile("CheckDialog: LtCheckDialog: Window Focus gained: Event = " + e.paramString());
               }
-              setAtWorkButtonState(atWork);
+              setAtWorkButtonState(atWork, true);
               currentDocument = getCurrentDocument();
               if (currentDocument == null) {
                 closeDialog();
@@ -456,7 +460,7 @@ public class WtAiDialog extends Thread implements ActionListener {
             if (debugMode) {
               WtMessageHandler.printToLogFile("CheckDialog: LtCheckDialog: Window Focus lost: Event = " + e.paramString());
             }
-            setAtWorkButtonState(atWork);
+            setAtWorkButtonState(atWork, false);
             dialog.setEnabled(true);
             focusLost = true;
           } catch (Throwable t) {
@@ -790,7 +794,8 @@ public class WtAiDialog extends Thread implements ActionListener {
    * @throws Throwable 
    */
   public void show() throws Throwable {
-    if (currentDocument == null || currentDocument.getDocumentType() != DocumentType.WRITER) {
+    if (currentDocument == null || (currentDocument.getDocumentType() != DocumentType.WRITER 
+          && currentDocument.getDocumentType() != DocumentType.IMPRESS)) {
       return;
     }
     if (debugMode) {
@@ -819,9 +824,11 @@ public class WtAiDialog extends Thread implements ActionListener {
    */
   private WtSingleDocument getCurrentDocument() {
     WtSingleDocument currentDocument = documents.getCurrentDocument();
-    if (currentDocument != null && currentDocument.getDocumentType() != DocumentType.WRITER) {
+    if (currentDocument == null || (currentDocument.getDocumentType() != DocumentType.WRITER 
+        && currentDocument.getDocumentType() != DocumentType.IMPRESS)) {
       return null;
     }
+    documentType = currentDocument.getDocumentType();
     return currentDocument;
   }
 
@@ -839,8 +846,9 @@ public class WtAiDialog extends Thread implements ActionListener {
       locale = docCache.getTextParagraphLocale(tPara);
       paragraph.setText(paraText);
     } else {
+      XComponent xComponent = currentDocument.getXComponent();
       paraText = "";
-      locale = null;
+      locale = WtOfficeDrawTools.getDocumentLocale(xComponent);
       paragraph.setText(paraText);
     }
   }
@@ -848,33 +856,33 @@ public class WtAiDialog extends Thread implements ActionListener {
   /**
    * Initial button state
    */
-  private void setAtWorkButtonState(boolean work) {
+  private void setAtWorkButtonState(boolean work, boolean enabled) {
     checkProgress.setIndeterminate(work);
-    instruction.setEnabled(!work);
-    paragraph.setEnabled(!work);
-    result.setEnabled(!work);
-    execute.setEnabled(!work);
-    copyResult.setEnabled(!work);
-    reset.setEnabled(!work);
-    clear.setEnabled(!work);
-    undo.setEnabled(saveText == null ? false : !work);
-    overrideParagraph.setEnabled(resultText == null ? false : !work);
-    addToParagraph.setEnabled(resultText == null ? false : !work);
-    help.setEnabled(!work);
+    instruction.setEnabled(!work && enabled);
+    paragraph.setEnabled(!work && enabled);
+    result.setEnabled(!work && enabled);
+    execute.setEnabled(!work && enabled);
+    copyResult.setEnabled(!work && enabled);
+    reset.setEnabled(!work && enabled);
+    clear.setEnabled(!work && enabled);
+    undo.setEnabled(saveText == null ? false : !work && enabled);
+    overrideParagraph.setEnabled(resultText == null ? false : !work && enabled);
+    addToParagraph.setEnabled(resultText == null ? false : !work && enabled);
+    help.setEnabled(!work && enabled);
     close.setEnabled(true);
 
-    imgInstruction.setEnabled(!work);
-    exclude.setEnabled(!work);
-    imageFrame.setEnabled(!work);
-    changeImage.setEnabled(!work);
-    newImage.setEnabled(!work);
-    removeImage.setEnabled(!work);
-    saveImage.setEnabled(!work);
-    insertImage.setEnabled(!work);
+    imgInstruction.setEnabled(!work && enabled);
+    exclude.setEnabled(!work && enabled);
+    imageFrame.setEnabled(!work && enabled);
+    changeImage.setEnabled(!work && enabled);
+    newImage.setEnabled(!work && enabled);
+    removeImage.setEnabled(!work && enabled);
+    saveImage.setEnabled(!work && enabled);
+    insertImage.setEnabled(!work && enabled);
     
     contentPane.revalidate();
     contentPane.repaint();
-    dialog.setEnabled(!work);
+//    dialog.setEnabled(!work);
     atWork = work;
   }
   
@@ -901,7 +909,7 @@ public class WtAiDialog extends Thread implements ActionListener {
         writeInstructions(instructionList);
       }
       String text = paragraph.getText();
-      setAtWorkButtonState(true);
+      setAtWorkButtonState(true, false);
       WtAiRemote aiRemote = new WtAiRemote(documents, config);
       if (debugMode) {
         WtMessageHandler.printToLogFile("AiParagraphChanging: runInstruction: instruction: " + instructionText + ", text: " + text);
@@ -917,7 +925,7 @@ public class WtAiDialog extends Thread implements ActionListener {
       WtMessageHandler.showError(t);
       closeDialog();
     }
-    setAtWorkButtonState(false);
+    setAtWorkButtonState(false, true);
   }
 
   /**
@@ -937,7 +945,7 @@ public class WtAiDialog extends Thread implements ActionListener {
       if (excludeText == null) {
         excludeText = "";
       }
-      setAtWorkButtonState(true);
+      setAtWorkButtonState(true, false);
       WtAiRemote aiRemote = new WtAiRemote(documents, config);
       if (debugMode) {
         WtMessageHandler.printToLogFile("AiParagraphChanging: runInstruction: instruction: " + instructionText + ", exclude: " + excludeText);
@@ -952,7 +960,7 @@ public class WtAiDialog extends Thread implements ActionListener {
       WtMessageHandler.showError(t);
       closeDialog();
     }
-    setAtWorkButtonState(false);
+    setAtWorkButtonState(false, true);
   }
 
   /**
@@ -1035,7 +1043,11 @@ public class WtAiDialog extends Thread implements ActionListener {
   }
 
   private void writeToParagraph(boolean override) throws Throwable {
-    WtAiParagraphChanging.insertText(resultText, currentDocument.getXComponent(), override);
+    if (documentType == DocumentType.WRITER) {
+      WtAiParagraphChanging.insertText(resultText, currentDocument.getXComponent(), override);
+    } else {
+      WtOfficeGraphicTools.insertDrawText(resultText, 256, 128, currentDocument.getXComponent());
+    }
   }
   
   
@@ -1154,8 +1166,13 @@ public class WtAiDialog extends Thread implements ActionListener {
     File dir = WtOfficeTools.getCacheDir();
     File tmpFile = new File(dir, TEMP_IMAGE_FILE_NAME);
     saveImage(tmpFile);
-    WtOfficeGraphicTools.insertGraphic(tmpFile.getAbsolutePath(), imageWidth, 
+    if (documentType == DocumentType.IMPRESS) {
+      WtOfficeGraphicTools.insertGraphicInImpress(tmpFile.getAbsolutePath(), imageWidth,
         currentDocument.getXComponent(), documents.getContext());
+    } else {
+      WtOfficeGraphicTools.insertGraphic(tmpFile.getAbsolutePath(), imageWidth, 
+        currentDocument.getXComponent(), documents.getContext());
+    }
   }
   
   private void removeImage() {

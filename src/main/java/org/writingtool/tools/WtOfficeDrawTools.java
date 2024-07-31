@@ -473,7 +473,7 @@ public class WtOfficeDrawTools {
   /**
    * get the first paragraph of current draw page
    */
-  public static int getParagraphFromCurrentPage(XComponent xComponent) {
+  public static int getParagraphNumberFromCurrentPage(XComponent xComponent) {
     int nParaCount = 0;
     try {
       XModel xModel = UnoRuntime.queryInterface(XModel.class, xComponent);

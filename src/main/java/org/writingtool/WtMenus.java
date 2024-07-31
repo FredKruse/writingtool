@@ -617,18 +617,24 @@ public class WtMenus {
           WtMessageHandler.printToLogFile("LanguageToolMenus: notifyContextMenuExecute: get xContextMenu");
         }
         
+        document.setMenuDocId();
         if (document.getDocumentType() == DocumentType.IMPRESS) {
+          int nId = 0;
           XMultiServiceFactory xMenuElementFactory = UnoRuntime.queryInterface(XMultiServiceFactory.class, xContextMenu);
           XPropertySet xNewMenuEntry = UnoRuntime.queryInterface(XPropertySet.class,
               xMenuElementFactory.createInstance("com.sun.star.ui.ActionTrigger"));
           xNewMenuEntry.setPropertyValue("Text", MESSAGES.getString("loContextMenuGrammarCheck"));
           xNewMenuEntry.setPropertyValue("CommandURL", LT_CHECKDIALOG_COMMAND);
-          xContextMenu.insertByIndex(0, xNewMenuEntry);
-
+          xContextMenu.insertByIndex(nId, xNewMenuEntry);
+          nId++;
+          if (config.useAiSupport() || config.useAiImgSupport()) {
+            addAIMenuEntry(nId, xContextMenu, xMenuElementFactory);
+            nId++;
+          }
           XPropertySet xSeparator = UnoRuntime.queryInterface(XPropertySet.class,
               xMenuElementFactory.createInstance("com.sun.star.ui.ActionTriggerSeparator"));
           xSeparator.setPropertyValue("SeparatorType", ActionTriggerSeparatorType.LINE);
-          xContextMenu.insertByIndex(1, xSeparator);
+          xContextMenu.insertByIndex(nId, xSeparator);
           if (debugModeTm) {
             long runTime = System.currentTimeMillis() - startTime;
             if (runTime > WtOfficeTools.TIME_TOLERANCE) {
@@ -653,7 +659,6 @@ public class WtMenus {
         }
 
         //  Add LT Options Item if a Grammar or Spell error was detected
-        document.setMenuDocId();
         XMultiServiceFactory xMenuElementFactory = UnoRuntime.queryInterface(XMultiServiceFactory.class, xContextMenu);
         for (int i = 0; i < count; i++) {
           Any a = (Any) xContextMenu.getByIndex(i);
