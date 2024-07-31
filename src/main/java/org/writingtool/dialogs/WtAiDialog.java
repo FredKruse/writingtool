@@ -75,7 +75,6 @@ import org.writingtool.aisupport.WtAiRemote;
 import org.writingtool.config.WtConfiguration;
 import org.writingtool.tools.WtMessageHandler;
 import org.writingtool.tools.WtOfficeDrawTools;
-import org.writingtool.tools.WtOfficeDrawTools.ParagraphContainer;
 import org.writingtool.tools.WtOfficeGraphicTools;
 import org.writingtool.tools.WtOfficeTools;
 import org.writingtool.tools.WtViewCursorTools;
@@ -163,7 +162,7 @@ public class WtAiDialog extends Thread implements ActionListener {
   private float temperature = DEFAULT_TEMPERATURE;
   private int seed = randomInteger();
   private int step = DEFAULT_STEP;
-  private int nPara = 0;
+//  private int nPara = 0;
   private BufferedImage image;
   private String urlString;
 
@@ -848,13 +847,8 @@ public class WtAiDialog extends Thread implements ActionListener {
       paragraph.setText(paraText);
     } else {
       XComponent xComponent = currentDocument.getXComponent();
-      nPara = WtOfficeDrawTools.getParagraphNumberFromCurrentPage(xComponent);
-      ParagraphContainer paraContainer = WtOfficeDrawTools.getAllParagraphs(xComponent);
-      if (nPara >= paraContainer.paragraphs.size()) {
-        nPara = paraContainer.paragraphs.size() -1;
-      }
-      paraText = paraContainer.paragraphs.get(nPara);
-      locale = paraContainer.locales.get(nPara);
+      paraText = "";
+      locale = WtOfficeDrawTools.getDocumentLocale(xComponent);
       paragraph.setText(paraText);
     }
   }
@@ -1052,8 +1046,7 @@ public class WtAiDialog extends Thread implements ActionListener {
     if (documentType == DocumentType.WRITER) {
       WtAiParagraphChanging.insertText(resultText, currentDocument.getXComponent(), override);
     } else {
-      int length = override ? paraText.length() : 0;
-      WtOfficeDrawTools.changeTextOfParagraph(nPara, 0, length, resultText, currentDocument.getXComponent());
+      WtOfficeGraphicTools.insertDrawText(resultText, 256, 128, currentDocument.getXComponent());
     }
   }
   

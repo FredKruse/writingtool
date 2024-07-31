@@ -23,8 +23,6 @@ import java.io.File;
 import com.sun.star.awt.Point;
 import com.sun.star.awt.Size;
 import com.sun.star.beans.PropertyValue;
-import com.sun.star.beans.PropertyVetoException;
-import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.ElementExistException;
 import com.sun.star.container.XNameContainer;
@@ -32,13 +30,10 @@ import com.sun.star.drawing.LineStyle;
 import com.sun.star.drawing.XDrawPage;
 import com.sun.star.drawing.XDrawView;
 import com.sun.star.drawing.XShape;
-import com.sun.star.drawing.XShapes;
 import com.sun.star.frame.XController;
 import com.sun.star.frame.XModel;
 import com.sun.star.graphic.XGraphic;
 import com.sun.star.graphic.XGraphicProvider;
-import com.sun.star.lang.IllegalArgumentException;
-import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.lang.XComponent;
 import com.sun.star.lang.XMultiComponentFactory;
 import com.sun.star.lang.XMultiServiceFactory;
@@ -46,6 +41,7 @@ import com.sun.star.text.XText;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.text.XTextRange;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
@@ -62,13 +58,7 @@ public class WtOfficeGraphicTools {
 
   public static void insertGraphic(String strUrl, int size, XComponent xComp, XComponentContext xContext) {
     try {
-      // get the remote office service manager
-//      XMultiComponentFactory xMCF = xContext.getServiceManager();
-
-      // Querying for the interface XTextDocument on the xcomponent
       XTextDocument xTextDoc = UnoRuntime.queryInterface(XTextDocument.class, xComp);
-
-      // Querying for the interface XMultiServiceFactory on the xtextdocument
       XMultiServiceFactory xMSFDoc = UnoRuntime.queryInterface(XMultiServiceFactory.class, xTextDoc);
 
       Object oGraphic = null;
@@ -143,20 +133,6 @@ public class WtOfficeGraphicTools {
     }
   }
   
-  //  For Impress
-  
-  public static void insertGraphicInImpress(String strUrl, int size, XComponent xComponent, XComponentContext xContext) {
-    try {
-      XModel xModel = UnoRuntime.queryInterface(XModel.class, xComponent);
-      XController xController = xModel.getCurrentController();
-      XDrawView xDrawView = UnoRuntime.queryInterface(XDrawView.class, xController);
-      XDrawPage xCurrentDrawPage = xDrawView.getCurrentPage();
-      drawImage(xCurrentDrawPage, strUrl, 0, 0, size / SIZE_Del, size / SIZE_Del, xComponent, xContext);    
-    } catch (Throwable e) {
-      WtMessageHandler.showError(e);
-    }
-  }
-  
   private static XGraphic getGraphic(String sUrl, XComponentContext xContext) {
     try {
       XMultiComponentFactory xMCF = xContext.getServiceManager();
@@ -174,27 +150,20 @@ public class WtOfficeGraphicTools {
     }
   }
   
-  private static XShape drawImage(XDrawPage slide, String imFnm, XComponent xComponent, XComponentContext xcc) {
+  //  For Impress
+  
+  public static void insertGraphicInImpress(String strUrl, int size, XComponent xComponent, XComponentContext xContext) {
     try {
-      Size slideSize = getSlideSize(slide);  // returned in mm units
-      Size imSize = getSize100mm(imFnm, xcc);   // in 1/100 mm units
-      if (imSize == null) {
-        System.out.println("Could not calculate size of " + imFnm);
-        return null;
-      }
-      else {   // center the image on the page
-        int imWidth = imSize.Width/100;   // in mm units
-        int imHeight = imSize.Height/100;
-        int x = (slideSize.Width - imWidth)/2;
-        int y = (slideSize.Height - imHeight)/2;
-        return drawImage(slide, imFnm, x, y, imWidth, imHeight, xComponent, xcc);
-      }
-    } catch (Throwable t) {
-      WtMessageHandler.showError(t);
-      return null;
+      XModel xModel = UnoRuntime.queryInterface(XModel.class, xComponent);
+      XController xController = xModel.getCurrentController();
+      XDrawView xDrawView = UnoRuntime.queryInterface(XDrawView.class, xController);
+      XDrawPage xCurrentDrawPage = xDrawView.getCurrentPage();
+      drawImage(xCurrentDrawPage, strUrl, 0, 0, size / SIZE_Del, size / SIZE_Del, xComponent, xContext);    
+    } catch (Throwable e) {
+      WtMessageHandler.showError(e);
     }
-  }  // end of drawImage()
-
+  }
+  
   private static XShape drawImage(XDrawPage slide, String imFnm, int x, int y, int width, int height,
       XComponent xComponent, XComponentContext xContext) {
     // units in mm's
@@ -257,16 +226,6 @@ public class WtOfficeGraphicTools {
     }
   }  // end of warnsPosition()
 
-  private static XShape addSlideNumber(XDrawPage slide, XComponent xComponent)
-  // add slide number at bottom right (like on the default slide)
-  {
-    Size sz = getSlideSize(slide);
-    int width = 60;
-    int height = 15;
-    return addPresShape(slide, "SlideNumberShape", 
-                          sz.Width-width-12, sz.Height-height-4, width, height, xComponent); 
-  }  // end of addSlideNumber()
-
   private static Size getSlideSize(XDrawPage xDrawPage)
   // get size of the given slide page (in mm units)
   {
@@ -285,46 +244,6 @@ public class WtOfficeGraphicTools {
        return null;
     }
   }  // end of getSlideSize()
-
-  private static XShape addPresShape(XDrawPage slide, String shapeType, 
-                                              int x, int y, int width, int height, XComponent xComponent) {
-    // ((x,y), width, height must be set after insertion
-    try {
-      warnsPosition(slide, x, y);
-      XMultiServiceFactory msf = UnoRuntime.queryInterface(XMultiServiceFactory.class, xComponent);
-      Object o;
-      o = msf.createInstance("com.sun.star.presentation." + shapeType);
-      XShape shape = UnoRuntime.queryInterface(XShape.class, o);
-      if (shape != null) {
-        slide.add(shape);
-        setPosition(shape, x, y);
-        setSize(shape, width, height);
-      }
-      return shape;
-    } catch (Throwable e) {
-      WtMessageHandler.printException(e);
-    }
-    return null;
-  }  // end of addPresShape()
-
-  private static void setSize(XShape shape, Size sz) {
-    setSize(shape, sz.Width, sz.Height);
-  }
-
-  private static void setSize(XShape shape, int width, int height)
-  {
-    try {
-      shape.setSize(new Size(width*100, height*100));  // convert to 1/100 mm units
-      System.out.println("(w,h): " + width + ", " + height);
-    }
-    catch(Exception e) {
-      WtMessageHandler.printToLogFile("Could not set the shape's size");
-    }
-  }  // end of setSize()
-
-  private static void setPosition(XShape shape, int x, int y) {
-    shape.setPosition(new Point(x*100, y*100));
-  } 
 
   private static void setLineStyle(XShape shape, LineStyle style) {
     try {
@@ -348,42 +267,6 @@ public class WtOfficeGraphicTools {
     }
   }  // end of setImage()
   
-  private static Size getSize100mm(String imFnm, XComponentContext xcc) throws Throwable {
-    XGraphic graphic = loadGraphicFile(imFnm, xcc);
-    if (graphic == null) {
-      return null;
-    }
-    XPropertySet propSet =  UnoRuntime.queryInterface(XPropertySet.class, graphic);
-    return (Size) propSet.getPropertyValue("Size100thMM");
-  }  // end of getSize100mm()
-  
-  private static XGraphic loadGraphicFile(String imFnm, XComponentContext xcc) {
-//    System.out.println("Loading XGraphic from " + imFnm);
-    try {
-      XMultiComponentFactory mcFactory = xcc.getServiceManager();
-      Object o = mcFactory.createInstanceWithContext("com.sun.star.graphic.GraphicProvider", xcc);     
-      XGraphicProvider gProvider = UnoRuntime.queryInterface(XGraphicProvider.class, o);
-      if (gProvider == null) {
-        System.out.println("Graphic Provider could not be found");
-        return null;
-      }
-  
-      PropertyValue[] fileProps =  makeProps("URL", fnmToURL(imFnm));
-      return gProvider.queryGraphic(fileProps);
-    } catch(Throwable e) {
-      WtMessageHandler.printException(e);
-      return null;  
-    }
-  }  // end of loadGraphicFile()
-
-  private static PropertyValue[] makeProps(String oName, Object oValue) {
-    PropertyValue[] props = new PropertyValue[1];
-    props[0] = new PropertyValue();
-    props[0].Name = oName;
-    props[0].Value = oValue;
-    return props;
-  }  // end of makeProps()
-
   private static Object getBitmap(String fnm, XComponent xComponent)
   // load the graphic as a bitmap, and return it as a string
   {
@@ -450,7 +333,31 @@ public class WtOfficeGraphicTools {
        WtMessageHandler.printException(e);
        return null;
      }
-  } // end of fnmToURL()
+  }
+
+  public static void insertDrawText(String txt, int width, int height, XComponent xComponent) {
+    try {
+      XModel xModel = UnoRuntime.queryInterface(XModel.class, xComponent);
+      XController xController = xModel.getCurrentController();
+      XDrawView xDrawView = UnoRuntime.queryInterface(XDrawView.class, xController);
+      XDrawPage xCurrentDrawPage = xDrawView.getCurrentPage();
+      XShape shape = addShape(xCurrentDrawPage, "TextShape", 0, 0, width, height, xComponent);
+      addText(shape, txt);
+    } catch (Throwable e) {
+      WtMessageHandler.showError(e);
+    }
+  }
+  
+  private static void addText(XShape shape, String txt)
+  {
+    XText xText = UnoRuntime.queryInterface(XText.class, shape);
+    XTextCursor cursor = xText.createTextCursor();
+    cursor.gotoEnd(false);
+    XTextRange range = UnoRuntime.queryInterface(XTextRange.class, cursor);
+    range.setString(txt);
+  }  // end of addText()
+
+
 
 
 
