@@ -2535,7 +2535,7 @@ public class WtCheckDialog extends Thread {
             y = docCache.getFlatParagraphNumber(tPara);
           }
         } else if (docType == DocumentType.IMPRESS) {
-          y = WtOfficeDrawTools.getParagraphFromCurrentPage(xComponent);
+          y = WtOfficeDrawTools.getParagraphNumberFromCurrentPage(xComponent);
         } else {
           y = WtOfficeSpreadsheetTools.getParagraphFromCurrentSheet(xComponent);
         }
