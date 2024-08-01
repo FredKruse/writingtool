@@ -53,7 +53,7 @@ public class WtConfigThread extends Thread {
     this.config = config;
     this.lt = lt;
     this.documents = documents;
-    String title = WtOfficeTools.getMessageBundle().getString("guiConfigWindowTitle") + " (LT " + WtOfficeTools.getLtInformation() + ")";
+    String title = WtOfficeTools.getMessageBundle().getString("guiWtConfigWindowTitle") + " (LT " + WtOfficeTools.getLtInformation() + ")";
     cfgDialog = new WtConfigurationDialog(null, WtOfficeTools.getLtImage(), title, config);
   }
 

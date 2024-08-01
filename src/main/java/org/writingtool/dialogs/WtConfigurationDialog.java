@@ -195,7 +195,7 @@ public class WtConfigurationDialog implements ActionListener {
     restartShow = false;
     dialog = new JDialog(owner, true);
     if (dialogTitle == null) {
-      dialogTitle = messages.getString("guiConfigWindowTitle");
+      dialogTitle = messages.getString("guiWtConfigWindowTitle");
     }
     dialog.setTitle(dialogTitle);
     if (ltImage != null) {
