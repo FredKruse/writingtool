@@ -157,8 +157,8 @@ public class WtAiDialog extends Thread implements ActionListener {
   private String paraText;
   private String resultText;
   private Locale locale;
-  private boolean atWork;
-  private boolean focusLost;
+  private boolean atWork = false;
+  private boolean focusLost = false;
   private float temperature = DEFAULT_TEMPERATURE;
   private int seed = randomInteger();
   private int step = DEFAULT_STEP;
@@ -437,7 +437,7 @@ public class WtAiDialog extends Thread implements ActionListener {
               if (debugMode) {
                 WtMessageHandler.printToLogFile("CheckDialog: LtCheckDialog: Window Focus gained: Event = " + e.paramString());
               }
-              setAtWorkButtonState(atWork, true);
+              setButtonState(!atWork);
               currentDocument = getCurrentDocument();
               if (currentDocument == null) {
                 closeDialog();
@@ -460,7 +460,7 @@ public class WtAiDialog extends Thread implements ActionListener {
             if (debugMode) {
               WtMessageHandler.printToLogFile("CheckDialog: LtCheckDialog: Window Focus lost: Event = " + e.paramString());
             }
-            setAtWorkButtonState(atWork, false);
+            setButtonState(false);
             dialog.setEnabled(true);
             focusLost = true;
           } catch (Throwable t) {
@@ -856,34 +856,40 @@ public class WtAiDialog extends Thread implements ActionListener {
   /**
    * Initial button state
    */
-  private void setAtWorkButtonState(boolean work, boolean enabled) {
+  private void setAtWorkState(boolean work) {
     checkProgress.setIndeterminate(work);
-    instruction.setEnabled(!work && enabled);
-    paragraph.setEnabled(!work && enabled);
-    result.setEnabled(!work && enabled);
-    execute.setEnabled(!work && enabled);
-    copyResult.setEnabled(!work && enabled);
-    reset.setEnabled(!work && enabled);
-    clear.setEnabled(!work && enabled);
-    undo.setEnabled(saveText == null ? false : !work && enabled);
-    overrideParagraph.setEnabled(resultText == null ? false : !work && enabled);
-    addToParagraph.setEnabled(resultText == null ? false : !work && enabled);
-    help.setEnabled(!work && enabled);
+    atWork = work;
+  }
+  
+  /**
+   * Initial button state
+   */
+  private void setButtonState(boolean enabled) {
+    instruction.setEnabled(enabled);
+    paragraph.setEnabled(enabled);
+    result.setEnabled(enabled);
+    execute.setEnabled(enabled);
+    copyResult.setEnabled(enabled);
+    reset.setEnabled(enabled);
+    clear.setEnabled(enabled);
+    undo.setEnabled(saveText == null ? false : enabled);
+    overrideParagraph.setEnabled(resultText == null ? false : enabled);
+    addToParagraph.setEnabled(resultText == null ? false : enabled);
+    help.setEnabled(enabled);
     close.setEnabled(true);
 
-    imgInstruction.setEnabled(!work && enabled);
-    exclude.setEnabled(!work && enabled);
-    imageFrame.setEnabled(!work && enabled);
-    changeImage.setEnabled(!work && enabled);
-    newImage.setEnabled(!work && enabled);
-    removeImage.setEnabled(!work && enabled);
-    saveImage.setEnabled(!work && enabled);
-    insertImage.setEnabled(!work && enabled);
+    imgInstruction.setEnabled(enabled);
+    exclude.setEnabled(enabled);
+    imageFrame.setEnabled(enabled);
+    changeImage.setEnabled(enabled);
+    newImage.setEnabled(enabled);
+    removeImage.setEnabled(enabled);
+    saveImage.setEnabled(enabled);
+    insertImage.setEnabled(enabled);
     
     contentPane.revalidate();
     contentPane.repaint();
-//    dialog.setEnabled(!work);
-    atWork = work;
+    dialog.setEnabled(enabled);
   }
   
   /**
@@ -891,6 +897,8 @@ public class WtAiDialog extends Thread implements ActionListener {
    */
   private void execute() {
     try {
+      setAtWorkState(true);
+      setButtonState(false);
       if (!documents.isEnoughHeapSpace()) {
         closeDialog();
         return;
@@ -909,7 +917,6 @@ public class WtAiDialog extends Thread implements ActionListener {
         writeInstructions(instructionList);
       }
       String text = paragraph.getText();
-      setAtWorkButtonState(true, false);
       WtAiRemote aiRemote = new WtAiRemote(documents, config);
       if (debugMode) {
         WtMessageHandler.printToLogFile("AiParagraphChanging: runInstruction: instruction: " + instructionText + ", text: " + text);
@@ -924,8 +931,10 @@ public class WtAiDialog extends Thread implements ActionListener {
     } catch (Throwable t) {
       WtMessageHandler.showError(t);
       closeDialog();
+    } finally {
+      setAtWorkState(false);
+      setButtonState(true);
     }
-    setAtWorkButtonState(false, true);
   }
 
   /**
@@ -945,7 +954,8 @@ public class WtAiDialog extends Thread implements ActionListener {
       if (excludeText == null) {
         excludeText = "";
       }
-      setAtWorkButtonState(true, false);
+      setAtWorkState(true);
+      setButtonState(false);
       WtAiRemote aiRemote = new WtAiRemote(documents, config);
       if (debugMode) {
         WtMessageHandler.printToLogFile("AiParagraphChanging: runInstruction: instruction: " + instructionText + ", exclude: " + excludeText);
@@ -960,7 +970,8 @@ public class WtAiDialog extends Thread implements ActionListener {
       WtMessageHandler.showError(t);
       closeDialog();
     }
-    setAtWorkButtonState(false, true);
+    setAtWorkState(false);
+    setButtonState(true);
   }
 
   /**
