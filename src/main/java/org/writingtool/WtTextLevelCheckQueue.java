@@ -48,7 +48,6 @@ public class WtTextLevelCheckQueue {
   protected List<QueueEntry> textRuleQueue = Collections.synchronizedList(new ArrayList<QueueEntry>());  //  Queue to check text rules in a separate thread
 //  private Object queueWakeup = new Object();
   protected WtDocumentsHandler multiDocHandler;
-  private WtSortedTextRules sortedTextRules = null;
 
   private QueueIterator queueIterator = null;
   private TextParagraph lastStart = null;
@@ -209,6 +208,7 @@ public class WtTextLevelCheckQueue {
       }
       textRuleQueue.add(queueEntry);
     }
+    lt = null;
     wakeupQueue();
   }
   
@@ -290,9 +290,7 @@ public class WtTextLevelCheckQueue {
     }
     lt = multiDocHandler.initLanguageTool(language, false);
     if (lt != null) {
-      multiDocHandler.initCheck(lt);
-      String langCode = WtOfficeTools.localeToString(multiDocHandler.getLocale());
-      sortedTextRules = new WtSortedTextRules(lt, multiDocHandler.getConfiguration(), multiDocHandler.getDisabledRules(langCode), false);
+      lt.initCheck(false);
     }
   }
   
@@ -664,10 +662,10 @@ public class WtTextLevelCheckQueue {
                       }
                     }
                     if (!interruptCheck) {
-                      sortedTextRules.activateTextRulesByIndex(queueEntry.nCache, lt);
+                      lt.activateTextRulesByIndex(queueEntry.nCache);
                     }
                   } else if (lastCache != queueEntry.nCache && !interruptCheck) {
-                    sortedTextRules.activateTextRulesByIndex(queueEntry.nCache, lt);
+                    lt.activateTextRulesByIndex(queueEntry.nCache);
                   }
                 }
                 lastDocId = queueEntry.docId;

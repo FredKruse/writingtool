@@ -63,6 +63,7 @@ public class WtLanguageTool {
   private final WtRemoteLanguageTool rlt;
   private JLanguageToolLo lt;
 
+  private WtSortedTextRules sortedTextRules;
   private boolean isMultiThread;
   private boolean isRemote;
   private boolean doReset;
@@ -99,6 +100,106 @@ public class WtLanguageTool {
       }
       mlt = null;
       rlt = null;
+    }
+  }
+  
+  /**
+   * Enable or disable rules as given by configuration file
+   */
+  public void initCheck(boolean checkImpressDocument) throws Throwable {
+    if (config.enableTmpOffRules()) {
+      //  enable TempOff rules if configured
+      List<Rule> allRules = getAllRules();
+      WtMessageHandler.printToLogFile("initCheck: enableTmpOffRules: true");
+      for (Rule rule : allRules) {
+        if (rule.isDefaultTempOff()) {
+          WtMessageHandler.printToLogFile("initCheck: enableTmpOffRule: " + rule.getId());
+          enableRule(rule.getId());
+        }
+      }
+    }
+    Set<String> disabledRuleIds = config.getDisabledRuleIds();
+    if (disabledRuleIds != null) {
+      // copy as the config thread may access this as well
+      List<String> list = new ArrayList<>(disabledRuleIds);
+      for (String id : list) {
+        disableRule(id);
+      }
+    }
+    Set<String> disabledCategories = config.getDisabledCategoryNames();
+    if (disabledCategories != null) {
+      // copy as the config thread may access this as well
+      List<String> list = new ArrayList<>(disabledCategories);
+      for (String categoryName : list) {
+        disableCategory(new CategoryId(categoryName));
+      }
+    }
+    Set<String> enabledRuleIds = config.getEnabledRuleIds();
+    if (enabledRuleIds != null) {
+      // copy as the config thread may access this as well
+      List<String> list = new ArrayList<>(enabledRuleIds);
+      for (String ruleName : list) {
+//        MessageHandler.printToLogFile("Enable Rule: " + ruleName);
+        lt.enableRule(ruleName);
+      }
+    }
+    String langCode = getLanguage().getShortCodeWithCountryAndVariant();
+    Set<String> disabledLocaleRules = WtDocumentsHandler.getDisabledRules(langCode);
+    if (disabledLocaleRules != null) {
+      for (String id : disabledLocaleRules) {
+//        MessageHandler.printToLogFile("Disable local Rule: " + id + ", Locale: " + lt.getLanguage().getShortCodeWithCountryAndVariant());
+        lt.disableRule(id);
+      }
+    }
+    sortedTextRules = new WtSortedTextRules(this, config, WtDocumentsHandler.getDisabledRules(langCode), checkImpressDocument);
+//    handleLtDictionary();
+  }
+  
+  /**
+   * reset sorted text level rules
+   */
+  public void resetSortedTextRules(boolean checkImpressDocument) throws Throwable {
+    String langCode = getLanguage().getShortCodeWithCountryAndVariant();
+    sortedTextRules = new WtSortedTextRules(this, config, WtDocumentsHandler.getDisabledRules(langCode), checkImpressDocument);
+  }
+
+  /**
+   * Returns a list of different numbers of paragraphs to check for text level rules
+   */
+  public List<Integer> getNumMinToCheckParas() {
+    if (sortedTextRules == null) {
+      return null;
+    }
+    return sortedTextRules.minToCheckParagraph;
+  }
+
+  /**
+   * Test if sorted rules for index exist
+   */
+  public boolean isSortedRuleForIndex(int index) {
+    if (index < 0 || sortedTextRules == null
+        || index >= sortedTextRules.textLevelRules.size() || sortedTextRules.textLevelRules.get(index).isEmpty()) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * activate all rules stored under a given index related to the list of getNumMinToCheckParas
+   * deactivate all other text level rules
+   */
+  public void activateTextRulesByIndex(int index) {
+    if (sortedTextRules != null) {
+      sortedTextRules.activateTextRulesByIndex(index, this);
+    }
+  }
+
+  /**
+   * reactivate all text level rules
+   */
+  public void reactivateTextRules() {
+    if (sortedTextRules != null) {
+      sortedTextRules.reactivateTextRules(this);
     }
   }
   

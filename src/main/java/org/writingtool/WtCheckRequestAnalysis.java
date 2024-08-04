@@ -101,7 +101,7 @@ class WtCheckRequestAnalysis {
     xComponent = singleDocument.getXComponent();
     docID = singleDocument.getDocID();
     docType = singleDocument.getDocumentType();
-    minToCheckPara = mDocHandler.getNumMinToCheckParas();
+    minToCheckPara = mDocHandler.getLanguageTool().getNumMinToCheckParas();
     docCache = singleDocument.getDocumentCache();
 //    flatPara = singleDocument.getFlatParagraphTools();
     config = mDocHandler.getConfiguration();

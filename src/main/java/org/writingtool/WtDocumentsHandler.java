@@ -46,7 +46,6 @@ import org.jetbrains.annotations.Nullable;
 import org.languagetool.Language;
 import org.languagetool.Languages;
 import org.languagetool.UserConfig;
-import org.languagetool.rules.CategoryId;
 import org.languagetool.rules.Rule;
 import org.languagetool.tools.Tools;
 import org.writingtool.WtDocumentCache.TextParagraph;
@@ -129,8 +128,7 @@ public class WtDocumentsHandler {
   private String configFile;
   private WtConfiguration config = null;
   private WtLinguisticServices linguServices = null;
-  private WtSortedTextRules sortedTextRules;
-  private Map<String, Set<String>> disabledRulesUI; //  Rules disabled by context menu or spell dialog
+  private static Map<String, Set<String>> disabledRulesUI; //  Rules disabled by context menu or spell dialog
   private final List<Rule> extraRemoteRules;        //  store of rules supported by remote server but not locally
   private LtCheckDialog ltDialog = null;            //  WT spelling and grammar check dialog
   private WtConfigurationDialog cfgDialog = null;   //  configuration dialog (show only one configuration panel)
@@ -268,7 +266,7 @@ public class WtDocumentsHandler {
 //          testFootnotes(propertyValues);
 //        }
         lt = initLanguageTool(!isSameLanguage);
-        initCheck(lt);
+        lt.initCheck(checkImpressDocument);
         if (initDocs) {
           initDocuments(true);
         }
@@ -583,7 +581,7 @@ public class WtDocumentsHandler {
   /**
    *  get disabled rules for a language code by context menu or spell dialog
    */
-  public Set<String> getDisabledRules(String langCode) {
+  public static Set<String> getDisabledRules(String langCode) {
     if (langCode == null || !disabledRulesUI.containsKey(langCode)) {
       return new HashSet<String>();
     }
@@ -601,7 +599,7 @@ public class WtDocumentsHandler {
    *  get all disabled rules
    */
   void setAllDisabledRules(Map<String, Set<String>> disabledRulesUI) {
-    this.disabledRulesUI = disabledRulesUI;
+    WtDocumentsHandler.disabledRulesUI = disabledRulesUI;
   }
   
   /**
@@ -670,6 +668,11 @@ public class WtDocumentsHandler {
         docLanguage = getCurrentLanguage();
       }
       lt = initLanguageTool();
+      try {
+        lt.initCheck(checkImpressDocument);
+      } catch (Throwable e) {
+        WtMessageHandler.showError(e);
+      }
     }
     return lt;
   }
@@ -1117,66 +1120,6 @@ public class WtDocumentsHandler {
   }
 
   /**
-   * Enable or disable rules as given by configuration file
-   */
-  public void initCheck(WtLanguageTool lt) throws Throwable {
-    long startTime = 0;
-    if (debugModeTm) {
-      startTime = System.currentTimeMillis();
-    }
-    if (config.enableTmpOffRules()) {
-      //  enable TempOff rules if configured
-      List<Rule> allRules = lt.getAllRules();
-      WtMessageHandler.printToLogFile("initCheck: enableTmpOffRules: true");
-      for (Rule rule : allRules) {
-        if (rule.isDefaultTempOff()) {
-          WtMessageHandler.printToLogFile("initCheck: enableTmpOffRule: " + rule.getId());
-          lt.enableRule(rule.getId());
-        }
-      }
-    }
-    Set<String> disabledRuleIds = config.getDisabledRuleIds();
-    if (disabledRuleIds != null) {
-      // copy as the config thread may access this as well
-      List<String> list = new ArrayList<>(disabledRuleIds);
-      for (String id : list) {
-        lt.disableRule(id);
-      }
-    }
-    Set<String> disabledCategories = config.getDisabledCategoryNames();
-    if (disabledCategories != null) {
-      // copy as the config thread may access this as well
-      List<String> list = new ArrayList<>(disabledCategories);
-      for (String categoryName : list) {
-        lt.disableCategory(new CategoryId(categoryName));
-      }
-    }
-    Set<String> enabledRuleIds = config.getEnabledRuleIds();
-    if (enabledRuleIds != null) {
-      // copy as the config thread may access this as well
-      List<String> list = new ArrayList<>(enabledRuleIds);
-      for (String ruleName : list) {
-//        MessageHandler.printToLogFile("Enable Rule: " + ruleName);
-        lt.enableRule(ruleName);
-      }
-    }
-    Set<String> disabledLocaleRules = getDisabledRules(lt.getLanguage().getShortCodeWithCountryAndVariant());
-    if (disabledLocaleRules != null) {
-      for (String id : disabledLocaleRules) {
-//        MessageHandler.printToLogFile("Disable local Rule: " + id + ", Locale: " + lt.getLanguage().getShortCodeWithCountryAndVariant());
-        lt.disableRule(id);
-      }
-    }
-//    handleLtDictionary();
-    if (debugModeTm) {
-      long runTime = System.currentTimeMillis() - startTime;
-      if (runTime > WtOfficeTools.TIME_TOLERANCE) {
-        WtMessageHandler.printToLogFile("Time to init Check: " + runTime);
-      }
-    }
-  }
-  
-  /**
    * Initialize single documents, prepare text level rules and start queue
    */
   public void initDocuments(boolean resetCache) throws Throwable {
@@ -1185,8 +1128,6 @@ public class WtDocumentsHandler {
       startTime = System.currentTimeMillis();
     }
     setConfigValues(config, lt);
-    String langCode = lt.getLanguage().getShortCodeWithCountryAndVariant();
-    sortedTextRules = new WtSortedTextRules(lt, config, getDisabledRules(langCode), checkImpressDocument);
     if (useQueue && !noBackgroundCheck) {
       if (textLevelQueue == null) {
         textLevelQueue = new WtTextLevelCheckQueue(this);
@@ -1628,54 +1569,6 @@ public class WtDocumentsHandler {
   }
   
   /**
-   * reset sorted text level rules
-   */
-  public void resetSortedTextRules(WtLanguageTool lt) throws Throwable {
-    String langCode = lt.getLanguage().getShortCodeWithCountryAndVariant();
-    sortedTextRules = new WtSortedTextRules(lt, config, getDisabledRules(langCode), checkImpressDocument);
-  }
-
-  /**
-   * Returns a list of different numbers of paragraphs to check for text level rules
-   */
-  public List<Integer> getNumMinToCheckParas() {
-    if (sortedTextRules == null) {
-      return null;
-    }
-    return sortedTextRules.minToCheckParagraph;
-  }
-
-  /**
-   * Test if sorted rules for index exist
-   */
-  public boolean isSortedRuleForIndex(int index) {
-    if (index < 0 || sortedTextRules == null
-        || index >= sortedTextRules.textLevelRules.size() || sortedTextRules.textLevelRules.get(index).isEmpty()) {
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   * activate all rules stored under a given index related to the list of getNumMinToCheckParas
-   * deactivate all other text level rules
-   */
-  public void activateTextRulesByIndex(int index, WtLanguageTool lt) {
-    if (sortedTextRules != null) {
-      sortedTextRules.activateTextRulesByIndex(index, lt);
-    }
-  }
-
-  /**
-   * reactivate all text level rules
-   */
-  public void reactivateTextRules(WtLanguageTool lt) {
-    if (sortedTextRules != null) {
-      sortedTextRules.reactivateTextRules(lt);
-    }
-  }
-
-  /**
    * We leave spell checking to OpenOffice/LibreOffice.
    * @return false
    */
@@ -1707,7 +1600,7 @@ public class WtDocumentsHandler {
       if (lTool == null || !lang.equals(docLanguage)) {
         docLanguage = lang;
         lTool = initLanguageTool();
-        initCheck(lTool);
+        lTool.initCheck(checkImpressDocument);
         config = this.config;
       }
       config.initStyleCategories(lTool.getAllRules());
@@ -2107,7 +2000,7 @@ public class WtDocumentsHandler {
             this.locale = locale;
             extraRemoteRules.clear();
             lt = initLanguageTool(true);
-            initCheck(lt);
+            lt.initCheck(checkImpressDocument);
             initDocuments(true);
           }
           return true;
@@ -2485,7 +2378,7 @@ public class WtDocumentsHandler {
             if (langForShortName != null) {
               docLanguage = langForShortName;
               lt = initLanguageTool(true);
-              initCheck(lt);
+              lt.initCheck(checkImpressDocument);
               initDocuments(false);
             }
           }

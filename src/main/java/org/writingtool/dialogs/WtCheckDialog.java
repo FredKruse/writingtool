@@ -228,8 +228,8 @@ public class WtCheckDialog extends Thread {
       }
       lt = documents.initLanguageTool(language, false);
       if (lt != null) {
-        documents.initCheck(lt);
-        documents.resetSortedTextRules(lt);
+        lt.initCheck(document.getDocumentType() == DocumentType.IMPRESS);
+        lt.resetSortedTextRules(document.getDocumentType() == DocumentType.IMPRESS);
       }
       if (debugMode) {
         for (String id : lt.getDisabledRules()) {
@@ -443,8 +443,8 @@ public class WtCheckDialog extends Thread {
     document.removeResultCache(nFPara, true);
     document.removeIgnoredMatch(nFPara, true);
     if (documents.getConfiguration().useTextLevelQueue() && !documents.getConfiguration().noBackgroundCheck()) {
-      for (int i = 1; i < documents.getNumMinToCheckParas().size(); i++) {
-        document.addQueueEntry(nFPara, i, documents.getNumMinToCheckParas().get(i), document.getDocID(), true);
+      for (int i = 1; i < lt.getNumMinToCheckParas().size(); i++) {
+        document.addQueueEntry(nFPara, i, lt.getNumMinToCheckParas().get(i), document.getDocID(), true);
       }
     }
   }
@@ -534,8 +534,8 @@ public class WtCheckDialog extends Thread {
     List<SingleProofreadingError[]> errors = new ArrayList<>();
     while (nWait < TEST_LOOPS) {
       document = documents.getCurrentDocument();
-      for (int cacheNum = 0; cacheNum < documents.getNumMinToCheckParas().size(); cacheNum++) {
-        if (!docCache.isAutomaticGenerated(nFPara, true) && (cacheNum == 0 || (documents.isSortedRuleForIndex(cacheNum) 
+      for (int cacheNum = 0; cacheNum < lt.getNumMinToCheckParas().size(); cacheNum++) {
+        if (!docCache.isAutomaticGenerated(nFPara, true) && (cacheNum == 0 || (lt.isSortedRuleForIndex(cacheNum) 
                                 && !document.getDocumentCache().isSingleParagraph(nFPara)))) {
           SingleProofreadingError[] pErrors = document.getParagraphsCache().get(cacheNum).getSafeMatches(nFPara);
           //  Note: unsafe matches are needed to prevent the thread to get into a read lock
@@ -563,9 +563,9 @@ public class WtCheckDialog extends Thread {
       }
       nWait++;
     }
-    for (int cacheNum = 0; cacheNum < documents.getNumMinToCheckParas().size(); cacheNum++) {
-      if (documents.isSortedRuleForIndex(cacheNum)) {
-        document.addQueueEntry(nFPara, cacheNum, documents.getNumMinToCheckParas().get(cacheNum), document.getDocID(), false);
+    for (int cacheNum = 0; cacheNum < lt.getNumMinToCheckParas().size(); cacheNum++) {
+      if (lt.isSortedRuleForIndex(cacheNum)) {
+        document.addQueueEntry(nFPara, cacheNum, lt.getNumMinToCheckParas().get(cacheNum), document.getDocID(), false);
       }
     }
     return document.mergeErrors(errors, nFPara);
@@ -1876,7 +1876,7 @@ public class WtCheckDialog extends Thread {
       int pSize = 0;
       int numCache = 0;
       for (int i = 0; i < currentDocument.getParagraphsCache().size(); i++) {
-        if (documents.isSortedRuleForIndex(i)) {
+        if (lt.isSortedRuleForIndex(i)) {
           pSize += (currentDocument.getParagraphsCache().get(i).size() + nAuto);
           if (i > 0) {
             pSize += nSingle;
@@ -2034,8 +2034,8 @@ public class WtCheckDialog extends Thread {
       List<RuleIdentification> errors = new ArrayList<>();
       List<Rule> allRules = lt.getAllRules();
       for (int nFPara = 0; nFPara < docCache.size(); nFPara++) {
-        for (int cacheNum = 0; cacheNum < documents.getNumMinToCheckParas().size(); cacheNum++) {
-          if (!docCache.isAutomaticGenerated(nFPara, true) && (cacheNum == 0 || (documents.isSortedRuleForIndex(cacheNum) 
+        for (int cacheNum = 0; cacheNum < lt.getNumMinToCheckParas().size(); cacheNum++) {
+          if (!docCache.isAutomaticGenerated(nFPara, true) && (cacheNum == 0 || (lt.isSortedRuleForIndex(cacheNum) 
                                   && !currentDocument.getDocumentCache().isSingleParagraph(nFPara)))) {
             SingleProofreadingError[] pErrors = currentDocument.getParagraphsCache().get(cacheNum).getSafeMatches(nFPara);
             if (pErrors != null) {

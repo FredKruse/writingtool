@@ -68,7 +68,7 @@ public class WtConfigThread extends Thread {
     documents.setConfigurationDialog(cfgDialog);
     try {
       List<Rule> allRules = lt.getAllRules();
-      Set<String> disabledRulesUI = documents.getDisabledRules(docLanguage.getShortCodeWithCountryAndVariant());
+      Set<String> disabledRulesUI = WtDocumentsHandler.getDisabledRules(docLanguage.getShortCodeWithCountryAndVariant());
       config.addDisabledRuleIds(disabledRulesUI);
       boolean configChanged = cfgDialog.show(allRules);
       if (configChanged) {
@@ -85,7 +85,7 @@ public class WtConfigThread extends Thread {
         documents.resetDocumentCaches();
         documents.resetConfiguration();
       } else {
-        config.removeDisabledRuleIds(documents.getDisabledRules(docLanguage.getShortCodeWithCountryAndVariant()));
+        config.removeDisabledRuleIds(WtDocumentsHandler.getDisabledRules(docLanguage.getShortCodeWithCountryAndVariant()));
       }
     } catch (Throwable e) {
       WtMessageHandler.showError(e);

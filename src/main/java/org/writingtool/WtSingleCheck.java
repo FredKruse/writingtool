@@ -116,7 +116,7 @@ public class WtSingleCheck {
     docType = singleDocument.getDocumentType();
     config = mDocHandler.getConfiguration();
     useQueue = numParasToCheck != 0 && !isDialogRequest && !mDocHandler.isTestMode() && config.useTextLevelQueue();
-    minToCheckPara = mDocHandler.getNumMinToCheckParas();
+    minToCheckPara = mDocHandler.getLanguageTool().getNumMinToCheckParas();
     changedParas = new ArrayList<>();
   }
   
@@ -227,7 +227,7 @@ public class WtSingleCheck {
       List<Integer> nextSentencePositions = null;
       //  NOTE: lt == null if language is not supported by LT
       //        but empty proof reading errors have added to cache to satisfy text level queue
-      if (lt != null && mDocHandler.isSortedRuleForIndex(cacheNum)) {
+      if (lt != null && mDocHandler.getLanguageTool().isSortedRuleForIndex(cacheNum)) {
         if (!docCache.isAutomaticGenerated(nFPara, true)) {
           int startText = docCache.getStartOfParaCheck(tPara, parasToCheck, checkOnlyParagraph, useQueue, true);
           int endText = docCache.getEndOfParaCheck(tPara, parasToCheck, checkOnlyParagraph, useQueue, true);
@@ -449,8 +449,8 @@ public class WtSingleCheck {
       List<Integer> tmpChangedParas;
       for (int i = 0; i < minToCheckPara.size(); i++) {
         int parasToCheck = minToCheckPara.get(i);
-        if (i == 0 || mDocHandler.isSortedRuleForIndex(i)) {
-          mDocHandler.activateTextRulesByIndex(i, lt);
+        if (i == 0 || lt.isSortedRuleForIndex(i)) {
+          lt.activateTextRulesByIndex(i);
           if (debugMode > 0) {
             WtMessageHandler.printToLogFile("SingleCheck: checkTextRules: Index: " + i + "/" + minToCheckPara.size() 
             + "; paraNum: " + paraNum + "; numParasToCheck: " + parasToCheck + "; useQueue: " + useQueue);
@@ -488,7 +488,7 @@ public class WtSingleCheck {
           pErrors.add(new SingleProofreadingError[0]);
         }
       }
-      mDocHandler.reactivateTextRules(lt);
+      lt.reactivateTextRules();
       if (debugMode > 1) {
         WtMessageHandler.printToLogFile("SingleCheck: checkTextRules: Text rules reactivated");
       }
@@ -572,7 +572,7 @@ public class WtSingleCheck {
           Language mLang = WtDocumentsHandler.getLanguage(primaryLocale);
           if (mLang != null) {
             mLt = mDocHandler.initLanguageTool(mLang, false);
-            mDocHandler.initCheck(mLt);
+            mLt.initCheck(singleDocument.getDocumentType() == DocumentType.IMPRESS);
           }
         }
         List<Integer> nextSentencePositions = getNextSentencePositions(paraText, mLt);

@@ -475,7 +475,7 @@ public class WtSingleDocument {
     try {
       docCache.setForTest(paragraphs, textParagraphs, footnotes, chapterBegins, locale);
       numParasToCheck = -1;
-      mDocHandler.resetSortedTextRules(mDocHandler.getLanguageTool());
+      mDocHandler.getLanguageTool().resetSortedTextRules(mDocHandler.isCheckImpressDocument());
     } catch (Throwable t) {
       //  For tests no messages
     }
@@ -844,7 +844,7 @@ public class WtSingleDocument {
    * nFPara is number of flat paragraph
    */
   public void addQueueEntry(int nFPara, int nCache, int nCheck, String docId, boolean overrideRunning) {
-    if (!disposed && mDocHandler.getTextLevelCheckQueue() != null && mDocHandler.isSortedRuleForIndex(nCache) && 
+    if (!disposed && mDocHandler.getTextLevelCheckQueue() != null && mDocHandler.getLanguageTool().isSortedRuleForIndex(nCache) && 
         docCache != null && (nCache == 0 || !docCache.isSingleParagraph(nFPara))) {
       boolean checkOnlyParagraph = docCache.isSingleParagraph(nFPara);
       if (nCache > 0 && checkOnlyParagraph) {
@@ -872,7 +872,7 @@ public class WtSingleDocument {
    * used by getNextQueueEntry
    */
   QueueEntry createQueueEntry(TextParagraph nPara, int nCache) {
-    int nCheck = mDocHandler.getNumMinToCheckParas().get(nCache);
+    int nCheck = mDocHandler.getLanguageTool().getNumMinToCheckParas().get(nCache);
     int nStart = docCache.getStartOfParaCheck(nPara, nCheck, false, true, false);
     int nEnd = docCache.getEndOfParaCheck(nPara, nCheck, false, true, false);
     if (nCheck > 0 && nStart + 1 < nEnd) {
@@ -896,7 +896,7 @@ public class WtSingleDocument {
       if (nPara != null && nPara.type != WtDocumentCache.CURSOR_TYPE_UNKNOWN && nPara.number < docCache.textSize(nPara)
           && !docCache.isSingleParagraph(docCache.getFlatParagraphNumber(nPara))) {
         for (int nCache = 1; nCache < paragraphsCache.size(); nCache++) {
-          if (mDocHandler.isSortedRuleForIndex(nCache) && docCache.isFinished() 
+          if (mDocHandler.getLanguageTool().isSortedRuleForIndex(nCache) && docCache.isFinished() 
               && (paragraphsCache.get(nCache).getCacheEntry(docCache.getFlatParagraphNumber(nPara)) == null && 
                   !docCache.isSingleParagraph(docCache.getFlatParagraphNumber(nPara)))) {
             return createQueueEntry(nPara, nCache);
@@ -908,7 +908,7 @@ public class WtSingleDocument {
       for (int i = nStart; i < docCache.size(); i++) {
         if (docCache.getNumberOfTextParagraph(i).type != WtDocumentCache.CURSOR_TYPE_UNKNOWN && !docCache.isSingleParagraph(i)) {
           for (int nCache = 1; nCache < paragraphsCache.size(); nCache++) {
-            if (mDocHandler.isSortedRuleForIndex(nCache) && docCache.isFinished() && 
+            if (mDocHandler.getLanguageTool().isSortedRuleForIndex(nCache) && docCache.isFinished() && 
                 (paragraphsCache.get(nCache).getCacheEntry(i) == null  && !docCache.isSingleParagraph(i))) {
               return createQueueEntry(docCache.getNumberOfTextParagraph(i), nCache);
             }
@@ -918,7 +918,7 @@ public class WtSingleDocument {
       for (int i = 0; i < nStart && i < docCache.size(); i++) {
         if (docCache.getNumberOfTextParagraph(i).type != WtDocumentCache.CURSOR_TYPE_UNKNOWN && !docCache.isSingleParagraph(i)) {
           for (int nCache = 1; nCache < paragraphsCache.size(); nCache++) {
-            if (mDocHandler.isSortedRuleForIndex(nCache) && docCache.isFinished() && 
+            if (mDocHandler.getLanguageTool().isSortedRuleForIndex(nCache) && docCache.isFinished() && 
                 (paragraphsCache.get(nCache).getCacheEntry(i) == null  && !docCache.isSingleParagraph(i))) {
               return createQueueEntry(docCache.getNumberOfTextParagraph(i), nCache);
             }
@@ -993,8 +993,8 @@ public class WtSingleDocument {
                   || (mDocHandler.useAnalyzedSentencesCache() && !docCache.isCorrectAnalyzedParagraphLength(nPara, sPara)))) {
                 docCache.setFlatParagraph(nPara, sPara);
 //                removeResultCache(nPara, false);
-                for (int i = 1; i < mDocHandler.getNumMinToCheckParas().size(); i++) {
-                  addQueueEntry(nPara, i, mDocHandler.getNumMinToCheckParas().get(i), docID, false);
+                for (int i = 1; i < mDocHandler.getLanguageTool().getNumMinToCheckParas().size(); i++) {
+                  addQueueEntry(nPara, i, mDocHandler.getLanguageTool().getNumMinToCheckParas().get(i), docID, false);
                 }
                 if (!changedParas.isEmpty()) {
                   addQueueEntry(nPara, 0, 0, docID, false);
@@ -1037,7 +1037,7 @@ public class WtSingleDocument {
       if (changedParas != null) { 
         for (int i = 0; i < changedParas.size(); i++) {
           for (int nCache = 0; nCache < paragraphsCache.size(); nCache++) {
-            int nCheck = mDocHandler.getNumMinToCheckParas().get(nCache);
+            int nCheck = mDocHandler.getLanguageTool().getNumMinToCheckParas().get(nCache);
             addQueueEntry(changedParas.get(i), nCache, nCheck, docID, true);
           }
         }
