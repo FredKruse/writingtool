@@ -2421,6 +2421,7 @@ public class WtDocumentCache implements Serializable {
     }
     paraText = fixLinebreak(WtSingleCheck.removeFootnotes(paraText, 
         getFlatParagraphFootnotes(nFPara), getFlatParagraphDeletedCharacters(nFPara)));
+    paraText = paraText.replace("\u00AD", "");
     List<AnalyzedSentence> analyzedSentences = getAnalyzedParagraph(nFPara);
     List<String> sentences = new ArrayList<>();
     if (analyzedSentences == null) {
