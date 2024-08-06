@@ -666,7 +666,7 @@ public class WtOfficeTools {
       }
 //      LocalDateTime dateTime = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 //      return dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z"));
-      date.toString();
+      return date.toString();
   }
 
   /**
