@@ -23,10 +23,17 @@ import static org.languagetool.JLanguageTool.MESSAGE_BUNDLE;
 import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -36,7 +43,6 @@ import org.apache.commons.lang3.SystemUtils;
 import org.jetbrains.annotations.Nullable;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
-import org.languagetool.ResourceBundleWithFallback;
 import org.languagetool.rules.AbstractStatisticSentenceStyleRule;
 import org.languagetool.rules.AbstractStatisticStyleRule;
 import org.languagetool.rules.AbstractStyleTooOftenUsedWordRule;
@@ -96,6 +102,11 @@ public class WtOfficeTools {
     BOTH          //  spell and grammar error
   }
     
+  public static final String WT_NAME = "WritingTool";
+  public static final String WT_VERSION = "1.0-SNAPSHOT";
+  public static final String WT_BUILD_DATE = getClassBuildTime();
+
+
   public static final String AI_GRAMMAR_CATEGORY = "AI_GRAMMAR_CATEGORY";
   public static final String AI_STYLE_CATEGORY = "AI_STYLE_CATEGORY";
   public static final String AI_GRAMMAR_RULE_ID = "LO_AI_DETECTION_RULE";
@@ -105,7 +116,6 @@ public class WtOfficeTools {
   public static final String EXTENSION_MAINTAINER = "Fred Kruse";
   public static final String WT_SERVICE_NAME = "org.writingtool.WritingTool";
   public static final String WT_SPELL_SERVICE_NAME = "org.writingtool.WritingToolSpellChecker";
-  public static final String WT_NAME = "WritingTool";
   public static final String WT_DISPLAY_SERVICE_NAME = WT_NAME;
   
   public static final int PROOFINFO_UNKNOWN = 0;
@@ -623,6 +633,51 @@ public class WtOfficeTools {
   public static String getJavaInformation () {
     return "Java-Version: " + System.getProperty("java.version") + ", max. Heap-Space: " + ((int) (getMaxHeapSpace()/1048576)) +
         " MB, LT Heap Space Limit: " + ((int) (getHeapLimit(getMaxHeapSpace())/1048576)) + " MB";
+  }
+
+  /**
+   * Handles files, jar entries, and deployed jar entries in a zip file (EAR).
+   * @return The date if it can be determined, or null if not.
+   */
+  private static String getClassBuildTime() {
+      Date date = null;
+      Class<?> currentClass = new Object() {}.getClass().getEnclosingClass();
+      URL resource = currentClass.getResource(currentClass.getSimpleName() + ".class");
+      if (resource != null) {
+          if (resource.getProtocol().equals("file")) {
+              try {
+                date = new Date(new File(resource.toURI()).lastModified());
+              } catch (URISyntaxException ignored) { }
+          } else if (resource.getProtocol().equals("jar")) {
+              String path = resource.getPath();
+              date = new Date( new File(path.substring(5, path.indexOf("!"))).lastModified() );    
+          } else if (resource.getProtocol().equals("zip")) {
+              String path = resource.getPath();
+              File jarFileOnDisk = new File(path.substring(0, path.indexOf("!")));
+              //long jfodLastModifiedLong = jarFileOnDisk.lastModified ();
+              //Date jfodLasModifiedDate = new Date(jfodLastModifiedLong);
+              try(JarFile jf = new JarFile (jarFileOnDisk)) {
+                  ZipEntry ze = jf.getEntry (path.substring(path.indexOf("!") + 2));//Skip the ! and the /
+                  long zeTimeLong = ze.getTime ();
+                  Date zeTimeDate = new Date(zeTimeLong);
+                  date = zeTimeDate;
+              } catch (IOException|RuntimeException ignored) { }
+          }
+      }
+//      LocalDateTime dateTime = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+//      return dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z"));
+      date.toString();
+  }
+
+  /**
+   * Get information about WritingTool
+   */
+  public static String getWtInformation () {
+    String txt = WT_VERSION;
+    if (WT_VERSION.contains("SNAPSHOT")) {
+      txt += " - " + WT_BUILD_DATE;
+    }
+    return txt;
   }
 
   /**

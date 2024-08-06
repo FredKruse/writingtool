@@ -67,7 +67,8 @@ public class WtMessageHandler {
           ) {
         Date date = new Date();
         OfficeProductInfo officeInfo = WtOfficeTools.getOfficeProductInfo(xContext);
-        writer.write("LT office integration log from " + date + logLineBreak + logLineBreak);
+        writer.write("WritingTool log from " + date + logLineBreak + logLineBreak);
+        writer.write("WritingTool " + WtOfficeTools.WT_VERSION + " (" + WtOfficeTools.WT_BUILD_DATE + ")" + logLineBreak);
         writer.write("LanguageTool " + JLanguageTool.VERSION + " (" + JLanguageTool.BUILD_DATE + ", " 
             + JLanguageTool.GIT_SHORT_ID + ")" + logLineBreak);
         writer.write("OS: " + System.getProperty("os.name") + " " 

@@ -140,7 +140,7 @@ public class WtLanguageTool {
       List<String> list = new ArrayList<>(enabledRuleIds);
       for (String ruleName : list) {
 //        MessageHandler.printToLogFile("Enable Rule: " + ruleName);
-        lt.enableRule(ruleName);
+        enableRule(ruleName);
       }
     }
     String langCode = getLanguage().getShortCodeWithCountryAndVariant();
@@ -148,7 +148,7 @@ public class WtLanguageTool {
     if (disabledLocaleRules != null) {
       for (String id : disabledLocaleRules) {
 //        MessageHandler.printToLogFile("Disable local Rule: " + id + ", Locale: " + lt.getLanguage().getShortCodeWithCountryAndVariant());
-        lt.disableRule(id);
+        disableRule(id);
       }
     }
     sortedTextRules = new WtSortedTextRules(this, config, WtDocumentsHandler.getDisabledRules(langCode), checkImpressDocument);
