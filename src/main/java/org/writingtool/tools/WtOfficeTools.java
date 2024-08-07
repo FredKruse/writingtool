@@ -106,7 +106,6 @@ public class WtOfficeTools {
   public static final String WT_VERSION = "1.0-SNAPSHOT";
   public static final String WT_BUILD_DATE = getClassBuildTime();
 
-
   public static final String AI_GRAMMAR_CATEGORY = "AI_GRAMMAR_CATEGORY";
   public static final String AI_STYLE_CATEGORY = "AI_STYLE_CATEGORY";
   public static final String AI_GRAMMAR_RULE_ID = "LO_AI_DETECTION_RULE";
@@ -641,8 +640,18 @@ public class WtOfficeTools {
    */
   private static String getClassBuildTime() {
       Date date = null;
-      Class<?> currentClass = new Object() {}.getClass().getEnclosingClass();
-      URL resource = currentClass.getResource(currentClass.getSimpleName() + ".class");
+//      Class<?> currentClass = new Object() {}.getClass().getEnclosingClass();
+//      URL resource = currentClass.getResource(currentClass.getSimpleName() + ".class");
+      WtOfficeTools wtTools = new WtOfficeTools();
+      URL resource = wtTools.getClass().getResource(wtTools.getClass().getSimpleName() + ".class");
+/*      
+      Class<?> wtClass;
+      URL resource = null;
+      try {
+        wtClass = Class.forName(WT_NAME);
+        resource = wtClass.getResource(WT_NAME + ".class");
+      } catch (ClassNotFoundException ignored) { }
+*/
       if (resource != null) {
           if (resource.getProtocol().equals("file")) {
               try {
