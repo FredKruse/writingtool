@@ -99,8 +99,8 @@ public class WtMessageHandler {
     if (testMode) {
       throw new RuntimeException(e);
     }
-    String msg = "An error has occurred in LanguageTool "
-        + JLanguageTool.VERSION + " (" + JLanguageTool.BUILD_DATE + "):\n" + e + "\nStacktrace:\n";
+    String msg = "An error has occurred in WritingTool "
+        + WtOfficeTools.WT_VERSION + " (" + WtOfficeTools.WT_BUILD_DATE + "):\n" + e + "\nStacktrace:\n";
     msg += Tools.getFullStackTrace(e);
     String metaInfo = "OS: " + System.getProperty("os.name") + " on "
         + System.getProperty("os.arch") + ", Java version "
