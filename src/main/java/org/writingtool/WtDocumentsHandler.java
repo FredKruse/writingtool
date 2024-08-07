@@ -262,11 +262,7 @@ public class WtDocumentsHandler {
           this.locale = locale;
           extraRemoteRules.clear();
         }
-//        if (lt == null) {
-//          testFootnotes(propertyValues);
-//        }
-        lt = initLanguageTool(!isSameLanguage);
-        lt.initCheck(checkImpressDocument);
+        lt = initLanguageTool();
         if (initDocs) {
           initDocuments(true);
         }
@@ -668,11 +664,6 @@ public class WtDocumentsHandler {
         docLanguage = getCurrentLanguage();
       }
       lt = initLanguageTool();
-      try {
-        lt.initCheck(checkImpressDocument);
-      } catch (Throwable e) {
-        WtMessageHandler.showError(e);
-      }
     }
     return lt;
   }
@@ -1039,14 +1030,10 @@ public class WtDocumentsHandler {
    * Initialize LanguageTool
    */
   public WtLanguageTool initLanguageTool() {
-    return initLanguageTool(null, false);
+    return initLanguageTool(null);
   }
 
-  public WtLanguageTool initLanguageTool(boolean setService) {
-    return initLanguageTool(null, setService);
-  }
-
-  public WtLanguageTool initLanguageTool(Language currentLanguage, boolean setService) {
+  public WtLanguageTool initLanguageTool(Language currentLanguage) {
     WtLanguageTool lt = null;
     try {
       config = new WtConfiguration(configDir, configFile, oldConfigFile, docLanguage, true);
@@ -1076,35 +1063,10 @@ public class WtDocumentsHandler {
         }
         currentLanguage = docLanguage;
       }
-      // not using MultiThreadedSwJLanguageTool here fixes "osl::Thread::Create failed", see https://bugs.documentfoundation.org/show_bug.cgi?id=90740:
       lt = new WtLanguageTool(currentLanguage, config.getMotherTongue(),
-          new UserConfig(config.getConfigurableValues(), linguServices), config, extraRemoteRules, testMode);
+          new UserConfig(config.getConfigurableValues(), linguServices), config, extraRemoteRules, 
+          noLtSpeller, checkImpressDocument, testMode);
       config.initStyleCategories(lt.getAllRules());
-      /* The next row is only for a single line break marks a paragraph
-      docLanguage.getSentenceTokenizer().setSingleLineBreaksMarksParagraph(true);
-       */
-      File ngramDirectory = config.getNgramDirectory();
-      if (ngramDirectory != null) {
-        File ngramLangDir = new File(config.getNgramDirectory(), currentLanguage.getShortCode());
-        if (ngramLangDir.exists()) {  // user might have ngram data only for some languages and that's okay
-          lt.activateLanguageModelRules(ngramDirectory);
-          if (debugMode) {
-            WtMessageHandler.printToLogFile("MultiDocumentsHandler: initLanguageTool: ngram Model activated for language: " + currentLanguage.getShortCode());
-          }
-        }
-      }
-      if (noLtSpeller) {  // if LT spell checker is not use disable the spelling rules
-        List<Rule> allRules = checkImpressDocument ? lt.getAllActiveRules() : lt.getAllActiveOfficeRules();
-        for (Rule rule : allRules) {
-          if (rule.isDictionaryBasedSpellingRule()) {
-            lt.disableRule(rule.getId());
-            if (rule.useInOffice()) {
-              // set default off so it can be re-enabled by user configuration
-              rule.setDefaultOff();
-            }
-          }
-        }
-      }
       recheck = false;
       if (debugModeTm) {
         long runTime = System.currentTimeMillis() - startTime;
@@ -1600,7 +1562,6 @@ public class WtDocumentsHandler {
       if (lTool == null || !lang.equals(docLanguage)) {
         docLanguage = lang;
         lTool = initLanguageTool();
-        lTool.initCheck(checkImpressDocument);
         config = this.config;
       }
       config.initStyleCategories(lTool.getAllRules());
@@ -1999,8 +1960,7 @@ public class WtDocumentsHandler {
             docLanguage = langForShortName;
             this.locale = locale;
             extraRemoteRules.clear();
-            lt = initLanguageTool(true);
-            lt.initCheck(checkImpressDocument);
+            lt = initLanguageTool();
             initDocuments(true);
           }
           return true;
@@ -2377,8 +2337,7 @@ public class WtDocumentsHandler {
             langForShortName = getLanguage(locale);
             if (langForShortName != null) {
               docLanguage = langForShortName;
-              lt = initLanguageTool(true);
-              lt.initCheck(checkImpressDocument);
+              lt = initLanguageTool();
               initDocuments(false);
             }
           }

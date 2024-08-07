@@ -226,11 +226,7 @@ public class WtCheckDialog extends Thread {
       if (document.getDocumentType() == DocumentType.IMPRESS) {
         documents.setCheckImpressDocument(true);
       }
-      lt = documents.initLanguageTool(language, false);
-      if (lt != null) {
-        lt.initCheck(document.getDocumentType() == DocumentType.IMPRESS);
-        lt.resetSortedTextRules(document.getDocumentType() == DocumentType.IMPRESS);
-      }
+      lt = documents.initLanguageTool(language);
       if (debugMode) {
         for (String id : lt.getDisabledRules()) {
           WtMessageHandler.printToLogFile("CheckDialog: setLangTool: After init disabled rule: " + id);

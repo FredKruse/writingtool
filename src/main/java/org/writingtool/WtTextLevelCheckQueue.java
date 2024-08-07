@@ -288,10 +288,7 @@ public class WtTextLevelCheckQueue {
     if (debugMode) {
       WtMessageHandler.printToLogFile("TextLevelCheckQueue: initLangtool: language = " + (language == null ? "null" : language.getShortCodeWithCountryAndVariant()));
     }
-    lt = multiDocHandler.initLanguageTool(language, false);
-    if (lt != null) {
-      lt.initCheck(false);
-    }
+    lt = multiDocHandler.initLanguageTool(language);
   }
   
   /**

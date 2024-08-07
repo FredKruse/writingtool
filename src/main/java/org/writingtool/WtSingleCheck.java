@@ -571,8 +571,7 @@ public class WtSingleCheck {
         } else {
           Language mLang = WtDocumentsHandler.getLanguage(primaryLocale);
           if (mLang != null) {
-            mLt = mDocHandler.initLanguageTool(mLang, false);
-            mLt.initCheck(singleDocument.getDocumentType() == DocumentType.IMPRESS);
+            mLt = mDocHandler.initLanguageTool(mLang);
           }
         }
         List<Integer> nextSentencePositions = getNextSentencePositions(paraText, mLt);

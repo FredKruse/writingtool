@@ -108,7 +108,7 @@ public class WtStatAnCache {
             if(!lang.equals(tmpLt.getLanguage())) {
               tmpLt = document.getMultiDocumentsHandler().getLanguageTool();
               if(!lang.equals(tmpLt.getLanguage())) {
-                tmpLt = document.getMultiDocumentsHandler().initLanguageTool(lang, false);
+                tmpLt = document.getMultiDocumentsHandler().initLanguageTool(lang);
               }
             }
             docCache.createAnalyzedParagraph(nFPara, tmpLt);

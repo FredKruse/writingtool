@@ -70,7 +70,8 @@ public class WtLanguageTool {
   private WtConfiguration config;
 
   public WtLanguageTool(Language language, Language motherTongue, UserConfig userConfig, 
-      WtConfiguration config, List<Rule> extraRemoteRules, boolean testMode) throws MalformedURLException {
+      WtConfiguration config, List<Rule> extraRemoteRules, 
+      boolean noLtSpeller, boolean checkImpressDocument, boolean testMode) throws Throwable {
     this.config = config;
     isMultiThread = config.isMultiThread();
     isRemote = config.doRemoteCheck() && !testMode;
@@ -101,12 +102,32 @@ public class WtLanguageTool {
       mlt = null;
       rlt = null;
     }
+    File ngramDirectory = config.getNgramDirectory();
+    if (ngramDirectory != null) {
+      File ngramLangDir = new File(config.getNgramDirectory(), language.getShortCode());
+      if (ngramLangDir.exists()) {  // user might have ngram data only for some languages and that's okay
+        activateLanguageModelRules(ngramDirectory);
+      }
+    }
+    if (noLtSpeller) {  // if LT spell checker is not use disable the spelling rules
+      List<Rule> allRules = checkImpressDocument ? getAllActiveRules() : getAllActiveOfficeRules();
+      for (Rule rule : allRules) {
+        if (rule.isDictionaryBasedSpellingRule()) {
+          disableRule(rule.getId());
+          if (rule.useInOffice()) {
+            // set default off so it can be re-enabled by user configuration
+            rule.setDefaultOff();
+          }
+        }
+      }
+    }
+    initCheck(checkImpressDocument);
   }
   
   /**
    * Enable or disable rules as given by configuration file
    */
-  public void initCheck(boolean checkImpressDocument) throws Throwable {
+  private void initCheck(boolean checkImpressDocument) throws Throwable {
     if (config.enableTmpOffRules()) {
       //  enable TempOff rules if configured
       List<Rule> allRules = getAllRules();
