@@ -18,6 +18,7 @@
  */
 package org.writingtool.dialogs;
 
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -30,6 +31,8 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
@@ -48,6 +51,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -113,6 +117,7 @@ public class WtAiDialog extends Thread implements ActionListener {
   private final Image ltImage;
   
   private final JLabel instructionLabel;
+  private final JLabel imgInstructionLabel;
   private final JComboBox<String> instruction;
   private final JLabel paragraphLabel;
   private final JTextPane paragraph;
@@ -156,13 +161,14 @@ public class WtAiDialog extends Thread implements ActionListener {
   private String saveResult;
   private String paraText;
   private String resultText;
+  private String imgInstText;
+  private String instText;
   private Locale locale;
   private boolean atWork = false;
   private boolean focusLost = false;
   private float temperature = DEFAULT_TEMPERATURE;
   private int seed = randomInteger();
   private int step = DEFAULT_STEP;
-//  private int nPara = 0;
   private BufferedImage image;
   private String urlString;
 
@@ -193,8 +199,10 @@ public class WtAiDialog extends Thread implements ActionListener {
     instruction = new JComboBox<String>();
     paragraphLabel = new JLabel(messages.getString("loAiDialogParagraphLabel") + ":");
     paragraph = new JTextPane();
+    paragraph.setBorder(BorderFactory.createLineBorder(Color.gray));
     resultLabel = new JLabel(messages.getString("loAiDialogResultLabel") + ":");
     result = new JTextPane();
+    result.setBorder(BorderFactory.createLineBorder(Color.gray));
     execute = new JButton (messages.getString("loAiDialogExecuteButton")); 
     copyResult = new JButton (messages.getString("loAiDialogcopyResultButton")); 
     reset = new JButton (messages.getString("loAiDialogResetButton")); 
@@ -205,12 +213,14 @@ public class WtAiDialog extends Thread implements ActionListener {
     help = new JButton (messages.getString("loAiDialogHelpButton")); 
     close = new JButton (messages.getString("loAiDialogCloseButton")); 
     
+    imgInstructionLabel = new JLabel(messages.getString("loAiDialogInstructionLabel") + ":");
     imgInstruction = new JTextField();
     excludeLabel = new JLabel(messages.getString("loAiDialogImgExcludeLabel") + ":");
     exclude = new JTextField();
     imageLabel = new JLabel(messages.getString("loAiDialogImgImageLabel") + ":");
     imageFrame = new JLabel();
     imageFrame.setSize(imageWidth, imageWidth);
+    imageFrame.setBorder(BorderFactory.createLineBorder(Color.gray));
 //    imageFrame = new JFrame();
 //    imageFrame.setSize(imageWidth, imageHeight);
 //    imageFrame.add(image);
@@ -250,6 +260,7 @@ public class WtAiDialog extends Thread implements ActionListener {
 
       Font dialogFont = instructionLabel.getFont();
       instructionLabel.setFont(dialogFont);
+      imgInstructionLabel.setFont(dialogFont);
 
       instruction.setFont(dialogFont);
       instruction.setEditable(true);
@@ -337,6 +348,14 @@ public class WtAiDialog extends Thread implements ActionListener {
         }
         @Override
         public void keyTyped(KeyEvent e) {
+          String txt = imgInstruction.getText();
+          if (imgInstText == null && !txt.isEmpty()) {
+            imgInstText = txt;
+            setButtonState(true);
+          } else if (imgInstText != null && txt.isEmpty()) {
+            imgInstText = null;
+            setButtonState(true);
+          }
         }
       });
       
@@ -355,11 +374,13 @@ public class WtAiDialog extends Thread implements ActionListener {
         }
       });
       
+// TODO: new kind of comboBox      
+/*  doesn't work      
       instruction.addKeyListener(new KeyListener() {
         @Override
         public void keyPressed(KeyEvent e) {
           if(e.getKeyCode() == KeyEvent.VK_ENTER) {
-            execute();
+            createText();
           }
         }
         @Override
@@ -367,6 +388,23 @@ public class WtAiDialog extends Thread implements ActionListener {
         }
         @Override
         public void keyTyped(KeyEvent e) {
+          String txt = (String) instruction.getSelectedItem();
+          WtMessageHandler.printToLogFile("keyTyped: Instruction: " + txt);
+          if (instText == null && !txt.isEmpty()) {
+            instText = txt;
+            setButtonState(true);
+          } else if (instText != null && txt.isEmpty()) {
+            instText = null;
+            setButtonState(true);
+          }
+        }
+      });
+*/
+      instruction.addItemListener(new ItemListener() {
+        @Override
+        public void itemStateChanged(ItemEvent e) {
+//          WtMessageHandler.printToLogFile("itemStateChanged: Instruction: " + instruction.getSelectedItem());
+          setButtonState(true);
         }
       });
       
@@ -610,7 +648,7 @@ public class WtAiDialog extends Thread implements ActionListener {
       cons11.weighty = 0.0f;
       cons11.insets = new Insets(SHIFT1, 0, 4, 0);
       cons11.gridy++;
-      leftPanel1.add(instructionLabel, cons11);
+      leftPanel1.add(imgInstructionLabel, cons11);
       cons11.insets = new Insets(4, 0, 4, 0);
       cons11.gridy++;
       leftPanel1.add(imgInstruction, cons11);
@@ -811,6 +849,7 @@ public class WtAiDialog extends Thread implements ActionListener {
     dialog.setAutoRequestFocus(true);
     dialog.setVisible(true);
     setText();
+    setButtonState(true);
   }
   
   public void toFront() {
@@ -865,27 +904,32 @@ public class WtAiDialog extends Thread implements ActionListener {
    * Initial button state
    */
   private void setButtonState(boolean enabled) {
+    boolean isImpress = documentType == DocumentType.IMPRESS;
     instruction.setEnabled(enabled);
     paragraph.setEnabled(enabled);
     result.setEnabled(enabled);
+//  TODO: manage execute button
+//    String instructionText = (String) instruction.getSelectedItem();
+//    execute.setEnabled(instructionText == null || instructionText.isEmpty() ? false : enabled);
     execute.setEnabled(enabled);
-    copyResult.setEnabled(enabled);
-    reset.setEnabled(enabled);
-    clear.setEnabled(enabled);
+    copyResult.setEnabled(resultText == null  || resultText.isEmpty() ? false : enabled);
+    reset.setEnabled(isImpress ? false : enabled);
+    clear.setEnabled(paraText == null || paraText.isEmpty() ? false : enabled);
     undo.setEnabled(saveText == null ? false : enabled);
-    overrideParagraph.setEnabled(resultText == null ? false : enabled);
-    addToParagraph.setEnabled(resultText == null ? false : enabled);
+    overrideParagraph.setEnabled(resultText == null || resultText.isEmpty() || isImpress ? false : enabled);
+    addToParagraph.setEnabled(resultText == null  || resultText.isEmpty() ? false : enabled);
     help.setEnabled(enabled);
     close.setEnabled(true);
 
+    String instructionText = imgInstruction.getText();
     imgInstruction.setEnabled(enabled);
     exclude.setEnabled(enabled);
     imageFrame.setEnabled(enabled);
-    changeImage.setEnabled(enabled);
-    newImage.setEnabled(enabled);
-    removeImage.setEnabled(enabled);
-    saveImage.setEnabled(enabled);
-    insertImage.setEnabled(enabled);
+    changeImage.setEnabled(instructionText == null || instructionText.isEmpty() ? false : enabled);
+    newImage.setEnabled(instructionText == null || instructionText.isEmpty() ? false : enabled);
+    removeImage.setEnabled(image == null ? false : enabled);
+    saveImage.setEnabled(image == null ? false : enabled);
+    insertImage.setEnabled(image == null ? false : enabled);
     
     contentPane.revalidate();
     contentPane.repaint();
@@ -895,7 +939,7 @@ public class WtAiDialog extends Thread implements ActionListener {
   /**
    * execute AI request
    */
-  private void execute() {
+  private void createText() {
     try {
       setAtWorkState(true);
       setButtonState(false);
@@ -906,22 +950,26 @@ public class WtAiDialog extends Thread implements ActionListener {
       if (debugMode) {
         WtMessageHandler.printToLogFile("AiDialog: execute: start AI request");
       }
-      String instructionText = (String) instruction.getSelectedItem();
-      if (!instructionList.contains(instructionText)) {
-        instruction.insertItemAt(instructionText, 0);
-        instructionList.add(0, instructionText);
-        if (instructionList.size() > MAX_INSTRUCTIONS) {
-          instructionList.remove(instructionList.size() - 1);
-          instruction.removeItemAt(instruction.getItemCount() - 1);
-        }
-        writeInstructions(instructionList);
+      instText = (String) instruction.getSelectedItem();
+      if (instText == null || instText.isBlank()) {
+        return;
       }
+      if (instructionList.contains(instText)) {
+        instructionList.remove(instText);
+      }
+      instruction.insertItemAt(instText, 0);
+      instructionList.add(0, instText);
+      if (instructionList.size() > MAX_INSTRUCTIONS) {
+        instructionList.remove(instructionList.size() - 1);
+        instruction.removeItemAt(instruction.getItemCount() - 1);
+      }
+      writeInstructions(instructionList);
       String text = paragraph.getText();
       WtAiRemote aiRemote = new WtAiRemote(documents, config);
       if (debugMode) {
-        WtMessageHandler.printToLogFile("AiParagraphChanging: runInstruction: instruction: " + instructionText + ", text: " + text);
+        WtMessageHandler.printToLogFile("AiParagraphChanging: runInstruction: instruction: " + instText + ", text: " + text);
       }
-      String output = aiRemote.runInstruction(instructionText, text, temperature, 0, locale, false);
+      String output = aiRemote.runInstruction(instText, text, temperature, 0, locale, false);
       if (debugMode) {
         WtMessageHandler.printToLogFile("AiParagraphChanging: runAiChangeOnParagraph: output: " + output);
       }
@@ -949,7 +997,7 @@ public class WtAiDialog extends Thread implements ActionListener {
       if (debugMode) {
         WtMessageHandler.printToLogFile("AiDialog: execute image: start AI request");
       }
-      String instructionText = imgInstruction.getText();
+      imgInstText = imgInstruction.getText();
       String excludeText = exclude.getText();
       if (excludeText == null) {
         excludeText = "";
@@ -958,9 +1006,9 @@ public class WtAiDialog extends Thread implements ActionListener {
       setButtonState(false);
       WtAiRemote aiRemote = new WtAiRemote(documents, config);
       if (debugMode) {
-        WtMessageHandler.printToLogFile("AiParagraphChanging: runInstruction: instruction: " + instructionText + ", exclude: " + excludeText);
+        WtMessageHandler.printToLogFile("AiParagraphChanging: runInstruction: instruction: " + imgInstText + ", exclude: " + excludeText);
       }
-      urlString = aiRemote.runImgInstruction(instructionText, excludeText, step, seed, imageWidth);
+      urlString = aiRemote.runImgInstruction(imgInstText, excludeText, step, seed, imageWidth);
       if (debugMode) {
         WtMessageHandler.printToLogFile("AiParagraphChanging: runAiChangeOnParagraph: url: " + urlString);
       }
@@ -987,34 +1035,37 @@ public class WtAiDialog extends Thread implements ActionListener {
         if (action.getActionCommand().equals("close")) {
           closeDialog();
         } else if (action.getActionCommand().equals("help")) {
-          WtMessageHandler.showMessage(messages.getString("Not implemented yet"));
+          WtMessageHandler.showMessage("Not implemented yet");
         } else if (action.getActionCommand().equals("execute")) {
-          execute();
-        } else if (action.getActionCommand().equals("copyResult")) {
-          copyResult();
-        } else if (action.getActionCommand().equals("reset")) {
-          resetText();
-        } else if (action.getActionCommand().equals("clear")) {
-          clearText();
-        } else if (action.getActionCommand().equals("undo")) {
-          undo();
-        } else if (action.getActionCommand().equals("overrideParagraph")) {
-          writeToParagraph(true);
-        } else if (action.getActionCommand().equals("addToParagraph")) {
-          writeToParagraph(false);
+          createText();
         } else if (action.getActionCommand().equals("changeImage")) {
           createImage();
         } else if (action.getActionCommand().equals("newImage")) {
           seed = randomInteger();
           createImage();
-        } else if (action.getActionCommand().equals("removeImage")) {
-          removeImage();
-        } else if (action.getActionCommand().equals("saveImage")) {
-          saveImage();
-        } else if (action.getActionCommand().equals("insertImage")) {
-          insertImage();
         } else {
-          WtMessageHandler.showMessage("Action '" + action.getActionCommand() + "' not supported");
+          if (action.getActionCommand().equals("copyResult")) {
+            copyResult();
+          } else if (action.getActionCommand().equals("reset")) {
+            resetText();
+          } else if (action.getActionCommand().equals("clear")) {
+            clearText();
+          } else if (action.getActionCommand().equals("undo")) {
+            undo();
+          } else if (action.getActionCommand().equals("overrideParagraph")) {
+            writeToParagraph(true);
+          } else if (action.getActionCommand().equals("addToParagraph")) {
+            writeToParagraph(false);
+          } else if (action.getActionCommand().equals("saveImage")) {
+            saveImage();
+          } else if (action.getActionCommand().equals("insertImage")) {
+            insertImage();
+          } else if (action.getActionCommand().equals("removeImage")) {
+            removeImage();
+          } else {
+            WtMessageHandler.showMessage("Action '" + action.getActionCommand() + "' not supported");
+          }
+          setButtonState(true);
         }
       } catch (Throwable e) {
         WtMessageHandler.showError(e);
@@ -1034,6 +1085,7 @@ public class WtAiDialog extends Thread implements ActionListener {
     saveText = paraText;
     saveResult = resultText;
     setText();
+    setButtonState(true);
   }
 
   private void clearText() throws Throwable {
@@ -1041,6 +1093,7 @@ public class WtAiDialog extends Thread implements ActionListener {
     saveResult = resultText;
     paraText = "";
     paragraph.setText(paraText);
+    setButtonState(true);
   }
 
   private void undo() {
@@ -1050,6 +1103,7 @@ public class WtAiDialog extends Thread implements ActionListener {
       saveText = null;
       paragraph.setText(paraText);
       result.setText(resultText);
+      setButtonState(true);
     }
   }
 
@@ -1189,6 +1243,7 @@ public class WtAiDialog extends Thread implements ActionListener {
   private void removeImage() {
     image = null;
     imageFrame.setIcon(null);
+    setButtonState(true);
   }
 
 }
