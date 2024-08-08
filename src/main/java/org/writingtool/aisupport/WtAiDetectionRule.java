@@ -399,6 +399,10 @@ public class WtAiDetectionRule extends TextLevelRule {
 
   private void setType(int nParaTokenStart, int nParaTokenEnd, int nResultTokenStart, int nResultTokenEnd,
       List<WtAiToken> paraTokens, List<WtAiToken> resultTokens, RuleMatch ruleMatch) {
+    WtMessageHandler.printToLogFile("ParaTokenStart: " + paraTokens.get(nParaTokenStart).getToken()
+        +", ParaTokenEnd: " + paraTokens.get(nParaTokenEnd).getToken()
+        + ", ResultTokenStart: " + resultTokens.get(nResultTokenStart).getToken()
+        +", ResultTokenEnd: " + resultTokens.get(nResultTokenEnd).getToken());
     if (nParaTokenStart == nParaTokenEnd && nResultTokenStart == nResultTokenEnd) {
       if (PUNCTUATION.matcher(paraTokens.get(nParaTokenStart).getToken()).matches()) {
         ruleMatch.setType(Type.Hint);
@@ -407,7 +411,19 @@ public class WtAiDetectionRule extends TextLevelRule {
         ruleMatch.setType(Type.Hint);
       } else {
         ruleMatch.setType(Type.Other);
-      }
+      } 
+    } else if (nParaTokenStart + 1 == nParaTokenEnd && nResultTokenStart == nResultTokenEnd
+        && ((PUNCTUATION.matcher(paraTokens.get(nParaTokenStart).getToken()).matches() 
+              && paraTokens.get(nParaTokenEnd).getToken().equals(resultTokens.get(nResultTokenStart).getToken()))
+            || (PUNCTUATION.matcher(paraTokens.get(nParaTokenEnd).getToken()).matches()
+              && paraTokens.get(nParaTokenStart).getToken().equals(resultTokens.get(nResultTokenStart).getToken())))) {
+      ruleMatch.setType(Type.Hint);
+    } else if (nParaTokenStart == nParaTokenEnd && nResultTokenStart + 1 == nResultTokenEnd
+        && ((PUNCTUATION.matcher(resultTokens.get(nResultTokenStart).getToken()).matches() 
+              && resultTokens.get(nParaTokenEnd).getToken().equals(paraTokens.get(nParaTokenStart).getToken()))
+            || (PUNCTUATION.matcher(resultTokens.get(nResultTokenEnd).getToken()).matches()
+              && paraTokens.get(nResultTokenStart).getToken().equals(paraTokens.get(nParaTokenStart).getToken())))) {
+      ruleMatch.setType(Type.Hint);
     } else {
       ruleMatch.setType(Type.Other);
     }
