@@ -98,7 +98,6 @@ public class WtAiDialog extends Thread implements ActionListener {
   private final static int DEFAULT_STEP = 30;
   private final static String TEMP_IMAGE_FILE_NAME = "tmpImage.jpg";
   private final static String AI_INSTRUCTION_FILE_NAME = "LT_AI_Instructions.dat";
-  private final static String AI_TRANSLATE_INSTRUCTION = "Translate into en";
   private final static int MAX_INSTRUCTIONS = 40;
   private final static int SHIFT1 = 14;
   private final static int dialogWidth = 700;
@@ -131,6 +130,7 @@ public class WtAiDialog extends Thread implements ActionListener {
   private final JButton reset; 
   private final JButton clear; 
   private final JButton undo;
+  private final JButton createImage;
   private final JButton overrideParagraph; 
   private final JButton addToParagraph;
   
@@ -148,6 +148,10 @@ public class WtAiDialog extends Thread implements ActionListener {
   private final JButton removeImage;
   private final JButton saveImage;
   private final JButton insertImage;
+  
+  private final JTabbedPane mainPanel;
+  private final JPanel mainImagePanel;
+  private final JPanel mainTextPanel;
 
   private final WtAiParagraphChanging aiParent;
   private WtSingleDocument currentDocument;
@@ -209,6 +213,7 @@ public class WtAiDialog extends Thread implements ActionListener {
     reset = new JButton (messages.getString("loAiDialogResetButton")); 
     clear = new JButton (messages.getString("loAiDialogClearButton")); 
     undo = new JButton (messages.getString("loAiDialogUndoButton")); 
+    createImage = new JButton (messages.getString("loAiDialogCreateImageButton")); 
     overrideParagraph = new JButton (messages.getString("loAiDialogOverrideButton")); 
     addToParagraph = new JButton (messages.getString("loAiDialogaddToButton")); 
     help = new JButton (messages.getString("loAiDialogHelpButton")); 
@@ -231,6 +236,10 @@ public class WtAiDialog extends Thread implements ActionListener {
     removeImage = new JButton (messages.getString("loAiDialogImgRemoveButton"));
     saveImage = new JButton (messages.getString("loAiDialogImgSaveButton"));
     insertImage = new JButton (messages.getString("loAiDialogImgInsertButton"));
+    
+    mainPanel = new JTabbedPane();
+    mainImagePanel = new JPanel();
+    mainTextPanel = new JPanel();
     
     checkProgress = new JProgressBar(0, 100);
 
@@ -437,6 +446,10 @@ public class WtAiDialog extends Thread implements ActionListener {
       undo.addActionListener(this);
       undo.setActionCommand("undo");
       
+      createImage.setFont(dialogFont);
+      createImage.addActionListener(this);
+      createImage.setActionCommand("createImage");
+      
       overrideParagraph.setFont(dialogFont);
       overrideParagraph.addActionListener(this);
       overrideParagraph.setActionCommand("overrideParagraph");
@@ -586,12 +599,13 @@ public class WtAiDialog extends Thread implements ActionListener {
       cons22.gridy++;
       rightPanel2.add(undo, cons22);
       cons22.gridy++;
+      rightPanel2.add(createImage, cons22);
+      cons22.gridy++;
       rightPanel2.add(addToParagraph, cons22);
       cons22.gridy++;
       rightPanel2.add(overrideParagraph, cons22);
       
-      //  Define main panel
-      JPanel mainTextPanel = new JPanel();
+      //  Define main text panel
       mainTextPanel.setLayout(new GridBagLayout());
       GridBagConstraints cons1 = new GridBagConstraints();
       cons1.insets = new Insets(SHIFT1, 4, 4, 4);
@@ -704,7 +718,6 @@ public class WtAiDialog extends Thread implements ActionListener {
       rightPanel2.add(insertImage, cons22);
       
       //  Define main panel
-      JPanel mainImagePanel = new JPanel();
       mainImagePanel.setLayout(new GridBagLayout());
       cons1 = new GridBagConstraints();
       cons1.insets = new Insets(4, 4, 4, 4);
@@ -741,7 +754,6 @@ public class WtAiDialog extends Thread implements ActionListener {
       mainImagePanel.add(stepSlider, cons1);
       
       //  Define tabbed main pane
-      JTabbedPane mainPanel = new JTabbedPane();
       if (config.useAiSupport()) {
         mainPanel.add(messages.getString("guiAiText"), mainTextPanel);
       }
@@ -924,6 +936,7 @@ public class WtAiDialog extends Thread implements ActionListener {
     reset.setEnabled(isImpress ? false : enabled);
     clear.setEnabled(paraText == null || paraText.isEmpty() ? false : enabled);
     undo.setEnabled(saveText == null ? false : enabled);
+    createImage.setEnabled(resultText == null  || resultText.isEmpty() || !config.useAiImgSupport() ? false : enabled);
     overrideParagraph.setEnabled(resultText == null || resultText.isEmpty() || isImpress ? false : enabled);
     addToParagraph.setEnabled(resultText == null  || resultText.isEmpty() ? false : enabled);
     help.setEnabled(enabled);
@@ -962,8 +975,10 @@ public class WtAiDialog extends Thread implements ActionListener {
       if (instText == null || instText.isBlank()) {
         return;
       }
+      instText = instText.trim();
       if (instructionList.contains(instText)) {
         instructionList.remove(instText);
+        instruction.removeItem(instText);
       }
       instruction.insertItemAt(instText, 0);
       instructionList.add(0, instText);
@@ -1048,6 +1063,8 @@ public class WtAiDialog extends Thread implements ActionListener {
           WtMessageHandler.showMessage("Not implemented yet");
         } else if (action.getActionCommand().equals("execute")) {
           createText();
+        } else if (action.getActionCommand().equals("createImage")) {
+          createImageFromText();
         } else if (action.getActionCommand().equals("changeImage")) {
           createImage();
         } else if (action.getActionCommand().equals("newImage")) {
@@ -1115,6 +1132,15 @@ public class WtAiDialog extends Thread implements ActionListener {
       result.setText(resultText);
       setButtonState(true);
     }
+  }
+
+  private void createImageFromText() {
+    resultText = result.getText();
+    String parsedText = resultText.replace("\n", "\r").replace("\r", " ").replace("\"", "\\\"").replace("\t", " ");
+    imgInstruction.setText(parsedText);
+    exclude.setText("");
+    createImage();
+    mainPanel.setSelectedComponent(mainImagePanel);
   }
 
   private void writeToParagraph(boolean override) throws Throwable {

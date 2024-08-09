@@ -420,9 +420,9 @@ public class WtAiDetectionRule extends TextLevelRule {
       ruleMatch.setType(Type.Hint);
     } else if (nParaTokenStart == nParaTokenEnd && nResultTokenStart + 1 == nResultTokenEnd
         && ((PUNCTUATION.matcher(resultTokens.get(nResultTokenStart).getToken()).matches() 
-              && resultTokens.get(nParaTokenEnd).getToken().equals(paraTokens.get(nParaTokenStart).getToken()))
+              && resultTokens.get(nResultTokenEnd).getToken().equals(paraTokens.get(nParaTokenStart).getToken()))
             || (PUNCTUATION.matcher(resultTokens.get(nResultTokenEnd).getToken()).matches()
-              && paraTokens.get(nResultTokenStart).getToken().equals(paraTokens.get(nParaTokenStart).getToken())))) {
+              && resultTokens.get(nResultTokenStart).getToken().equals(paraTokens.get(nParaTokenStart).getToken())))) {
       ruleMatch.setType(Type.Hint);
     } else {
       ruleMatch.setType(Type.Other);
