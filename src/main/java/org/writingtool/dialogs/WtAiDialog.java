@@ -98,6 +98,7 @@ public class WtAiDialog extends Thread implements ActionListener {
   private final static int DEFAULT_STEP = 30;
   private final static String TEMP_IMAGE_FILE_NAME = "tmpImage.jpg";
   private final static String AI_INSTRUCTION_FILE_NAME = "LT_AI_Instructions.dat";
+  private final static String AI_TRANSLATE_INSTRUCTION = "Translate into en";
   private final static int MAX_INSTRUCTIONS = 40;
   private final static int SHIFT1 = 14;
   private final static int dialogWidth = 700;
@@ -254,7 +255,7 @@ public class WtAiDialog extends Thread implements ActionListener {
       }
       String dialogName = messages.getString("loAiDialogTitle");
       dialog.setName(dialogName);
-      dialog.setTitle(dialogName + " (LanguageTool " + WtOfficeTools.getLtInformation() + ")");
+      dialog.setTitle(dialogName + " (WritingTool " + WtOfficeTools.getWtInformation() + ")");
       dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
       ((Frame) dialog.getOwner()).setIconImage(ltImage);
 
@@ -267,6 +268,9 @@ public class WtAiDialog extends Thread implements ActionListener {
       instructionList = readInstructions();
       for (String instr : instructionList) {
         instruction.addItem(instr);
+      }
+      if (!instructionList.isEmpty()) {
+        instText = instruction.getItemAt(0);
       }
       if (debugModeTm) {
         long runTime = System.currentTimeMillis() - startTime;
@@ -374,13 +378,17 @@ public class WtAiDialog extends Thread implements ActionListener {
         }
       });
       
-// TODO: new kind of comboBox      
-/*  doesn't work      
-      instruction.addKeyListener(new KeyListener() {
+      JTextField iText = (JTextField) instruction.getEditor().getEditorComponent();
+      iText.setSelectionColor(imgInstruction.getSelectionColor());
+      
+      instruction.getEditor().getEditorComponent().addKeyListener(new KeyListener() {
         @Override
         public void keyPressed(KeyEvent e) {
           if(e.getKeyCode() == KeyEvent.VK_ENTER) {
-            createText();
+            instText = (String) instruction.getEditor().getItem();
+            if (instText != null) {
+              createText();
+            }
           }
         }
         @Override
@@ -388,8 +396,8 @@ public class WtAiDialog extends Thread implements ActionListener {
         }
         @Override
         public void keyTyped(KeyEvent e) {
-          String txt = (String) instruction.getSelectedItem();
-          WtMessageHandler.printToLogFile("keyTyped: Instruction: " + txt);
+          String txt = (String) instruction.getEditor().getItem();
+//          WtMessageHandler.printToLogFile("keyTyped: Instruction: " + txt);
           if (instText == null && !txt.isEmpty()) {
             instText = txt;
             setButtonState(true);
@@ -399,11 +407,12 @@ public class WtAiDialog extends Thread implements ActionListener {
           }
         }
       });
-*/
+
       instruction.addItemListener(new ItemListener() {
         @Override
         public void itemStateChanged(ItemEvent e) {
 //          WtMessageHandler.printToLogFile("itemStateChanged: Instruction: " + instruction.getSelectedItem());
+          instText = (String) instruction.getSelectedItem();
           setButtonState(true);
         }
       });
@@ -908,10 +917,9 @@ public class WtAiDialog extends Thread implements ActionListener {
     instruction.setEnabled(enabled);
     paragraph.setEnabled(enabled);
     result.setEnabled(enabled);
-//  TODO: manage execute button
 //    String instructionText = (String) instruction.getSelectedItem();
-//    execute.setEnabled(instructionText == null || instructionText.isEmpty() ? false : enabled);
-    execute.setEnabled(enabled);
+    execute.setEnabled(instText == null || instText.isEmpty() ? false : enabled);
+//    execute.setEnabled(enabled);
     copyResult.setEnabled(resultText == null  || resultText.isEmpty() ? false : enabled);
     reset.setEnabled(isImpress ? false : enabled);
     clear.setEnabled(paraText == null || paraText.isEmpty() ? false : enabled);
@@ -950,7 +958,7 @@ public class WtAiDialog extends Thread implements ActionListener {
       if (debugMode) {
         WtMessageHandler.printToLogFile("AiDialog: execute: start AI request");
       }
-      instText = (String) instruction.getSelectedItem();
+//      instText = (String) instruction.getSelectedItem();
       if (instText == null || instText.isBlank()) {
         return;
       }
@@ -973,6 +981,7 @@ public class WtAiDialog extends Thread implements ActionListener {
       if (debugMode) {
         WtMessageHandler.printToLogFile("AiParagraphChanging: runAiChangeOnParagraph: output: " + output);
       }
+      instruction.setSelectedIndex(0);
       result.setEnabled(true);
       result.setText(output);
       resultText = output;
@@ -1006,7 +1015,8 @@ public class WtAiDialog extends Thread implements ActionListener {
       setButtonState(false);
       WtAiRemote aiRemote = new WtAiRemote(documents, config);
       if (debugMode) {
-        WtMessageHandler.printToLogFile("AiParagraphChanging: runInstruction: instruction: " + imgInstText + ", exclude: " + excludeText);
+        WtMessageHandler.printToLogFile("AiParagraphChanging: runInstruction: instruction: " 
+              + imgInstText + ", exclude: " + excludeText);
       }
       urlString = aiRemote.runImgInstruction(imgInstText, excludeText, step, seed, imageWidth);
       if (debugMode) {
@@ -1130,10 +1140,12 @@ public class WtAiDialog extends Thread implements ActionListener {
       String row = null;
       int n = 0;
       while ((row = in.readLine()) != null) {
-        instructions.add(row);
-        n++;
-        if (n > MAX_INSTRUCTIONS) {
-          break;
+        if (!row.isBlank() && !instructions.contains(row)) {
+          instructions.add(row);
+          n++;
+          if (n > MAX_INSTRUCTIONS) {
+            break;
+          }
         }
       }
     } catch (Throwable e) {
@@ -1245,5 +1257,7 @@ public class WtAiDialog extends Thread implements ActionListener {
     imageFrame.setIcon(null);
     setButtonState(true);
   }
+  
+  
 
 }
