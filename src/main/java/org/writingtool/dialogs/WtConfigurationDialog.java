@@ -84,6 +84,7 @@ public class WtConfigurationDialog implements ActionListener {
   private DefaultMutableTreeNode[] rootNode;
   private JPanel disabledRulesPanel;
   private JPanel enabledRulesPanel;
+  private JTabbedPane tabpane;
   private final List<JPanel> extraPanels = new ArrayList<>();
   private final List<Rule> configurableRules = new ArrayList<>();
   private String category;
@@ -263,8 +264,8 @@ public class WtConfigurationDialog implements ActionListener {
     cons.weightx = 0.0f;
     createOfficeElements(cons, portPanel);
 
-    JPanel buttonPanel = new JPanel();
-    buttonPanel.setLayout(new GridBagLayout());
+    JPanel subButtonPanel = new JPanel();
+    subButtonPanel.setLayout(new GridBagLayout());
     JButton okButton = new JButton(WtGeneralTools.getLabel(messages.getString("guiOKButton")));
     okButton.setMnemonic(WtGeneralTools.getMnemonic(messages.getString("guiOKButton")));
     okButton.setActionCommand(ACTION_COMMAND_OK);
@@ -273,12 +274,29 @@ public class WtConfigurationDialog implements ActionListener {
     cancelButton.setMnemonic(WtGeneralTools.getMnemonic(messages.getString("guiCancelButton")));
     cancelButton.setActionCommand(ACTION_COMMAND_CANCEL);
     cancelButton.addActionListener(this);
+    JButton helpButton = new JButton(WtGeneralTools.getLabel(messages.getString("guiHelpButton")));
+    helpButton.setMnemonic(WtGeneralTools.getMnemonic(messages.getString("guiHelpButton")));
+    helpButton.setActionCommand("Help");
+    helpButton.addActionListener(this);
+    cons = new GridBagConstraints();
+    subButtonPanel.add(okButton, cons);
+    subButtonPanel.add(cancelButton, cons);
+    JPanel buttonPanel = new JPanel();
+    buttonPanel.setLayout(new GridBagLayout());
     cons = new GridBagConstraints();
     cons.insets = new Insets(0, SHIFT1, 0, 0);
-    buttonPanel.add(okButton, cons);
-    buttonPanel.add(cancelButton, cons);
+    cons.gridx = 0;
+    cons.gridy = 0;
+    cons.anchor = GridBagConstraints.WEST;
+//    cons.fill = GridBagConstraints.HORIZONTAL;
+    cons.weightx = 1.0f;
+    cons.weighty = 0.0f;
+    buttonPanel.add(helpButton, cons);
+    cons.gridx++;
+    cons.anchor = GridBagConstraints.EAST;
+    buttonPanel.add(subButtonPanel, cons);
 
-    JTabbedPane tabpane = new JTabbedPane();
+    tabpane = new JTabbedPane();
 
 //  Profile tab    
     JPanel jProfilePane = new JPanel();
@@ -456,11 +474,11 @@ public class WtConfigurationDialog implements ActionListener {
     cons.fill = GridBagConstraints.BOTH;
     cons.anchor = GridBagConstraints.NORTHWEST;
     contentPane.add(tabpane, cons);
-    cons.weightx = 0.0f;
+    cons.weightx = 1.0f;
     cons.weighty = 0.0f;
     cons.gridy++;
-    cons.fill = GridBagConstraints.NONE;
-    cons.anchor = GridBagConstraints.EAST;
+//    cons.fill = GridBagConstraints.NONE;
+//    cons.anchor = GridBagConstraints.EAST;
     contentPane.add(buttonPanel, cons);
 
     dialog.pack();
@@ -1540,6 +1558,19 @@ public class WtConfigurationDialog implements ActionListener {
       dialog.setVisible(false);
     } else if (ACTION_COMMAND_CANCEL.equals(e.getActionCommand())) {
       dialog.setVisible(false);
+    } else if ("Help".equals(e.getActionCommand())) {
+      int ind = tabpane.getSelectedIndex();
+      if (ind == 0) {
+        WtGeneralTools.openURL(WtOfficeTools.getUrl("OptionProfiles"));
+      } else if (ind == 1) {
+        WtGeneralTools.openURL(WtOfficeTools.getUrl("OptionGeneral"));
+      } else if (ind == 2 || ind == 3) {
+        WtGeneralTools.openURL(WtOfficeTools.getUrl("OptionGrammarAndStyle"));
+      } else if (ind == 4) {
+        WtGeneralTools.openURL(WtOfficeTools.getUrl("OptionTechnicalSettings"));
+      } else if (ind == 5) {
+        WtGeneralTools.openURL(WtOfficeTools.getUrl("OptionAiSupport"));
+      }
     }
   }
 
