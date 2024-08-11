@@ -16,13 +16,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.writingtool.config;
+package org.writingtool.tools;
 
 import org.apache.commons.lang3.StringUtils;
 import org.languagetool.JLanguageTool;
 import org.languagetool.rules.*;
 import org.languagetool.rules.patterns.FalseFriendPatternRule;
 import org.languagetool.tools.StringTools;
+import org.writingtool.config.WtConfiguration;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
@@ -44,9 +45,9 @@ import org.apache.commons.lang3.SystemUtils;
  * 
  * @author Fred Kruse
  */
-public final class WtConfigTools {
+public final class WtGeneralTools {
 
-  private WtConfigTools() {
+  private WtGeneralTools() {
     // no public constructor
   }
 
@@ -223,7 +224,7 @@ public final class WtConfigTools {
       @Override
       public void hyperlinkUpdate(HyperlinkEvent e) {
         if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-          WtConfigTools.openURL(e.getURL());
+          WtGeneralTools.openURL(e.getURL());
         }
       }
     });
@@ -239,7 +240,7 @@ public final class WtConfigTools {
     try {
       openURL(new URL(url));
     } catch (MalformedURLException ex) {
-      WtConfigTools.showError(ex);
+      WtGeneralTools.showError(ex);
     }
   }
 
@@ -255,7 +256,7 @@ public final class WtConfigTools {
       try {
         Desktop.getDesktop().browse(url.toURI());
       } catch (Exception ex) {
-        WtConfigTools.showError(ex);
+        WtGeneralTools.showError(ex);
       }
     } else if(SystemUtils.IS_OS_LINUX) {
       //handle the case where Desktop.browse() is not supported, e.g. kubuntu
@@ -263,7 +264,7 @@ public final class WtConfigTools {
       try {
         Runtime.getRuntime().exec(new String[] { "xdg-open", url.toString() });
       } catch (Exception ex) {
-        WtConfigTools.showError(ex);
+        WtGeneralTools.showError(ex);
       }
     }
   }
@@ -276,7 +277,7 @@ public final class WtConfigTools {
     textPane.setBorder(BorderFactory.createEmptyBorder());
     textPane.setOpaque(false);
     textPane.setBackground(new Color(0, 0, 0, 0));
-    WtConfigTools.addHyperlinkListener(textPane);
+    WtGeneralTools.addHyperlinkListener(textPane);
     textPane.setSize(dialogWidth, Short.MAX_VALUE);
     String messageWithBold = message.replaceAll("<suggestion>", "<b>").replaceAll("</suggestion>", "</b>");
     String exampleSentences = getExampleSentences(rule, messages);

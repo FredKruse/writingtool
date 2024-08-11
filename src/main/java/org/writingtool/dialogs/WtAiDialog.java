@@ -77,6 +77,7 @@ import org.writingtool.WtDocumentsHandler.WaitDialogThread;
 import org.writingtool.aisupport.WtAiParagraphChanging;
 import org.writingtool.aisupport.WtAiRemote;
 import org.writingtool.config.WtConfiguration;
+import org.writingtool.tools.WtGeneralTools;
 import org.writingtool.tools.WtMessageHandler;
 import org.writingtool.tools.WtOfficeDrawTools;
 import org.writingtool.tools.WtOfficeGraphicTools;
@@ -972,10 +973,10 @@ public class WtAiDialog extends Thread implements ActionListener {
         WtMessageHandler.printToLogFile("AiDialog: execute: start AI request");
       }
 //      instText = (String) instruction.getSelectedItem();
-      if (instText == null || instText.isBlank()) {
+      instText = instText.trim();
+      if (instText == null || instText.isEmpty()) {
         return;
       }
-      instText = instText.trim();
       if (instructionList.contains(instText)) {
         instructionList.remove(instText);
         instruction.removeItem(instText);
@@ -1060,7 +1061,7 @@ public class WtAiDialog extends Thread implements ActionListener {
         if (action.getActionCommand().equals("close")) {
           closeDialog();
         } else if (action.getActionCommand().equals("help")) {
-          WtMessageHandler.showMessage("Not implemented yet");
+          help();
         } else if (action.getActionCommand().equals("execute")) {
           createText();
         } else if (action.getActionCommand().equals("createImage")) {
@@ -1133,6 +1134,14 @@ public class WtAiDialog extends Thread implements ActionListener {
       setButtonState(true);
     }
   }
+  
+  private void help() {
+    if (mainPanel.getSelectedComponent() == mainTextPanel) {
+      WtGeneralTools.openURL(WtOfficeTools.getUrl("AiDialogText"));
+    } else {
+      WtGeneralTools.openURL(WtOfficeTools.getUrl("AiDialogImage"));
+    }
+  }
 
   private void createImageFromText() {
     resultText = result.getText();
@@ -1151,8 +1160,6 @@ public class WtAiDialog extends Thread implements ActionListener {
     }
   }
   
-  
-  
   private List<String> readInstructions() {
     String dir = WtOfficeTools.getLOConfigDir().getAbsolutePath();
     File file = new File(dir, AI_INSTRUCTION_FILE_NAME);
@@ -1166,7 +1173,8 @@ public class WtAiDialog extends Thread implements ActionListener {
       String row = null;
       int n = 0;
       while ((row = in.readLine()) != null) {
-        if (!row.isBlank() && !instructions.contains(row)) {
+        row = row.trim();
+        if (!row.isEmpty() && !instructions.contains(row)) {
           instructions.add(row);
           n++;
           if (n > MAX_INSTRUCTIONS) {

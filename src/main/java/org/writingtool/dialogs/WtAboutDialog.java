@@ -50,7 +50,7 @@ import org.languagetool.Language;
 import org.languagetool.LanguageMaintainedState;
 import org.languagetool.Languages;
 import org.languagetool.language.Contributor;
-import org.writingtool.config.WtConfigTools;
+import org.writingtool.tools.WtGeneralTools;
 import org.writingtool.tools.WtMessageHandler;
 import org.writingtool.tools.WtOfficeTools;
 import org.writingtool.tools.WtOfficeTools.OfficeProductInfo;
@@ -73,7 +73,7 @@ public class WtAboutDialog {
 
   public void show(XComponentContext xContext) {
     try {
-      String aboutText = WtConfigTools.getLabel(messages.getString("guiMenuAbout"));
+      String aboutText = WtGeneralTools.getLabel(messages.getString("guiMenuAbout"));
       
       dialog.setName(aboutText);
       dialog.setTitle(aboutText);
@@ -107,7 +107,7 @@ public class WtAboutDialog {
           + "Copyright (C) 2005-2024 the LanguageTool community and Daniel Naber.<br>  <br>"
           + "WritingTool and LanguageTool are licensed under the GNU Lesser General Public License.<br>"
           + "</html>");
-      WtConfigTools.addHyperlinkListener(licensePane);
+      WtGeneralTools.addHyperlinkListener(licensePane);
 
       OfficeProductInfo officeInfo = WtOfficeTools.getOfficeProductInfo(xContext);
       JTextPane techPane = new JTextPane();

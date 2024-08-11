@@ -88,9 +88,9 @@ import org.writingtool.WtSingleCheck;
 import org.writingtool.WtSingleDocument;
 import org.writingtool.WtDocumentCache.TextParagraph;
 import org.writingtool.WtDocumentsHandler.WaitDialogThread;
-import org.writingtool.config.WtConfigTools;
 import org.writingtool.tools.WtDocumentCursorTools;
 import org.writingtool.tools.WtFlatParagraphTools;
+import org.writingtool.tools.WtGeneralTools;
 import org.writingtool.tools.WtMessageHandler;
 import org.writingtool.tools.WtOfficeDrawTools;
 import org.writingtool.tools.WtOfficeSpreadsheetTools;
@@ -1065,7 +1065,7 @@ public class WtCheckDialog extends Thread {
       sentenceIncludeError = new JTextPane();
       suggestionsLabel = new JLabel(labelSuggestions);
       suggestions = new JList<String>();
-      checkTypeLabel = new JLabel(WtConfigTools.getLabel(messages.getString("guiOOoCheckTypeLabel")));
+      checkTypeLabel = new JLabel(WtGeneralTools.getLabel(messages.getString("guiOOoCheckTypeLabel")));
       checkTypeButtons = new JRadioButton[CHECK_TYPE_NUM];
       checkTypeGroup = new ButtonGroup();
       help = new JButton (helpButtonName);
@@ -1245,7 +1245,7 @@ public class WtCheckDialog extends Thread {
           return;
         }
         
-        checkTypeButtons[0] = new JRadioButton(WtConfigTools.getLabel(messages.getString("guiOOoCheckAllButton")));
+        checkTypeButtons[0] = new JRadioButton(WtGeneralTools.getLabel(messages.getString("guiOOoCheckAllButton")));
         checkTypeButtons[0].setSelected(true);
         checkTypeButtons[0].addActionListener(e -> {
           setAtWorkButtonState();
@@ -1264,7 +1264,7 @@ public class WtCheckDialog extends Thread {
           });
           t.start();
         });
-        checkTypeButtons[1] = new JRadioButton(WtConfigTools.getLabel(messages.getString("guiOOoCheckSpellingButton")));
+        checkTypeButtons[1] = new JRadioButton(WtGeneralTools.getLabel(messages.getString("guiOOoCheckSpellingButton")));
         checkTypeButtons[1].addActionListener(e -> {
           setAtWorkButtonState();
           checkType = 1;
@@ -1282,7 +1282,7 @@ public class WtCheckDialog extends Thread {
           });
           t.start();
         });
-        checkTypeButtons[2] = new JRadioButton(WtConfigTools.getLabel(messages.getString("guiOOoCheckGrammarButton")));
+        checkTypeButtons[2] = new JRadioButton(WtGeneralTools.getLabel(messages.getString("guiOOoCheckGrammarButton")));
         checkTypeButtons[2].addActionListener(e -> {
           setAtWorkButtonState();
           checkType = 2;
@@ -1300,7 +1300,7 @@ public class WtCheckDialog extends Thread {
           });
           t.start();
         });
-        checkTypeButtons[3] = new JRadioButton(WtConfigTools.getLabel(messages.getString("guiOOoCheckOnlyRuleButton")));
+        checkTypeButtons[3] = new JRadioButton(WtGeneralTools.getLabel(messages.getString("guiOOoCheckOnlyRuleButton")));
         checkTypeButtons[3].addActionListener(e -> {
           if (checkType != 3) {
             checkType = 3;
@@ -2656,7 +2656,7 @@ public class WtCheckDialog extends Thread {
           if (action.getActionCommand().equals("close")) {
             closeDialog();
           } else if (action.getActionCommand().equals("more")) {
-            WtConfigTools.openURL(informationUrl);
+            WtGeneralTools.openURL(informationUrl);
           } else if (action.getActionCommand().equals("options")) {
             documents.runOptionsDialog();
           } else if (action.getActionCommand().equals("help")) {

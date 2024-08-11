@@ -28,11 +28,11 @@ import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleOption;
 import org.writingtool.config.WtCategoryNode;
 import org.writingtool.config.WtCheckBoxTreeCellRenderer;
-import org.writingtool.config.WtConfigTools;
 import org.writingtool.config.WtConfiguration;
 import org.writingtool.config.WtRuleNode;
 import org.writingtool.config.WtSavablePanel;
 import org.writingtool.config.WtTreeListener;
+import org.writingtool.tools.WtGeneralTools;
 import org.writingtool.tools.WtOfficeTools;
 
 import javax.swing.*;
@@ -265,12 +265,12 @@ public class WtConfigurationDialog implements ActionListener {
 
     JPanel buttonPanel = new JPanel();
     buttonPanel.setLayout(new GridBagLayout());
-    JButton okButton = new JButton(WtConfigTools.getLabel(messages.getString("guiOKButton")));
-    okButton.setMnemonic(WtConfigTools.getMnemonic(messages.getString("guiOKButton")));
+    JButton okButton = new JButton(WtGeneralTools.getLabel(messages.getString("guiOKButton")));
+    okButton.setMnemonic(WtGeneralTools.getMnemonic(messages.getString("guiOKButton")));
     okButton.setActionCommand(ACTION_COMMAND_OK);
     okButton.addActionListener(this);
-    JButton cancelButton = new JButton(WtConfigTools.getLabel(messages.getString("guiCancelButton")));
-    cancelButton.setMnemonic(WtConfigTools.getMnemonic(messages.getString("guiCancelButton")));
+    JButton cancelButton = new JButton(WtGeneralTools.getLabel(messages.getString("guiCancelButton")));
+    cancelButton.setMnemonic(WtGeneralTools.getMnemonic(messages.getString("guiCancelButton")));
     cancelButton.setActionCommand(ACTION_COMMAND_CANCEL);
     cancelButton.addActionListener(this);
     cons = new GridBagConstraints();
@@ -497,11 +497,11 @@ public class WtConfigurationDialog implements ActionListener {
     cons1.weightx = 0.0f;
     JRadioButton[] radioButtons = new JRadioButton[2];
     ButtonGroup numParaGroup = new ButtonGroup();
-    radioButtons[0] = new JRadioButton(WtConfigTools.getLabel(messages.getString("guiUseDocumentLanguage")));
+    radioButtons[0] = new JRadioButton(WtGeneralTools.getLabel(messages.getString("guiUseDocumentLanguage")));
     radioButtons[0].setActionCommand("DocLang");
     radioButtons[0].setSelected(true);
 
-    radioButtons[1] = new JRadioButton(WtConfigTools.getLabel(messages.getString("guiSetLanguageTo")));
+    radioButtons[1] = new JRadioButton(WtGeneralTools.getLabel(messages.getString("guiSetLanguageTo")));
     radioButtons[1].setActionCommand("SelectLang");
 
     JComboBox<String> fixedLanguageBox = new JComboBox<>(getPossibleLanguages(false));
@@ -561,13 +561,13 @@ public class WtConfigurationDialog implements ActionListener {
     boolean useTextLevelQueue = config.useTextLevelQueue();
     JRadioButton[] radioButtons = new JRadioButton[3];
     ButtonGroup numParaGroup = new ButtonGroup();
-    radioButtons[0] = new JRadioButton(WtConfigTools.getLabel(messages.getString("guiTextCheckMode")));
+    radioButtons[0] = new JRadioButton(WtGeneralTools.getLabel(messages.getString("guiTextCheckMode")));
     radioButtons[0].setActionCommand("FullTextCheck");
     
-    radioButtons[1] = new JRadioButton(WtConfigTools.getLabel(messages.getString("guiParagraphCheckMode")));
+    radioButtons[1] = new JRadioButton(WtGeneralTools.getLabel(messages.getString("guiParagraphCheckMode")));
     radioButtons[1].setActionCommand("ParagraphCheck");
 
-    radioButtons[2] = new JRadioButton(WtConfigTools.getLabel(messages.getString("guiDeveloperModeCheck")));
+    radioButtons[2] = new JRadioButton(WtGeneralTools.getLabel(messages.getString("guiDeveloperModeCheck")));
     radioButtons[2].setActionCommand("NParagraphCheck");
 
     JTextField numParaField = new JTextField(Integer.toString(5), 2);
@@ -644,7 +644,7 @@ public class WtConfigurationDialog implements ActionListener {
       }
     });
 
-    JLabel textChangedLabel = new JLabel(WtConfigTools.getLabel(messages.getString("guiSentenceExceedingRules")));
+    JLabel textChangedLabel = new JLabel(WtGeneralTools.getLabel(messages.getString("guiSentenceExceedingRules")));
     cons.gridy++;
     portPanel.add(textChangedLabel, cons);
     
@@ -679,7 +679,7 @@ public class WtConfigurationDialog implements ActionListener {
     cons.anchor = GridBagConstraints.WEST;
     cons.fill = GridBagConstraints.NONE;
     cons.weightx = 0.0f;
-    JCheckBox saveCacheBox = new JCheckBox(WtConfigTools.getLabel(messages.getString("guiSaveCacheToFile")));
+    JCheckBox saveCacheBox = new JCheckBox(WtGeneralTools.getLabel(messages.getString("guiSaveCacheToFile")));
     JTextField otherServerNameField = new JTextField(config.getServerUrl() ==  null ? "" : config.getServerUrl(), 25);
     otherServerNameField.setMinimumSize(new Dimension(100, 25));
     otherServerNameField.getDocument().addDocumentListener(new DocumentListener() {
@@ -707,7 +707,7 @@ public class WtConfigurationDialog implements ActionListener {
       }
     });
 
-    JCheckBox useServerBox = new JCheckBox(WtConfigTools.getLabel(messages.getString("guiUseServer")) + " ");
+    JCheckBox useServerBox = new JCheckBox(WtGeneralTools.getLabel(messages.getString("guiUseServer")) + " ");
     useServerBox.setSelected(config.useOtherServer());
     useServerBox.addItemListener(e -> {
       int select = JOptionPane.OK_OPTION;
@@ -728,7 +728,7 @@ public class WtConfigurationDialog implements ActionListener {
       }
     });
 
-    JLabel usernameLabel = new JLabel(WtConfigTools.getLabel(messages.getString("guiPremiumUsername")));
+    JLabel usernameLabel = new JLabel(WtGeneralTools.getLabel(messages.getString("guiPremiumUsername")));
 
     JTextField usernameField = new JTextField(config.getRemoteUsername() ==  null ? "" : config.getRemoteUsername(), 25);
     usernameField.setMinimumSize(new Dimension(100, 25));
@@ -754,7 +754,7 @@ public class WtConfigurationDialog implements ActionListener {
       }
     });
 
-    JLabel apiKeyLabel = new JLabel(WtConfigTools.getLabel(messages.getString("guiPremiumApiKey")));
+    JLabel apiKeyLabel = new JLabel(WtGeneralTools.getLabel(messages.getString("guiPremiumApiKey")));
 
     JTextField apiKeyField = new JTextField(config.getRemoteApiKey() ==  null ? "" : config.getRemoteApiKey(), 25);
     apiKeyField.setMinimumSize(new Dimension(100, 25));
@@ -780,7 +780,7 @@ public class WtConfigurationDialog implements ActionListener {
       }
     });
 
-    JCheckBox isPremiumBox = new JCheckBox(WtConfigTools.getLabel(messages.getString("guiUsePremiumAccount")) + " ");
+    JCheckBox isPremiumBox = new JCheckBox(WtGeneralTools.getLabel(messages.getString("guiUsePremiumAccount")) + " ");
     isPremiumBox.setSelected(config.isPremium());
     isPremiumBox.addItemListener(e -> {
       boolean selected = isPremiumBox.isSelected();
@@ -793,7 +793,7 @@ public class WtConfigurationDialog implements ActionListener {
     
     JRadioButton[] typeOfCheckButtons = new JRadioButton[3];
     ButtonGroup typeOfCheckGroup = new ButtonGroup();
-    typeOfCheckButtons[0] = new JRadioButton(WtConfigTools.getLabel(messages.getString("guiOneThread")));
+    typeOfCheckButtons[0] = new JRadioButton(WtGeneralTools.getLabel(messages.getString("guiOneThread")));
     typeOfCheckButtons[0].addActionListener(e -> {
       otherServerNameField.setEnabled(false);
       useServerBox.setEnabled(false);
@@ -805,7 +805,7 @@ public class WtConfigurationDialog implements ActionListener {
       config.setMultiThreadLO(false);
       config.setRemoteCheck(false);
     });
-    typeOfCheckButtons[1] = new JRadioButton(WtConfigTools.getLabel(messages.getString("guiIsMultiThread")));
+    typeOfCheckButtons[1] = new JRadioButton(WtGeneralTools.getLabel(messages.getString("guiIsMultiThread")));
     typeOfCheckButtons[1].addActionListener(e -> {
       otherServerNameField.setEnabled(false);
       useServerBox.setEnabled(false);
@@ -817,7 +817,7 @@ public class WtConfigurationDialog implements ActionListener {
       config.setMultiThreadLO(true);
       config.setRemoteCheck(false);
     });
-    typeOfCheckButtons[2] = new JRadioButton(WtConfigTools.getLabel(messages.getString("guiUseRemoteServer")));
+    typeOfCheckButtons[2] = new JRadioButton(WtGeneralTools.getLabel(messages.getString("guiUseRemoteServer")));
     typeOfCheckButtons[2].addActionListener(e -> {
       int select = JOptionPane.OK_OPTION;
       boolean selected = typeOfCheckButtons[2].isSelected();
@@ -903,7 +903,7 @@ public class WtConfigurationDialog implements ActionListener {
     serverPanel.add(useServerBox, cons1);
     cons1.gridx++;
     serverPanel.add(otherServerNameField, cons1);
-    JLabel serverExampleLabel = new JLabel(" " + WtConfigTools.getLabel(messages.getString("guiUseServerExample")));
+    JLabel serverExampleLabel = new JLabel(" " + WtGeneralTools.getLabel(messages.getString("guiUseServerExample")));
     serverExampleLabel.setEnabled(false);
     cons1.gridy++;
     serverPanel.add(serverExampleLabel, cons1);
@@ -962,7 +962,7 @@ public class WtConfigurationDialog implements ActionListener {
     cons.gridy++;
     portPanel.add(new JLabel(" "), cons);
     
-    JCheckBox useLtSpellCheckerBox = new JCheckBox(WtConfigTools.getLabel(messages.getString("guiUseLtSpellChecker")));
+    JCheckBox useLtSpellCheckerBox = new JCheckBox(WtGeneralTools.getLabel(messages.getString("guiUseLtSpellChecker")));
     useLtSpellCheckerBox.setSelected(config.useLtSpellChecker());
     useLtSpellCheckerBox.addItemListener(e -> {
       config.setUseLtSpellChecker(useLtSpellCheckerBox.isSelected());
@@ -970,13 +970,13 @@ public class WtConfigurationDialog implements ActionListener {
     cons.gridy++;
     portPanel.add(useLtSpellCheckerBox, cons);
 
-    JCheckBox markSingleCharBold = new JCheckBox(WtConfigTools.getLabel(messages.getString("guiMarkSingleCharBold")));
+    JCheckBox markSingleCharBold = new JCheckBox(WtGeneralTools.getLabel(messages.getString("guiMarkSingleCharBold")));
     markSingleCharBold.setSelected(config.markSingleCharBold());
     markSingleCharBold.addItemListener(e -> config.setMarkSingleCharBold(markSingleCharBold.isSelected()));
     cons.gridy++;
     portPanel.add(markSingleCharBold, cons);
 
-    JCheckBox noSynonymsAsSuggestionsBox = new JCheckBox(WtConfigTools.getLabel(messages.getString("guiNoSynonymsAsSuggestions")));
+    JCheckBox noSynonymsAsSuggestionsBox = new JCheckBox(WtGeneralTools.getLabel(messages.getString("guiNoSynonymsAsSuggestions")));
     noSynonymsAsSuggestionsBox.setSelected(config.noSynonymsAsSuggestions());
     noSynonymsAsSuggestionsBox.addItemListener(e -> {
       config.setNoSynonymsAsSuggestions(noSynonymsAsSuggestionsBox.isSelected());
@@ -984,7 +984,7 @@ public class WtConfigurationDialog implements ActionListener {
     cons.gridy++;
     portPanel.add(noSynonymsAsSuggestionsBox, cons);
 
-    JCheckBox includeTrackedChangesBox = new JCheckBox(WtConfigTools.getLabel(messages.getString("guiIncludeTrackedChanges")));
+    JCheckBox includeTrackedChangesBox = new JCheckBox(WtGeneralTools.getLabel(messages.getString("guiIncludeTrackedChanges")));
     includeTrackedChangesBox.setSelected(config.includeTrackedChanges());
     includeTrackedChangesBox.addItemListener(e -> {
       config.setIncludeTrackedChanges(includeTrackedChangesBox.isSelected());
@@ -992,7 +992,7 @@ public class WtConfigurationDialog implements ActionListener {
     cons.gridy++;
     portPanel.add(includeTrackedChangesBox, cons);
 
-    JCheckBox enableTmpOffRulesBox = new JCheckBox(WtConfigTools.getLabel(messages.getString("guiActivateTempOffRules")));
+    JCheckBox enableTmpOffRulesBox = new JCheckBox(WtGeneralTools.getLabel(messages.getString("guiActivateTempOffRules")));
     enableTmpOffRulesBox.setSelected(config.enableTmpOffRules());
     enableTmpOffRulesBox.addItemListener(e -> {
       config.setEnableTmpOffRules(enableTmpOffRulesBox.isSelected());
@@ -1000,7 +1000,7 @@ public class WtConfigurationDialog implements ActionListener {
     cons.gridy++;
     portPanel.add(enableTmpOffRulesBox, cons);
 
-    JCheckBox enableGoalSpecificRulesBox = new JCheckBox(WtConfigTools.getLabel(messages.getString("guiEnableGoalSpecificRules")));
+    JCheckBox enableGoalSpecificRulesBox = new JCheckBox(WtGeneralTools.getLabel(messages.getString("guiEnableGoalSpecificRules")));
     enableGoalSpecificRulesBox.setSelected(config.enableGoalSpecificRules());
     enableGoalSpecificRulesBox.addItemListener(e -> {
       config.setEnableGoalSpecificRules(enableGoalSpecificRulesBox.isSelected());
@@ -1008,7 +1008,7 @@ public class WtConfigurationDialog implements ActionListener {
     cons.gridy++;
     portPanel.add(enableGoalSpecificRulesBox, cons);
 
-    JCheckBox filterOverlappingMatchesBox = new JCheckBox(WtConfigTools.getLabel(messages.getString("guiFilterOverlappingMatches")));
+    JCheckBox filterOverlappingMatchesBox = new JCheckBox(WtGeneralTools.getLabel(messages.getString("guiFilterOverlappingMatches")));
     filterOverlappingMatchesBox.setSelected(config.filterOverlappingMatches());
     filterOverlappingMatchesBox.addItemListener(e -> {
       config.setFilterOverlappingMatches(filterOverlappingMatchesBox.isSelected());
@@ -1016,7 +1016,7 @@ public class WtConfigurationDialog implements ActionListener {
     cons.gridy++;
     portPanel.add(filterOverlappingMatchesBox, cons);
 
-    JCheckBox noBackgroundCheckBox = new JCheckBox(WtConfigTools.getLabel(messages.getString("guiNoBackgroundCheck")));
+    JCheckBox noBackgroundCheckBox = new JCheckBox(WtGeneralTools.getLabel(messages.getString("guiNoBackgroundCheck")));
     noBackgroundCheckBox.setSelected(config.noBackgroundCheck());
     noBackgroundCheckBox.addItemListener(e -> config.setNoBackgroundCheck(noBackgroundCheckBox.isSelected()));
     cons.gridy++;
@@ -1136,7 +1136,7 @@ public class WtConfigurationDialog implements ActionListener {
               if(lang == null) {
                 lang = Languages.getLanguageForLocale(Locale.getDefault());
               }
-              WtConfigTools.showRuleInfoDialog(tree, messages.getString("guiAboutRuleTitle"),
+              WtGeneralTools.showRuleInfoDialog(tree, messages.getString("guiAboutRuleTitle"),
                       rule.getDescription(), rule, rule.getUrl(), messages,
                       lang.getShortCodeWithCountryAndVariant());
             });
@@ -1469,7 +1469,7 @@ public class WtConfigurationDialog implements ActionListener {
     String buttonText = dir != null ? StringUtils.abbreviate(dir.getAbsolutePath(), maxDirDisplayLength) : messages.getString("guiNgramDirSelect");
     JButton ngramDirButton = new JButton(buttonText);
     ngramDirButton.addActionListener(e -> {
-      File newDir = WtConfigTools.openDirectoryDialog(owner, dir);
+      File newDir = WtGeneralTools.openDirectoryDialog(owner, dir);
       if (newDir != null) {
         try {
           if (config.getLanguage() != null) {  // may happen in office context
@@ -1479,7 +1479,7 @@ public class WtConfigurationDialog implements ActionListener {
           config.setNgramDirectory(newDir);
           ngramDirButton.setText(StringUtils.abbreviate(newDir.getAbsolutePath(), maxDirDisplayLength));
         } catch (Exception ex) {
-          WtConfigTools.showErrorMessage(ex);
+          WtGeneralTools.showErrorMessage(ex);
         }
       } else {
         // not the best UI, but this way user can turn off ngram feature without another checkbox
@@ -1490,7 +1490,7 @@ public class WtConfigurationDialog implements ActionListener {
     cons.gridx++;
     panel.add(ngramDirButton, cons);
     JButton helpButton = new JButton(messages.getString("guiNgramHelp"));
-    helpButton.addActionListener(e -> WtConfigTools.openURL("https://dev.languagetool.org/finding-errors-using-n-gram-data"));
+    helpButton.addActionListener(e -> WtGeneralTools.openURL("https://dev.languagetool.org/finding-errors-using-n-gram-data"));
     cons.gridx++;
     panel.add(helpButton, cons);
   }
@@ -1522,7 +1522,7 @@ public class WtConfigurationDialog implements ActionListener {
         String serverName = config.getServerUrl();
         if(serverName == null || (!serverName.startsWith("http://") && !serverName.startsWith("https://"))
             || serverName.endsWith("/") || serverName.endsWith("/v2")) {
-          JOptionPane.showMessageDialog(dialog, WtConfigTools.getLabel(messages.getString("guiUseServerWarning1")) + "\n" + WtConfigTools.getLabel(messages.getString("guiUseServerWarning2")));
+          JOptionPane.showMessageDialog(dialog, WtGeneralTools.getLabel(messages.getString("guiUseServerWarning1")) + "\n" + WtGeneralTools.getLabel(messages.getString("guiUseServerWarning2")));
           if(serverName.endsWith("/")) {
             serverName = serverName.substring(0, serverName.length() - 1);
             config.setOtherServerUrl(serverName);

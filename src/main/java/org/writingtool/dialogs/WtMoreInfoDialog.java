@@ -42,7 +42,7 @@ import javax.swing.JTextPane;
 import org.languagetool.rules.Category;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.patterns.FalseFriendPatternRule;
-import org.writingtool.config.WtConfigTools;
+import org.writingtool.tools.WtGeneralTools;
 import org.writingtool.tools.WtMessageHandler;
 import org.writingtool.tools.WtOfficeTools;
 
@@ -81,17 +81,17 @@ public class WtMoreInfoDialog {
       textPane.setBorder(BorderFactory.createEmptyBorder());
       textPane.setOpaque(false);
       textPane.setBackground(new Color(0, 0, 0, 0));
-      WtConfigTools.addHyperlinkListener(textPane);
+      WtGeneralTools.addHyperlinkListener(textPane);
       textPane.setSize(dialogWidth, Short.MAX_VALUE);
       String messageWithBold = message.replaceAll("<suggestion>", "<b>").replaceAll("</suggestion>", "</b>");
-      String exampleSentences = WtConfigTools.getExampleSentences(rule, messages);
-      String url = "http://community.languagetool.org/rule/show/" + WtConfigTools.encodeUrl(rule)
+      String exampleSentences = WtGeneralTools.getExampleSentences(rule, messages);
+      String url = "http://community.languagetool.org/rule/show/" + WtGeneralTools.encodeUrl(rule)
               + "?lang=" + lang + "&amp;ref=standalone-gui";
       boolean isExternal = rule.getCategory().getLocation() == Category.Location.EXTERNAL;
       String ruleDetailLink = rule instanceof FalseFriendPatternRule || isExternal ?
               "" : "<a href='" + url + "'>" + messages.getString("ruleDetailsLink") +"</a>";
       textPane.setText("<html>"
-              + messageWithBold + exampleSentences + WtConfigTools.formatURL(matchUrl)
+              + messageWithBold + exampleSentences + WtGeneralTools.formatURL(matchUrl)
               + "<br><br>"
               + ruleDetailLink
               + "</html>");

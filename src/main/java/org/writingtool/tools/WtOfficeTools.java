@@ -112,6 +112,7 @@ public class WtOfficeTools {
   public static final String AI_GRAMMAR_HINT_RULE_ID = "LO_AI_DETECTION_RULE_HINT";
   public static final String AI_GRAMMAR_OTHER_RULE_ID = "LO_AI_DETECTION_RULE_OTHER";
 
+  public static final String WT_SERVER_URL = "https://fk-es.de/index.php";
   public static final String EXTENSION_MAINTAINER = "Fred Kruse";
   public static final String WT_SERVICE_NAME = "org.writingtool.WritingTool";
   public static final String WT_SPELL_SERVICE_NAME = "org.writingtool.WritingToolSpellChecker";
@@ -175,6 +176,7 @@ public class WtOfficeTools {
   private static OfficeProductInfo OFFICE_PRODUCT_INFO = null;
 
   private static final String RESOURCES = "org.writingtool.MessagesBundle";
+  private static final String URL_RESOURCES = "org.writingtool.URLsBundle";
   
   private static final String MENU_BAR = "private:resource/menubar/menubar";
   private static final String LOG_DELIMITER = ",";
@@ -879,6 +881,19 @@ public class WtOfficeTools {
     }
     ResourceBundle fallbackBundle = JLanguageTool.getDataBroker().getResourceBundle(MESSAGE_BUNDLE, java.util.Locale.ENGLISH);
     return new WtResourceBundle(wtBundle, ltBundle, fallbackBundle);
+  }
+
+  /**
+   * Gets the URL from URLResourceBundle (i18n strings) for the default language of the user's system.
+   */
+  public static String getUrl(String key) {
+    return getUrl(null, key);
+  }
+
+  public static String getUrl(Language lang, String key) {
+    java.util.Locale locale = lang == null ? java.util.Locale.getDefault() : lang.getLocaleWithCountryAndVariant();
+    ResourceBundle bundle = ResourceBundle.getBundle(URL_RESOURCES, locale);
+    return WT_SERVER_URL + "/" + bundle.getString(key);
   }
 
   /**

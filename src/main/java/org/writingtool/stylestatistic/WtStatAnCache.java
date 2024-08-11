@@ -458,7 +458,7 @@ public class WtStatAnCache {
     } else {
       aError.aShortComment = aError.aFullComment;
     }
-    aError.aShortComment = org.writingtool.config.WtConfigTools.shortenComment(aError.aShortComment);
+    aError.aShortComment = org.writingtool.tools.WtGeneralTools.shortenComment(aError.aShortComment);
     //  Filter: provide user to delete footnotes by suggestion
     int numSuggestions;
     String[] allSuggestions;
@@ -487,7 +487,7 @@ public class WtStatAnCache {
       msg = docLanguage.toAdvancedTypography(msg);
     }
     aError.aFullComment = msg;
-    aError.aShortComment = org.writingtool.config.WtConfigTools.shortenComment(msg);
+    aError.aShortComment = org.writingtool.tools.WtGeneralTools.shortenComment(msg);
     if (allSuggestions == null) {
       allSuggestions = new String[0];
     }

@@ -1462,7 +1462,7 @@ public class WtDocumentsHandler {
                   if (StringUtils.isEmpty(tmp)) {
                     tmp = error.aFullComment;
                   }
-                  String msg = org.writingtool.config.WtConfigTools.shortenComment(tmp);
+                  String msg = org.writingtool.tools.WtGeneralTools.shortenComment(tmp);
                   String sUrl = null;
                   for (PropertyValue prop : error.aProperties) {
                     if ("FullCommentURL".equals(prop.Name)) {

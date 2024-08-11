@@ -683,7 +683,7 @@ public class WtSingleCheck {
     } else {
       aError.aShortComment = aError.aFullComment;
     }
-    aError.aShortComment = org.writingtool.config.WtConfigTools.shortenComment(aError.aShortComment);
+    aError.aShortComment = org.writingtool.tools.WtGeneralTools.shortenComment(aError.aShortComment);
     //  Filter: provide user to delete footnotes by suggestion
     boolean noSuggestions = false;
     if (footnotes != null && footnotes.length > 0 && !ruleMatch.getSuggestedReplacements().isEmpty()) {
