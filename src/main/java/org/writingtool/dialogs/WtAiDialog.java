@@ -276,9 +276,7 @@ public class WtAiDialog extends Thread implements ActionListener {
       instruction.setFont(dialogFont);
       instruction.setEditable(true);
       instructionList = readInstructions();
-      for (String instr : instructionList) {
-        instruction.addItem(instr);
-      }
+      setInstructionItemsFromList();
       if (!instructionList.isEmpty()) {
         instText = instruction.getItemAt(0);
       }
@@ -979,14 +977,12 @@ public class WtAiDialog extends Thread implements ActionListener {
       }
       if (instructionList.contains(instText)) {
         instructionList.remove(instText);
-        instruction.removeItem(instText);
       }
-      instruction.insertItemAt(instText, 0);
       instructionList.add(0, instText);
       if (instructionList.size() > MAX_INSTRUCTIONS) {
         instructionList.remove(instructionList.size() - 1);
-        instruction.removeItemAt(instruction.getItemCount() - 1);
       }
+      setInstructionItemsFromList();
       writeInstructions(instructionList);
       String text = paragraph.getText();
       WtAiRemote aiRemote = new WtAiRemote(documents, config);
@@ -1157,6 +1153,13 @@ public class WtAiDialog extends Thread implements ActionListener {
       WtAiParagraphChanging.insertText(resultText, currentDocument.getXComponent(), override);
     } else {
       WtOfficeGraphicTools.insertDrawText(resultText, 256, 128, currentDocument.getXComponent());
+    }
+  }
+
+  private void setInstructionItemsFromList() {
+    instruction.removeAllItems();
+    for (String instr : instructionList) {
+      instruction.addItem(instr);
     }
   }
   
