@@ -40,7 +40,6 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
-import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
 import org.languagetool.Languages;
 import org.languagetool.rules.ITSIssueType;
@@ -1285,6 +1284,7 @@ public class WtConfiguration {
    * returns default value if no value is set by configuration
    * @since 6.5
    */
+  @SuppressWarnings("unchecked")
   public <T> T getConfigValueByID(String ruleID, int index, Class<T> clazz, T defaultValue) {
     Object[] value = configurableRuleValues.get(ruleID);
     if (value == null || index >= value.length || !clazz.isInstance(value[index])) {
@@ -1748,7 +1748,7 @@ public class WtConfiguration {
     Properties props = new Properties();
     String qualifier = getQualifier(lang);
 
-    String[] versionParts = JLanguageTool.VERSION.split("-");
+    String[] versionParts = WtOfficeTools.WT_VERSION.split("-");
     props.setProperty(LT_VERSION_KEY, versionParts[0]);
 
     if (currentProfile != null && !currentProfile.isEmpty()) {
@@ -1768,7 +1768,7 @@ public class WtConfiguration {
     }
     
     try (FileOutputStream fos = new FileOutputStream(configFile)) {
-      props.store(fos, "LanguageTool configuration (" + JLanguageTool.VERSION + "/" + JLanguageTool.BUILD_DATE + ")");
+      props.store(fos, WtOfficeTools.WT_NAME + " configuration (" + WtOfficeTools.getWtInformation() + ")");
     }
 
     List<String> prefixes = new ArrayList<>();
@@ -2144,7 +2144,7 @@ public class WtConfiguration {
       props.setProperty(CURRENT_PROFILE_KEY, profile);
     }
     try (FileOutputStream fos = new FileOutputStream(exportFile)) {
-      props.store(fos, "LanguageTool configuration (" + JLanguageTool.VERSION + "/" + JLanguageTool.BUILD_DATE + ")");
+      props.store(fos, WtOfficeTools.WT_NAME + " configuration (" + WtOfficeTools.getWtInformation() + ")");
     }
     String prefix = profile;
     if (!prefix.isEmpty()) {

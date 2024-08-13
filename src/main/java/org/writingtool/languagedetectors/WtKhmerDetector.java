@@ -21,7 +21,6 @@ package org.writingtool.languagedetectors;
 /**
  * Helps to detect Khmer strings by their Unicode range.
  */
-@SuppressWarnings("MagicNumber")
 public
 class WtKhmerDetector extends WtUnicodeLanguageDetector {
 

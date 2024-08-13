@@ -55,7 +55,6 @@ import javax.swing.JTextField;
 import javax.swing.UIManager;
 
 import org.jetbrains.annotations.NotNull;
-import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
 import org.languagetool.Languages;
 import org.languagetool.UserConfig;

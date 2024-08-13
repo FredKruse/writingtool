@@ -31,7 +31,6 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
-import org.languagetool.JLanguageTool;
 import org.languagetool.tools.Tools;
 import org.writingtool.tools.WtOfficeTools.OfficeProductInfo;
 
@@ -69,8 +68,8 @@ public class WtMessageHandler {
         OfficeProductInfo officeInfo = WtOfficeTools.getOfficeProductInfo(xContext);
         writer.write("WritingTool log from " + date + logLineBreak + logLineBreak);
         writer.write("WritingTool " + WtOfficeTools.WT_VERSION + " (" + WtOfficeTools.WT_BUILD_DATE + ")" + logLineBreak);
-        writer.write("LanguageTool " + JLanguageTool.VERSION + " (" + JLanguageTool.BUILD_DATE + ", " 
-            + JLanguageTool.GIT_SHORT_ID + ")" + logLineBreak);
+        writer.write("LanguageTool " + WtOfficeTools.ltVersion() + " (" + WtOfficeTools.ltBuildDate() + ", " 
+            + WtOfficeTools.ltShortGitId() + ")" + logLineBreak);
         writer.write("OS: " + System.getProperty("os.name") + " " 
             + System.getProperty("os.version") + " on " + System.getProperty("os.arch") + logLineBreak);
         if (officeInfo != null) { 

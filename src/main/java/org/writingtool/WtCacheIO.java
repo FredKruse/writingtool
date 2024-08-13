@@ -36,7 +36,6 @@ import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import org.languagetool.JLanguageTool;
 import org.writingtool.WtDocumentCache.SerialLocale;
 import org.writingtool.WtIgnoredMatches.LocaleEntry;
 import org.writingtool.config.WtConfiguration;
@@ -189,7 +188,7 @@ public class WtCacheIO implements Serializable {
       try {
         if (!ignoredMatches.isEmpty() || exceedsSaveSize(docCache)) {
           allCaches = new AllCaches(docCache, paragraphsCache, mDocHandler.getAllDisabledRules(), config.getDisabledRuleIds(), config.getDisabledCategoryNames(), 
-              config.getEnabledRuleIds(), ignoredMatches, JLanguageTool.VERSION);
+              config.getEnabledRuleIds(), ignoredMatches, WtOfficeTools.ltVersion());
           saveAllCaches(cachePath);
         } else {
           File file = new File( cachePath );
@@ -230,7 +229,7 @@ public class WtCacheIO implements Serializable {
           return true;
         } else {
           WtMessageHandler.printToLogFile("Version or active rules have changed: Cache rejected (Cache Version: " 
-                + allCaches.ltVersion + ", actual LT Version: " + JLanguageTool.VERSION + ")");
+                + allCaches.ltVersion + ", actual LT Version: " + WtOfficeTools.ltVersion() + ")");
           return false;
         }
       }
@@ -254,7 +253,7 @@ public class WtCacheIO implements Serializable {
       }
       return false;
     }
-    if (!allCaches.ltVersion.equals(JLanguageTool.VERSION)) {
+    if (!allCaches.ltVersion.equals(WtOfficeTools.ltVersion())) {
       return false;
     }
     if (config.getEnabledRuleIds().size() != allCaches.enabledRuleIds.size() || config.getDisabledRuleIds().size() != allCaches.disabledRuleIds.size() 
@@ -281,7 +280,7 @@ public class WtCacheIO implements Serializable {
     }
     Set<String> disabledRuleIds = new HashSet<String>(config.getDisabledRuleIds());
     String langCode = WtOfficeTools.localeToString(mDocHandler.getLocale());
-    for (String ruleId : mDocHandler.getDisabledRules(langCode)) {
+    for (String ruleId : WtDocumentsHandler.getDisabledRules(langCode)) {
       disabledRuleIds.add(ruleId);
     }
     if (disabledRuleIds.size() != allCaches.disabledRuleIds.size()) {
@@ -728,11 +727,11 @@ public class WtCacheIO implements Serializable {
     private static final long serialVersionUID = 1L;
     private final Map<String, List<String>> lastWrongWords = new HashMap<>();
     private final Map<String, List<String[]>> lastSuggestions = new HashMap<>();
-    private String version = JLanguageTool.VERSION;
+    private String version = WtOfficeTools.ltVersion();
     
     private boolean putAll (SpellCache sc) {
       version = sc.version;
-      if (!version.equals(JLanguageTool.VERSION)) {
+      if (!version.equals(WtOfficeTools.ltVersion())) {
         return false;
       }
       lastWrongWords.clear();
@@ -784,7 +783,7 @@ public class WtCacheIO implements Serializable {
             return true;
           } else {
             WtMessageHandler.printToLogFile("Version has changed: Spell Cache rejected (Cache Version: " 
-                  + version + ", actual LT Version: " + JLanguageTool.VERSION + ")");
+                  + version + ", actual LT Version: " + WtOfficeTools.ltVersion() + ")");
             return false;
           }
         }

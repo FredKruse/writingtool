@@ -33,6 +33,7 @@ import javax.swing.tree.TreeCellRenderer;
  */
 public class WtCheckBoxTreeCellRenderer extends JPanel implements TreeCellRenderer {
 
+  private static final long serialVersionUID = 1L;
   private final DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
   private final JCheckBox checkBox = new JCheckBox();
   

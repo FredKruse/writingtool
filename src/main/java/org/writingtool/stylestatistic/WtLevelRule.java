@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import org.languagetool.JLanguageTool;
 import org.languagetool.rules.AbstractStatisticSentenceStyleRule;
 import org.languagetool.rules.AbstractStatisticStyleRule;
 import org.languagetool.rules.ReadabilityRule;

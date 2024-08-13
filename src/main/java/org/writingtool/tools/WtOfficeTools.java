@@ -43,6 +43,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.jetbrains.annotations.Nullable;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
+import org.languagetool.LtBuildInfo;
 import org.languagetool.rules.AbstractStatisticSentenceStyleRule;
 import org.languagetool.rules.AbstractStatisticStyleRule;
 import org.languagetool.rules.AbstractStyleTooOftenUsedWordRule;
@@ -112,7 +113,8 @@ public class WtOfficeTools {
   public static final String AI_GRAMMAR_HINT_RULE_ID = "LO_AI_DETECTION_RULE_HINT";
   public static final String AI_GRAMMAR_OTHER_RULE_ID = "LO_AI_DETECTION_RULE_OTHER";
 
-  public static final String WT_SERVER_URL = "https://fk-es.de/index.php";
+  public static final String WT_SERVER = "https://fk-es.de";
+  public static final String WT_SERVER_URL = WT_SERVER + "/index.php";
   public static final String EXTENSION_MAINTAINER = "Fred Kruse";
   public static final String WT_SERVICE_NAME = "org.writingtool.WritingTool";
   public static final String WT_SPELL_SERVICE_NAME = "org.writingtool.WritingToolSpellChecker";
@@ -692,12 +694,40 @@ public class WtOfficeTools {
   }
 
   /**
+   * Get name and information about WritingTool
+   */
+  public static String getWtNameWithInformation () {
+    return WT_NAME + " " + getWtInformation();
+  }
+  
+  /**
+   * get LanguageTool version
+   */
+  public static String ltVersion() {
+    return LtBuildInfo.OS.getVersion();
+  }
+
+  /**
+   * get LanguageTool build date
+   */
+  public static String ltBuildDate() {
+    return LtBuildInfo.OS.getBuildDate();
+  }
+
+  /**
+   * get LanguageTool short git id
+   */
+  public static String ltShortGitId() {
+    return LtBuildInfo.OS.getShortGitId();
+  }
+
+  /**
    * Get information about LanguageTool
    */
   public static String getLtInformation () {
-    String txt = JLanguageTool.VERSION;
-    if (JLanguageTool.VERSION.contains("SNAPSHOT")) {
-      txt += " - " + JLanguageTool.BUILD_DATE + ", " + JLanguageTool.GIT_SHORT_ID;
+    String txt = ltVersion();
+    if (txt.contains("SNAPSHOT")) {
+      txt += " - " + ltBuildDate() + ", " + ltShortGitId();
     }
     return txt;
   }

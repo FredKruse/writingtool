@@ -65,7 +65,7 @@ public class WtAiRemote {
 */
   private enum AiType { EDITS, COMPLETIONS, CHAT }
   
-  boolean debugModeTm = true;
+  boolean debugModeTm = WtOfficeTools.DEBUG_MODE_TM;
   boolean debugMode = WtOfficeTools.DEBUG_MODE_AI;
   
   private final WtDocumentsHandler documents;
@@ -263,10 +263,10 @@ public class WtAiRemote {
     if (size != 128 && size != 256 && size != 512) {
       size = 256;
     }
-    long startTime = 0;
-    if (debugModeTm) {
-      startTime = System.currentTimeMillis();
-    }
+//    long startTime = 0;
+//    if (debugModeTm) {
+//      startTime = System.currentTimeMillis();
+//    }
     if (debugMode) {
       WtMessageHandler.printToLogFile("AiRemote: runInstruction: Ask AI started! URL: " + url);
     }

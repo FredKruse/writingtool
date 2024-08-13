@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
-import org.writingtool.WtSingleCheck;
 import org.writingtool.WtSingleCheck.SentenceErrors;
 
 import com.sun.star.beans.Property;

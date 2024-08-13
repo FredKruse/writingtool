@@ -24,12 +24,7 @@ import com.sun.star.lang.Locale;
 import com.sun.star.linguistic2.ProofreadingResult;
 import org.junit.Test;
 import org.languagetool.rules.Rule;
-import org.writingtool.WtDocumentCache;
-import org.writingtool.WritingTool;
-import org.writingtool.WtSingleCheck;
-import org.writingtool.WtSingleDocument;
 import org.writingtool.tools.WtOfficeTools.LoErrorType;
-import org.writingtool.WtLanguageTool;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

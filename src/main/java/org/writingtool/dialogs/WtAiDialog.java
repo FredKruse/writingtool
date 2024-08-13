@@ -265,7 +265,7 @@ public class WtAiDialog extends Thread implements ActionListener {
       }
       String dialogName = messages.getString("loAiDialogTitle");
       dialog.setName(dialogName);
-      dialog.setTitle(dialogName + " (WritingTool " + WtOfficeTools.getWtInformation() + ")");
+      dialog.setTitle(dialogName + " (" + WtOfficeTools.getWtNameWithInformation() + ")");
       dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
       ((Frame) dialog.getOwner()).setIconImage(ltImage);
 
