@@ -60,34 +60,34 @@ public class WtStatAnConfiguration {
   private boolean showAllParagraphs = SHOW_ALLPARAGRAPHS_DEFAULT;
   private boolean showAdditionalOptions = false;
   
-  WtStatAnConfiguration(List<TextLevelRule> rules) throws Throwable {
+  public WtStatAnConfiguration(List<TextLevelRule> rules) throws Throwable {
     this.rules = rules;
     loadConfiguration();
   }
   
-  boolean isWithoutDirectSpeech(TextLevelRule rule) {
+  public boolean isWithoutDirectSpeech(TextLevelRule rule) {
     if (!withoutDirectSpeech.containsKey(rule.getId())) {
       return false;
     }
     return withoutDirectSpeech.get(rule.getId());
   }
   
-  void setWithoutDirectSpeech(TextLevelRule rule, boolean wDS) {
+  public void setWithoutDirectSpeech(TextLevelRule rule, boolean wDS) {
     withoutDirectSpeech.put(rule.getId(), wDS);
   }
   
-  int getLevelStep(TextLevelRule rule) {
+  public int getLevelStep(TextLevelRule rule) {
     if (!levelStep.containsKey(rule.getId())) {
       return 0;
     }
     return levelStep.get(rule.getId());
   }
   
-  void setLevelStep(TextLevelRule rule, int step) {
+  public void setLevelStep(TextLevelRule rule, int step) {
     levelStep.put(rule.getId(), step);
   }
 
-  List<String> getExcludedWords(TextLevelRule rule) {
+  public List<String> getExcludedWords(TextLevelRule rule) {
     List<String> exWords = excludedWords.get(rule.getId());
     if (exWords == null) {
       return new ArrayList<>();
@@ -95,11 +95,11 @@ public class WtStatAnConfiguration {
     return exWords;
   }
 
-  void setAllExcludedWords(TextLevelRule rule, List<String> words) {
+  public void setAllExcludedWords(TextLevelRule rule, List<String> words) {
     excludedWords.put(rule.getId(), words);
   }
 
-  void removeAllExcludedWords(TextLevelRule rule) {
+  public void removeAllExcludedWords(TextLevelRule rule) {
     List<String> exWords = excludedWords.get(rule.getId());
     if (exWords != null) {
       exWords.clear();
@@ -107,7 +107,7 @@ public class WtStatAnConfiguration {
     }
   }
 
-  void addExcludedWord(TextLevelRule rule, String word) {
+  public void addExcludedWord(TextLevelRule rule, String word) {
     List<String> words = excludedWords.get(rule.getId());
     if (words == null) {
       words = new ArrayList<>();
@@ -116,39 +116,39 @@ public class WtStatAnConfiguration {
     excludedWords.put(rule.getId(), words);
   }
   
-  short getUnderlineType() {
+  public short getUnderlineType() {
     return underlineType;
   }
   
-  void setUnderlineType(short underlineType) {
+  public void setUnderlineType(short underlineType) {
     this.underlineType = underlineType;
   }
   
-  boolean showAllParagraphs() {
+  public boolean showAllParagraphs() {
     return showAllParagraphs;
   }
   
-  void setShowAllParagraphs(boolean showAllParagraphs) {
+  public void setShowAllParagraphs(boolean showAllParagraphs) {
     this.showAllParagraphs = showAllParagraphs;
   }
   
-  boolean showAdditionalOptions() {
+  public boolean showAdditionalOptions() {
     return this.showAdditionalOptions;
   }
   
-  void setShowAdditionalOptions(boolean showAdditionalOptions) {
+  public void setShowAdditionalOptions(boolean showAdditionalOptions) {
     this.showAdditionalOptions = showAdditionalOptions;
   }
   
-  Color getUnderlineColor() {
+  public Color getUnderlineColor() {
     return underlineColor;
   }
   
-  void setDefaultUnderlineColor() {
+  public void setDefaultUnderlineColor() {
     underlineColor = UNDERLINE_COLOR_DEFAULT;
   }
   
-  void setUnderlineColor(Color underlineColor) {
+  public void setUnderlineColor(Color underlineColor) {
     this.underlineColor = underlineColor;
   }
   
@@ -241,7 +241,7 @@ public class WtStatAnConfiguration {
     }
   }
   
-  void saveConfiguration() throws Throwable {
+  public void saveConfiguration() throws Throwable {
     Properties props = new Properties();
     for (TextLevelRule rule : rules) {
       if (rule instanceof AbstractStyleTooOftenUsedWordRule) {

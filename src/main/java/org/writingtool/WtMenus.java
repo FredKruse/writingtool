@@ -29,7 +29,7 @@ import org.writingtool.aisupport.WtAiErrorDetection;
 import org.writingtool.aisupport.WtAiParagraphChanging;
 import org.writingtool.aisupport.WtAiRemote.AiCommand;
 import org.writingtool.config.WtConfiguration;
-import org.writingtool.stylestatistic.WtStatAnDialog;
+import org.writingtool.dialogs.WtStatAnDialog;
 import org.writingtool.tools.WtMessageHandler;
 import org.writingtool.tools.WtOfficeTools;
 import org.writingtool.tools.WtOfficeTools.DocumentType;

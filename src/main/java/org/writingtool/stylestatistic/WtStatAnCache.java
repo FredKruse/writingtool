@@ -520,9 +520,9 @@ public class WtStatAnCache {
   }
 
   public class Heading {
-    String name;
-    int hierarchy;
-    int paraNum;
+    public String name;
+    public int hierarchy;
+    public int paraNum;
     
     Heading (String name, int hierarchy, int paraNum) {
       this.name = new String(name);
