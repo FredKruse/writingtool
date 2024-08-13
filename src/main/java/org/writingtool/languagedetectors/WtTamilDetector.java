@@ -22,7 +22,6 @@ package org.writingtool.languagedetectors;
  * Helps to detect Tamil strings by their Unicode range.
  * @since 2.7
  */
-@SuppressWarnings("MagicNumber")
 public
 class WtTamilDetector extends WtUnicodeLanguageDetector {
 

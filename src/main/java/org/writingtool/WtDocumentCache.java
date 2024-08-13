@@ -946,7 +946,7 @@ public class WtDocumentCache implements Serializable {
         }
         numUnknown = paragraphs.size() - numUnknown;  // nUnknown: number of headings of graphic elements
         String msg = "An error has occurred in LanguageTool "
-            + JLanguageTool.VERSION + " (" + JLanguageTool.BUILD_DATE + "):\nDocument cache mapping failed:\nParagraphs:\n"
+            + WtOfficeTools.ltVersion() + " (" + WtOfficeTools.ltBuildDate() + "):\nDocument cache mapping failed:\nParagraphs:\n"
             + "Endnotes: " + toParaMapping.get(CURSOR_TYPE_ENDNOTE).size() + " / " + textParas.get(CURSOR_TYPE_ENDNOTE).size() + "\n"
             + "Footnotes: " + toParaMapping.get(CURSOR_TYPE_FOOTNOTE).size() + " / " + textParas.get(CURSOR_TYPE_FOOTNOTE).size() + "\n"
             + "Headers/Footers: " + toParaMapping.get(CURSOR_TYPE_HEADER_FOOTER).size() + " / " + textParas.get(CURSOR_TYPE_HEADER_FOOTER).size() + "\n"

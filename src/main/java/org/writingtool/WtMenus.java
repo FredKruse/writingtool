@@ -537,7 +537,7 @@ public class WtMenus {
         } else if (definedProfiles != null && event.MenuId > switchOffId + SUBMENU_ID_DIFF 
             && event.MenuId <= switchOffId + SUBMENU_ID_DIFF + definedProfiles.size()) {
           runProfileAction(definedProfiles.get(event.MenuId - switchOffId - 22));
-        } else if (event.MenuId > switchOffId + SUBMENU_ID_DIFF + definedProfiles.size()) {
+        } else if (definedProfiles != null && event.MenuId > switchOffId + SUBMENU_ID_DIFF + definedProfiles.size()) {
           Map<String, String> deactivatedRulesMap = document.getMultiDocumentsHandler().getDisabledRulesMap(null);
           short j = (short)(switchOffId + SUBMENU_ID_DIFF + definedProfiles.size() + 1);
           for (String ruleId : deactivatedRulesMap.keySet()) {

@@ -45,7 +45,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
-import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
 import org.languagetool.LanguageMaintainedState;
 import org.languagetool.Languages;
@@ -89,7 +88,9 @@ public class WtAboutDialog {
       headerText.setContentType("text/html");
       headerText.setEditable(false);
       headerText.setOpaque(false);
-      headerText.setText("<html><FONT SIZE=\"+2\"><b>WritingTool - " + messages.getString("loAboutLtDesc") + "</b></FONT></html>");
+      headerText.setText("<html><FONT SIZE=\"+2\"><b>"
+          + WtOfficeTools.WT_NAME + " - " 
+          + messages.getString("loAboutLtDesc") + "</b></FONT></html>");
       JPanel headerPanel = new JPanel();
       headerPanel.add(headerLabel);
       headerPanel.add(headerText);
@@ -102,7 +103,7 @@ public class WtAboutDialog {
       licensePane.setOpaque(false);
       licensePane.setText("<html>"
           + "<p>Copyright (C) 2024 Fred Kruse - "
-          + "<a href=\"https://fk-es.de\">https://fk-es.de</a><br>  <br>"
+          + "<a href=\"" + WtOfficeTools.WT_SERVER + "\">" + WtOfficeTools.WT_SERVER + "</a><br>  <br>"
           + "based on LanguageTool - "
           + "Copyright (C) 2005-2024 the LanguageTool community and Daniel Naber.<br>  <br>"
           + "WritingTool and LanguageTool are licensed under the GNU Lesser General Public License.<br>"
@@ -123,9 +124,9 @@ public class WtAboutDialog {
           + "Java version: %s (%s)<br>"
           + "Java max/total/free memory: %sMB, %sMB, %sMB</p>"
           + "</html>", 
-           JLanguageTool.VERSION,
-           JLanguageTool.BUILD_DATE,
-           JLanguageTool.GIT_SHORT_ID,
+           WtOfficeTools.ltVersion(),
+           WtOfficeTools.ltBuildDate(),
+           WtOfficeTools.ltShortGitId(),
            System.getProperty("os.name"),
            System.getProperty("os.version"),
            System.getProperty("os.arch"),
@@ -176,9 +177,9 @@ public class WtAboutDialog {
             + "%s %s%s (%s), %s\n"
             + "Java version: %s (%s)\n"
             + "Java max/total/free memory: %sMB, %sMB, %sMB\n",
-             JLanguageTool.VERSION,
-             JLanguageTool.BUILD_DATE,
-             JLanguageTool.GIT_SHORT_ID,
+             WtOfficeTools.ltVersion(),
+             WtOfficeTools.ltBuildDate(),
+             WtOfficeTools.ltShortGitId(),
              System.getProperty("os.name"),
              System.getProperty("os.version"),
              System.getProperty("os.arch"),
@@ -321,7 +322,7 @@ public class WtAboutDialog {
     str.append("</table>");
     return str.toString();
   }
-  
+/*  
   private String getMaintainersAsText() {
     TreeMap<String, Language> list = new TreeMap<>();
     for (Language lang : Languages.get()) {
@@ -353,7 +354,7 @@ public class WtAboutDialog {
     }
     return str.toString();
   }
-  
+*/  
   public void close() {
     dialog.setVisible(false);
   }

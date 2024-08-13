@@ -126,7 +126,7 @@ public class WtSingleDocument {
   private boolean isOnUnload = false;             //  Document will be closed
   private String lastSinglePara = null;           //  stores the last paragraph which is checked as single paragraph
   private Language docLanguage;                   //  docLanguage (usually the Language of the first paragraph)
-  private Locale docLocale;                       //  docLanguage as Locale
+//  private Locale docLocale;                       //  docLanguage as Locale
   private final Language fixedLanguage;           //  fixed language (by configuration); if null: use language of document (given by LO/OO)
   private WtMenus ltMenus = null;                 //  LT menus (tools menu and context menu)
 //  TODO: add in 6.5   private LtToolbar ltToolbar = null;             //  LT dynamic toolbar
@@ -148,7 +148,7 @@ public class WtSingleDocument {
     this.config = config;
     this.docID = docID;
     docLanguage = lang;
-    docLocale = WtLinguisticServices.getLocale(lang);
+//    docLocale = WtLinguisticServices.getLocale(lang);
     if (docID.charAt(0) == 'I') {
       docType = DocumentType.IMPRESS;
     } else if (docID.charAt(0) == 'C') {
@@ -571,7 +571,7 @@ public class WtSingleDocument {
    */
   void setLanguage(Language language) {
     docLanguage = language;
-    docLocale = WtLinguisticServices.getLocale(language);
+//    docLocale = WtLinguisticServices.getLocale(language);
 /*  TODO: in LT 6.5 add dynamic toolbar          
     if (ltToolbar != null) {
       ltToolbar.makeToolbar(language);

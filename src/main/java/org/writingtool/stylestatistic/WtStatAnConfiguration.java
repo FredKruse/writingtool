@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.languagetool.JLanguageTool;
 import org.languagetool.rules.AbstractStatisticSentenceStyleRule;
 import org.languagetool.rules.AbstractStatisticStyleRule;
 import org.languagetool.rules.AbstractStyleTooOftenUsedWordRule;
@@ -267,7 +266,7 @@ public class WtStatAnConfiguration {
       
     }
     try (FileOutputStream fos = new FileOutputStream(WtOfficeTools.getStatisticalConfigFilePath())) {
-      props.store(fos, "LT statistical analyzes configuration (" + JLanguageTool.VERSION + "/" + JLanguageTool.BUILD_DATE + ")");
+      props.store(fos, WtOfficeTools.WT_NAME + " statistical analyzes configuration (" + WtOfficeTools.getWtInformation() + ")");
     } catch (Throwable e) {
       WtMessageHandler.showError(e);
     }

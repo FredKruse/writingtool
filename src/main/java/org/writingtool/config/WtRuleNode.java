@@ -27,6 +27,7 @@ import org.languagetool.rules.Rule;
  */
 public class WtRuleNode extends DefaultMutableTreeNode {
 
+  private static final long serialVersionUID = 1L;
   private final Rule rule;
   private boolean enabled;
 

@@ -31,11 +31,14 @@ import java.util.ResourceBundle;
 public class WtResourceBundle extends ResourceBundle {
 
   private final ResourceBundle wtBundle;
+  private final ResourceBundle wtFallbackBundle;
   private final ResourceBundle bundle;
   private final ResourceBundle fallbackBundle;
   
-  public WtResourceBundle(ResourceBundle wtBundle, ResourceBundle bundle, ResourceBundle fallbackBundle) {
+  public WtResourceBundle(ResourceBundle wtBundle, ResourceBundle wtFallbackBundle, 
+      ResourceBundle bundle, ResourceBundle fallbackBundle) {
     this.wtBundle = wtBundle;
+    this.wtFallbackBundle = wtFallbackBundle;
     this.bundle = bundle;
     this.fallbackBundle = fallbackBundle;
   }
@@ -48,8 +51,6 @@ public class WtResourceBundle extends ResourceBundle {
         s = wtBundle.getString(key);
       } catch (MissingResourceException e) {
       }
-//    } else {
-//      MessageHandler.printToLogFile("WtBundle == null");
     }
     if (s == null || s.trim().isEmpty()) {
       if (bundle != null) {
@@ -57,11 +58,13 @@ public class WtResourceBundle extends ResourceBundle {
           s = bundle.getString(key);
         } catch (MissingResourceException e) {
         }
-//      } else {
-//        MessageHandler.printToLogFile("bundle == null");
       }
       if (s == null || s.trim().isEmpty()) {
-        return fallbackBundle.getString(key);
+        try {
+          s = wtFallbackBundle.getString(key);
+        } catch (MissingResourceException e) {
+          return fallbackBundle.getString(key);
+        }
       }
       return s;
     }

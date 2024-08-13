@@ -86,7 +86,7 @@ public class WtSpellChecker extends WeakBase implements XServiceInfo,
     if (xContext == null) {
       try {
         xContext = xContxt;
-        WtMessageHandler.init(xContext);
+//        WtMessageHandler.init(xContext);
         OfficeProductInfo officeInfo = WtOfficeTools.getOfficeProductInfo(xContext);
         if (officeInfo == null || officeInfo.osArch.equals("x86")
             || !isEnoughHeap() || !runLTSpellChecker(xContext)) {

@@ -28,6 +28,7 @@ import org.languagetool.rules.Category;
  */
 public class WtCategoryNode extends DefaultMutableTreeNode {
 
+  private static final long serialVersionUID = 1L;
   private final Category category;
   private boolean enabled;
 

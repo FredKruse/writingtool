@@ -43,6 +43,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.jetbrains.annotations.Nullable;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
+import org.languagetool.LtBuildInfo;
 import org.languagetool.rules.AbstractStatisticSentenceStyleRule;
 import org.languagetool.rules.AbstractStatisticStyleRule;
 import org.languagetool.rules.AbstractStyleTooOftenUsedWordRule;
@@ -112,7 +113,8 @@ public class WtOfficeTools {
   public static final String AI_GRAMMAR_HINT_RULE_ID = "LO_AI_DETECTION_RULE_HINT";
   public static final String AI_GRAMMAR_OTHER_RULE_ID = "LO_AI_DETECTION_RULE_OTHER";
 
-  public static final String WT_SERVER_URL = "https://fk-es.de/index.php";
+  public static final String WT_SERVER = "https://fk-es.de";
+  public static final String WT_SERVER_URL = WT_SERVER + "/index.php";
   public static final String EXTENSION_MAINTAINER = "Fred Kruse";
   public static final String WT_SERVICE_NAME = "org.writingtool.WritingTool";
   public static final String WT_SPELL_SERVICE_NAME = "org.writingtool.WritingToolSpellChecker";
@@ -175,8 +177,8 @@ public class WtOfficeTools {
   private static String OFFICE_EXTENSION_ID = null;
   private static OfficeProductInfo OFFICE_PRODUCT_INFO = null;
 
-  private static final String RESOURCES = "org.writingtool.MessagesBundle";
-  private static final String URL_RESOURCES = "org.writingtool.URLsBundle";
+  private static final String RESOURCES = "org.writingtool";
+//  private static final String URL_RESOURCES = "org.writingtool.URLsBundle";
   
   private static final String MENU_BAR = "private:resource/menubar/menubar";
   private static final String LOG_DELIMITER = ",";
@@ -692,12 +694,40 @@ public class WtOfficeTools {
   }
 
   /**
+   * Get name and information about WritingTool
+   */
+  public static String getWtNameWithInformation () {
+    return WT_NAME + " " + getWtInformation();
+  }
+  
+  /**
+   * get LanguageTool version
+   */
+  public static String ltVersion() {
+    return LtBuildInfo.OS.getVersion();
+  }
+
+  /**
+   * get LanguageTool build date
+   */
+  public static String ltBuildDate() {
+    return LtBuildInfo.OS.getBuildDate();
+  }
+
+  /**
+   * get LanguageTool short git id
+   */
+  public static String ltShortGitId() {
+    return LtBuildInfo.OS.getShortGitId();
+  }
+
+  /**
    * Get information about LanguageTool
    */
   public static String getLtInformation () {
-    String txt = JLanguageTool.VERSION;
-    if (JLanguageTool.VERSION.contains("SNAPSHOT")) {
-      txt += " - " + JLanguageTool.BUILD_DATE + ", " + JLanguageTool.GIT_SHORT_ID;
+    String txt = ltVersion();
+    if (txt.contains("SNAPSHOT")) {
+      txt += " - " + ltBuildDate() + ", " + ltShortGitId();
     }
     return txt;
   }
@@ -866,21 +896,35 @@ public class WtOfficeTools {
   public static ResourceBundle getMessageBundle() {
     return getMessageBundle(null);
   }
+  
+  private static String getWtMessageResource(java.util.Locale locale) {
+    return RESOURCES + "." + locale.getLanguage() + ".MessagesBundle";
+  }
+
+  private static String getWtUrlResource(java.util.Locale locale) {
+    return RESOURCES + "." + locale.getLanguage() + ".URLsBundle";
+  }
 
   public static ResourceBundle getMessageBundle(Language lang) {
     java.util.Locale locale = lang == null ? java.util.Locale.getDefault() : lang.getLocaleWithCountryAndVariant();
     ResourceBundle wtBundle = null;
     ResourceBundle ltBundle = null;
+    ResourceBundle wtFallbackBundle = null;
     try {
-      wtBundle = ResourceBundle.getBundle(RESOURCES, locale);
+      wtBundle = ResourceBundle.getBundle(getWtMessageResource(locale), locale);
     } catch (MissingResourceException ex) {
     }
     try {
       ltBundle = JLanguageTool.getDataBroker().getResourceBundle(MESSAGE_BUNDLE, locale);
     } catch (MissingResourceException ex) {
     }
-    ResourceBundle fallbackBundle = JLanguageTool.getDataBroker().getResourceBundle(MESSAGE_BUNDLE, java.util.Locale.ENGLISH);
-    return new WtResourceBundle(wtBundle, ltBundle, fallbackBundle);
+    locale = java.util.Locale.ENGLISH;
+    try {
+      wtFallbackBundle = ResourceBundle.getBundle(getWtMessageResource(locale), locale);
+    } catch (MissingResourceException ex) {
+    }
+    ResourceBundle fallbackBundle = JLanguageTool.getDataBroker().getResourceBundle(MESSAGE_BUNDLE, locale);
+    return new WtResourceBundle(wtBundle, wtFallbackBundle, ltBundle, fallbackBundle);
   }
 
   /**
@@ -892,7 +936,13 @@ public class WtOfficeTools {
 
   public static String getUrl(Language lang, String key) {
     java.util.Locale locale = lang == null ? java.util.Locale.getDefault() : lang.getLocaleWithCountryAndVariant();
-    ResourceBundle bundle = ResourceBundle.getBundle(URL_RESOURCES, locale);
+    ResourceBundle bundle = null;
+    try {
+      bundle = ResourceBundle.getBundle(getWtUrlResource(locale), locale);
+    } catch (MissingResourceException ex) {
+    }
+    locale = java.util.Locale.ENGLISH;
+    bundle = ResourceBundle.getBundle(getWtUrlResource(locale), locale);
     return WT_SERVER_URL + "/" + bundle.getString(key);
   }
 

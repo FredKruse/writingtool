@@ -1099,7 +1099,7 @@ public class WtCheckDialog extends Thread {
           WtMessageHandler.printToLogFile("CheckDialog: LtCheckDialog: LtCheckDialog == null");
         }
         dialog.setName(dialogName);
-        dialog.setTitle(dialogName + " (LanguageTool " + WtOfficeTools.getLtInformation() + ")");
+        dialog.setTitle(dialogName + " (" + WtOfficeTools.getWtNameWithInformation() + ")");
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         ((Frame) dialog.getOwner()).setIconImage(ltImage);
         defaultForeground = dialog.getForeground() == null ? Color.BLACK : dialog.getForeground();
@@ -1832,6 +1832,7 @@ public class WtCheckDialog extends Thread {
     private void setJComboSelectionBackground(JComboBox<String> comboBox, Color color) {
       Object context = comboBox.getAccessibleContext().getAccessibleChild(0);
       BasicComboPopup popup = (BasicComboPopup)context;
+      @SuppressWarnings("unchecked")
       JList<Object> list = popup.getList();
       list.setSelectionBackground(color);
     }
