@@ -685,6 +685,14 @@ public class WtDocumentsHandler {
     return config;
   }
   
+  /**
+   *  get Configuration for language
+   *  @throws IOException 
+   */
+  public WtConfiguration getConfiguration(Language lang) throws IOException {
+    return new WtConfiguration(configDir, configFile, oldConfigFile, lang, true);
+  }
+  
   private void disableLTSpellChecker(XComponentContext xContext, Language lang) {
     try {
       config.setUseLtSpellChecker(false);
@@ -1036,7 +1044,7 @@ public class WtDocumentsHandler {
   public WtLanguageTool initLanguageTool(Language currentLanguage) {
     WtLanguageTool lt = null;
     try {
-      config = new WtConfiguration(configDir, configFile, oldConfigFile, docLanguage, true);
+      config = getConfiguration(currentLanguage == null ? docLanguage : currentLanguage);
       if (this.lt == null) {
         WtOfficeTools.setLogLevel(config.getlogLevel());
         debugMode = WtOfficeTools.DEBUG_MODE_MD;
@@ -1538,6 +1546,13 @@ public class WtDocumentsHandler {
     return true;
   }
   
+  /**
+   * Returns extra remote rules
+   */
+  public List<Rule> getExtraRemoteRules() {
+    return extraRemoteRules;
+  }
+
   /**
    * Returns xContext
    */
