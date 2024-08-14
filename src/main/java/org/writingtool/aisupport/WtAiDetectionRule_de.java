@@ -28,6 +28,8 @@ public class WtAiDetectionRule_de extends WtAiDetectionRule {
 //        + ", paraToken: " + paraToken.getToken() + ", resultToken: " + resultToken.getToken());
     if ("dass".equals(paraToken.getToken())  || "dass".equals(resultToken.getToken())) {
       return true;
+    } else if (paraToken.getToken().equalsIgnoreCase(resultToken.getToken())) {
+      return true;
     }
     return false;   
   }
