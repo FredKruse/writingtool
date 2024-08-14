@@ -23,7 +23,9 @@ import java.util.Collections;
 import java.util.List;
 
 import org.languagetool.Language;
+import org.languagetool.UserConfig;
 import org.writingtool.WtDocumentCache.TextParagraph;
+import org.writingtool.config.WtConfiguration;
 import org.writingtool.tools.WtMessageHandler;
 import org.writingtool.tools.WtOfficeTools;
 import org.writingtool.tools.WtOfficeTools.DocumentType;
@@ -288,7 +290,21 @@ public class WtTextLevelCheckQueue {
     if (debugMode) {
       WtMessageHandler.printToLogFile("TextLevelCheckQueue: initLangtool: language = " + (language == null ? "null" : language.getShortCodeWithCountryAndVariant()));
     }
-    lt = multiDocHandler.initLanguageTool(language);
+    lt = null;
+    try {
+      WtConfiguration config = multiDocHandler.getConfiguration(language);
+      WtLinguisticServices linguServices = multiDocHandler.getLinguisticServices();
+      linguServices.setNoSynonymsAsSuggestions(config.noSynonymsAsSuggestions() || multiDocHandler.isTestMode());
+      Language fixedLanguage = config.getDefaultLanguage();
+      if (fixedLanguage != null) {
+        language = fixedLanguage;
+      }
+      lt = new WtLanguageTool(language, config.getMotherTongue(),
+          new UserConfig(config.getConfigurableValues(), linguServices), config, multiDocHandler.getExtraRemoteRules(), 
+          !config.useLtSpellChecker(), false, multiDocHandler.isTestMode());
+    } catch (Throwable t) {
+      WtMessageHandler.showError(t);
+    }
   }
   
   /**

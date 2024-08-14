@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.writingtool.stylestatistic;
+package org.writingtool.dialogs;
 
 import java.awt.AWTError;
 import java.awt.Color;
@@ -69,8 +69,13 @@ import org.writingtool.WtSingleDocument;
 import org.writingtool.WtDocumentCache.TextParagraph;
 import org.writingtool.WtDocumentsHandler.WaitDialogThread;
 import org.writingtool.config.WtConfiguration;
+import org.writingtool.stylestatistic.WtLevelRule;
+import org.writingtool.stylestatistic.WtStatAnCache;
+import org.writingtool.stylestatistic.WtStatAnConfiguration;
+import org.writingtool.stylestatistic.WtUsedWordRule;
 import org.writingtool.stylestatistic.WtStatAnCache.Heading;
 import org.writingtool.stylestatistic.WtStatAnCache.Paragraph;
+import org.writingtool.tools.WtGeneralTools;
 import org.writingtool.tools.WtMessageHandler;
 import org.writingtool.tools.WtOfficeTools;
 import org.writingtool.tools.WtViewCursorTools;
@@ -192,7 +197,7 @@ public class WtStatAnDialog extends Thread  {
     }
     dialog = new JDialog();
     dialog.setName(dialogName);
-    dialog.setTitle(dialogName);
+    dialog.setTitle(dialogName + " (WritingTool " + WtOfficeTools.getWtInformation() + ")");
     dialog.setMinimumSize(new Dimension(MIN_DIALOG_WIDTH, MIN_DIALOG_HEIGHT));
 //    dialog.setSize(new Dimension(dialogWidth, dialogHeight));
     dialog.addWindowListener(new WindowListener() {
@@ -321,13 +326,16 @@ public class WtStatAnDialog extends Thread  {
     contentPane = dialog.getContentPane();
     contentPane.setLayout(new GridBagLayout());
     GridBagConstraints cons = new GridBagConstraints();
+    cons.insets = new Insets(8, 12, 8, 12);
     cons.gridx = 0;
     cons.gridy = 0;
     cons.weightx = 0.0f;
     cons.weighty = 0.0f;
     cons.fill = GridBagConstraints.NONE;
     cons.anchor = GridBagConstraints.NORTHWEST;
-    cons.insets = new Insets(2, 6, 2, 6);
+    JLabel functionLabel = new JLabel(MESSAGES.getString("loStatisticalAnalysisAnalysisLabel") + ":");
+    contentPane.add(functionLabel, cons);
+    cons.gridy++;
     function = new JComboBox<String>(getAllRuleNames());
     function.setSelectedIndex(method);
     function.addItemListener(e -> {
@@ -363,19 +371,37 @@ public class WtStatAnDialog extends Thread  {
     cons.weighty = 10.0f;
     cons.fill = GridBagConstraints.BOTH;
     cons.anchor = GridBagConstraints.NORTHWEST;
-    cons.insets = new Insets(2, 6, 2, 6);
     contentPane.add(mainPanel, cons);
-    cons.gridy++;
-    cons.fill = GridBagConstraints.NONE;
-    cons.anchor = GridBagConstraints.SOUTHEAST;
-    cons.weightx = 0.0f;
-    cons.weighty = 0.0f;
-    cons.gridy++;
+
+    //  Define general button panel
+    JPanel buttonPanel = new JPanel();
+    buttonPanel.setLayout(new GridBagLayout());
+    GridBagConstraints cons1 = new GridBagConstraints();
+    cons1.insets = new Insets(4, 4, 4, 4);
+    cons1.gridx = 0;
+    cons1.gridy = 0;
+    cons1.anchor = GridBagConstraints.WEST;
+    cons1.weightx = 1.0f;
+    cons1.weighty = 0.0f;
+    JButton helpButton = new JButton(MESSAGES.getString("guiHelpButton"));
+    helpButton.addActionListener(e -> {
+      WtGeneralTools.openURL(WtOfficeTools.getUrl("StatisticalAnalysis"));
+    });
+    buttonPanel.add(helpButton, cons1);
+    cons1.anchor = GridBagConstraints.EAST;
+    cons1.gridx++;
     JButton closeButton = new JButton(MESSAGES.getString("loStatisticalAnalysisCloseButton"));
     closeButton.addActionListener(e -> {
       closeDialog(waitdialog);
     });
-    contentPane.add(closeButton, cons);
+    buttonPanel.add(closeButton, cons1);
+    
+    cons.gridy++;
+    cons.fill = GridBagConstraints.BOTH;
+    cons.anchor = GridBagConstraints.SOUTHEAST;
+    cons.weightx = 1.0f;
+    cons.weighty = 0.0f;
+    contentPane.add(buttonPanel, cons);
     if (debugMode) {
       WtMessageHandler.printToLogFile("Content pane defined");
     }

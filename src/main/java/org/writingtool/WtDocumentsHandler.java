@@ -59,11 +59,11 @@ import org.writingtool.dialogs.WtAboutDialog;
 import org.writingtool.dialogs.WtCheckDialog;
 import org.writingtool.dialogs.WtConfigurationDialog;
 import org.writingtool.dialogs.WtMoreInfoDialog;
+import org.writingtool.dialogs.WtStatAnDialog;
 import org.writingtool.dialogs.WtCheckDialog.LtCheckDialog;
 import org.writingtool.languagedetectors.WtKhmerDetector;
 import org.writingtool.languagedetectors.WtTamilDetector;
 import org.writingtool.config.WtConfigThread;
-import org.writingtool.stylestatistic.WtStatAnDialog;
 import org.writingtool.tools.WtMessageHandler;
 import org.writingtool.tools.WtOfficeDrawTools;
 import org.writingtool.tools.WtOfficeSpreadsheetTools;
@@ -685,6 +685,14 @@ public class WtDocumentsHandler {
     return config;
   }
   
+  /**
+   *  get Configuration for language
+   *  @throws IOException 
+   */
+  public WtConfiguration getConfiguration(Language lang) throws IOException {
+    return new WtConfiguration(configDir, configFile, oldConfigFile, lang, true);
+  }
+  
   private void disableLTSpellChecker(XComponentContext xContext, Language lang) {
     try {
       config.setUseLtSpellChecker(false);
@@ -1036,7 +1044,7 @@ public class WtDocumentsHandler {
   public WtLanguageTool initLanguageTool(Language currentLanguage) {
     WtLanguageTool lt = null;
     try {
-      config = new WtConfiguration(configDir, configFile, oldConfigFile, docLanguage, true);
+      config = getConfiguration(currentLanguage == null ? docLanguage : currentLanguage);
       if (this.lt == null) {
         WtOfficeTools.setLogLevel(config.getlogLevel());
         debugMode = WtOfficeTools.DEBUG_MODE_MD;
@@ -1538,6 +1546,13 @@ public class WtDocumentsHandler {
     return true;
   }
   
+  /**
+   * Returns extra remote rules
+   */
+  public List<Rule> getExtraRemoteRules() {
+    return extraRemoteRules;
+  }
+
   /**
    * Returns xContext
    */
