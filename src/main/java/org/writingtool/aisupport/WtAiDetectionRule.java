@@ -319,12 +319,13 @@ public class WtAiDetectionRule extends TextLevelRule {
       if (nSentence > 0) {
         nSentence--;
       }
+      boolean overSentenceEnd = j < resultTokens.size() && PUNCTUATION.matcher(resultTokens.get(j - 1).getToken()).matches();
       int allSenTokens = nSentence == 0 ? sentenceEnds.get(nSentence) : sentenceEnds.get(nSentence) - sentenceEnds.get(nSentence - 1);
       if (debugMode) {
         WtMessageHandler.printToLogFile("AiDetectionRule: match: j < resultTokens.size(): mergeSentences: " + mergeSentences
             + ", nSenTokens: " + nSenTokens + ", allSenTokens: " + allSenTokens);
       }
-      if (mergeSentences || styleHintAssumed(nSenTokens, allSenTokens, tmpMatches, paraTokens, resultTokens)) {
+      if (mergeSentences || overSentenceEnd || styleHintAssumed(nSenTokens, allSenTokens, tmpMatches, paraTokens, resultTokens)) {
         if (showStylisticHints) {
           int startPos;
           int endPos;
