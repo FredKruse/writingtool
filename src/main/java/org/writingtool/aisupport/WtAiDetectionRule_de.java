@@ -61,7 +61,8 @@ public class WtAiDetectionRule_de extends WtAiDetectionRule {
                 || resultTokens.get(nResultStart + 2).getToken().equals("oder")))) {
       return true;
     }
-    if (isQuote(paraTokens.get(nParaStart).getToken()) 
+    if (nParaStart < paraTokens.size() - 1
+        && isQuote(paraTokens.get(nParaStart).getToken()) 
         && ",".equals(paraTokens.get(nParaStart + 1).getToken())
         && !containToken(paraTokens.get(nParaStart).getToken(), nResultStart, nResultEnd, resultTokens)) {
       return true;
