@@ -23,13 +23,33 @@ public class WtAiDetectionRule_de extends WtAiDetectionRule {
    * Set Exceptions to set Color for specific Languages
    */
   @Override
-  public boolean isHintException(WtAiToken paraToken, WtAiToken resultToken) {
+  public boolean isHintException(int nParaStart, int nParaEnd, 
+      int nResultStart, int nResultEnd, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) {
 //    WtMessageHandler.printToLogFile("isHintException in: de" 
 //        + ", paraToken: " + paraToken.getToken() + ", resultToken: " + resultToken.getToken());
-    if ("dass".equals(paraToken.getToken())  || "dass".equals(resultToken.getToken())) {
-      return true;
-    } else if (paraToken.getToken().equalsIgnoreCase(resultToken.getToken())) {
-      return true;
+    if (nParaStart == nParaEnd) {
+      String pToken = paraTokens.get(nParaStart).getToken();
+      if (nResultStart == nResultEnd) {
+        String rToken = resultTokens.get(nResultStart).getToken();
+        if ("dass".equals(pToken)  || "dass".equals(rToken)) {
+          return true;
+        } else if (pToken.equalsIgnoreCase(rToken)) {
+          return true;
+        }
+      } else if (nResultStart == nResultEnd - 1) {
+        if ((",".equals(resultTokens.get(nResultStart).getToken()) 
+                && (pToken.equals(resultTokens.get(nResultEnd).getToken()) || "dass".equals(resultTokens.get(nResultEnd).getToken())))
+            || pToken.equals(resultTokens.get(nResultStart).getToken() + resultTokens.get(nResultEnd).getToken())) {
+          return true;
+        }
+      }
+    } else if (nResultStart == nResultEnd) {
+      if (nParaStart == nParaEnd - 1) {
+        String rToken = resultTokens.get(nResultStart).getToken();
+        if (rToken.equals(paraTokens.get(nParaStart).getToken() + paraTokens.get(nParaEnd).getToken())) {
+          return true;
+        }
+      }
     }
     return false;   
   }

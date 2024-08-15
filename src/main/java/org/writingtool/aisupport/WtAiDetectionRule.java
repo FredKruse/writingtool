@@ -182,7 +182,9 @@ public class WtAiDetectionRule extends TextLevelRule {
                   || isIgnoredToken(paraTokens.get(i1).getToken(), resultTokens.get(j1).getToken())) {
                 endFound = true;
                 if (i1 - 1 < i) {
+                  // suggest to insert some words
                   if (i > 0) {
+                    //  add them to the word before
                     posStart = paraTokens.get(i - 1).getStartPos();
                     posEnd = paraTokens.get(i1 - 1).getEndPos();
                     sugStart = resultTokens.get(j - 1).getStartPos();
@@ -193,6 +195,7 @@ public class WtAiDetectionRule extends TextLevelRule {
                     nResultTokenStart = j - 1;
                     nResultTokenEnd = j1 -1;
                   } else {
+                    //  add them to the word after (i == 0)
                     posEnd = paraTokens.get(i1).getEndPos();
                     nParaTokenEnd = i1;
                     if (j < 1) {
@@ -208,6 +211,7 @@ public class WtAiDetectionRule extends TextLevelRule {
                     singleWordToken = j - 1 == j1 ? resultTokens.get(j1) : null;
                   }
                 } else {
+                  //  suggest to replace or delete some tokens
                   posEnd = paraTokens.get(i1 - 1).getEndPos();
                   nParaTokenEnd = i1 - 1;
                   if (j < 0) {
@@ -217,12 +221,25 @@ public class WtAiDetectionRule extends TextLevelRule {
                     j1 = 1;
                   }
                   if (j <= j1 - 1) {
-                    sugStart = resultTokens.get(j).getStartPos();
-                    sugEnd = resultTokens.get(j1 - 1).getEndPos();
+                    //  replace one or more tokens
                     nResultTokenStart = j;
                     nResultTokenEnd = j1 -1;
+                    if (j > 0 && PUNCTUATION.matcher(paraTokens.get(i).getToken()).matches() &&
+                        !PUNCTUATION.matcher(resultTokens.get(j).getToken()).matches()) {
+                      //  replace a punctuation by a word
+                      sugStart = resultTokens.get(j - 1).getEndPos();
+                    } else {
+                      sugStart = resultTokens.get(j).getStartPos();
+                    }
+                    sugEnd = resultTokens.get(j1 - 1).getEndPos();
                     singleWordToken = j == j1 - 1 ? resultTokens.get(j) : null;
+                    if (i > 0 && PUNCTUATION.matcher(resultTokens.get(j).getToken()).matches() &&
+                        !PUNCTUATION.matcher(paraTokens.get(i).getToken()).matches()) {
+                      //  replace a word by a punctuation
+                      posStart = paraTokens.get(i - 1).getEndPos();
+                    }
                   } else {
+                    //  delete some tokens
                     if (i > 0 && !PUNCTUATION.matcher(paraTokens.get(i - 1).getToken()).matches()) {
                       posStart = paraTokens.get(i - 1).getEndPos();
                     } else {
@@ -243,6 +260,7 @@ public class WtAiDetectionRule extends TextLevelRule {
           }
         }
         if (!endFound) {
+          //  replace all tokens from i to end of paragraph by the suggestion from j to end of suggestion
           posEnd = paraTokens.get(paraTokens.size() - 1).getEndPos();
           nParaTokenEnd = paraTokens.size() - 1;
           sugStart = resultTokens.get(j).getStartPos();
@@ -408,7 +426,7 @@ public class WtAiDetectionRule extends TextLevelRule {
       if (PUNCTUATION.matcher(paraTokens.get(nParaTokenStart).getToken()).matches()) {
         ruleMatch.setType(Type.Hint);
       } else if (shareLemma(paraTokens.get(nParaTokenStart), resultTokens.get(nResultTokenStart))
-          || isHintException(paraTokens.get(nParaTokenStart), resultTokens.get(nResultTokenStart))) {
+          || isHintException(nParaTokenStart, nParaTokenEnd, nResultTokenStart, nResultTokenEnd, paraTokens, resultTokens)) {
         ruleMatch.setType(Type.Hint);
       } else {
         ruleMatch.setType(Type.Other);
@@ -483,7 +501,8 @@ public class WtAiDetectionRule extends TextLevelRule {
   /**
    * Set language specific exceptions to set Color for specific Languages
    */
-  public boolean isHintException(WtAiToken paraToken, WtAiToken resultToken) {
+  public boolean isHintException(int nParaStart, int nParaEnd, 
+      int nResultStart, int nResultEnd, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) {
     return false;   
   }
 
