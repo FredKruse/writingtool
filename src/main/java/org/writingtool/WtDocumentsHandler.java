@@ -1154,6 +1154,16 @@ public class WtDocumentsHandler {
   }
 
   /**
+   * Is AI used?
+   */
+  public boolean useAi() {
+    if (config == null) {
+      config = getConfiguration();
+    }
+    return config.useAiSupport() && config.aiAutoCorrect();
+  }
+  
+  /**
    * Get current locale language
    */
   public Locale getLocale() {

@@ -201,6 +201,7 @@ public class WtCheckDialog extends Thread {
   private int dialogX = -1;
   private int dialogY = -1;
   private boolean hasUncheckedParas = false;
+  private boolean useAi = false;
   
   
   public WtCheckDialog(XComponentContext xContext, WtDocumentsHandler documents, Language language, WaitDialogThread inf) {
@@ -216,6 +217,7 @@ public class WtCheckDialog extends Thread {
     if (documents.noLtSpeller()) {
       linguServices = new WtLinguisticServices(xContext);
     }
+    useAi = documents.useAi();
   }
 
   /**
@@ -260,6 +262,7 @@ public class WtCheckDialog extends Thread {
         documents.setLtDialogIsRunning(false);
         return;
       }
+      useAi = documents.useAi();
       LtCheckDialog checkDialog = new LtCheckDialog(xContext, currentDocument, inf);
       if (inf.canceled()) {
         return;
@@ -530,9 +533,11 @@ public class WtCheckDialog extends Thread {
     List<SingleProofreadingError[]> errors = new ArrayList<>();
     while (nWait < TEST_LOOPS) {
       document = documents.getCurrentDocument();
-      for (int cacheNum = 0; cacheNum < lt.getNumMinToCheckParas().size(); cacheNum++) {
-        if (!docCache.isAutomaticGenerated(nFPara, true) && (cacheNum == 0 || (lt.isSortedRuleForIndex(cacheNum) 
-                                && !document.getDocumentCache().isSingleParagraph(nFPara)))) {
+//      for (int cacheNum = 0; cacheNum < lt.getNumMinToCheckParas().size(); cacheNum++) {
+      for (int cacheNum = 0; cacheNum < document.getParagraphsCache().size(); cacheNum++) {
+        if (!docCache.isAutomaticGenerated(nFPara, true) && ((cacheNum == WtOfficeTools.CACHE_SINGLE_PARAGRAPH 
+                || (lt.isSortedRuleForIndex(cacheNum) && !document.getDocumentCache().isSingleParagraph(nFPara)))
+            || (cacheNum == WtOfficeTools.CACHE_AI && useAi))) {
           SingleProofreadingError[] pErrors = document.getParagraphsCache().get(cacheNum).getSafeMatches(nFPara);
           //  Note: unsafe matches are needed to prevent the thread to get into a read lock
           if (pErrors == null) {
@@ -1832,8 +1837,7 @@ public class WtCheckDialog extends Thread {
     private void setJComboSelectionBackground(JComboBox<String> comboBox, Color color) {
       Object context = comboBox.getAccessibleContext().getAccessibleChild(0);
       BasicComboPopup popup = (BasicComboPopup)context;
-      JList<Object> list = popup.getList();
-      list.setSelectionBackground(color);
+      popup.getList().setSelectionBackground(color);
     }
 
     /**
@@ -1879,6 +1883,10 @@ public class WtCheckDialog extends Thread {
           }
           numCache++;
         }
+      }
+      if (useAi) {
+        pSize += (currentDocument.getParagraphsCache().get(WtOfficeTools.CACHE_AI).size() + nAuto);
+        numCache++;
       }
       int size;
       if (docType == DocumentType.WRITER) {
