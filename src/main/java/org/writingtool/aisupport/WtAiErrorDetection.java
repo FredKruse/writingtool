@@ -31,6 +31,7 @@ import org.writingtool.WtLinguisticServices;
 import org.writingtool.WtResultCache;
 import org.writingtool.WtSingleCheck;
 import org.writingtool.WtSingleDocument;
+import org.writingtool.WtResultCache.CacheEntry;
 import org.writingtool.WtLanguageTool;
 import org.writingtool.config.WtConfiguration;
 import org.writingtool.tools.WtMessageHandler;
@@ -50,7 +51,7 @@ public class WtAiErrorDetection {
   
   private static final int MIN_WORD = 4;
   
-  private boolean debugModeTm = true;
+  private boolean debugModeTm = WtOfficeTools.DEBUG_MODE_TM;
   private boolean debugMode = WtOfficeTools.DEBUG_MODE_AI;
   
   private static final ResourceBundle messages = WtOfficeTools.getMessageBundle();
@@ -217,26 +218,30 @@ public class WtAiErrorDetection {
   private void addMatchesByAiRule(int nFPara, RuleMatch[] ruleMatches,
                     int[] footnotePos, List<Integer> deletedChars) throws Throwable {
     WtResultCache aiCache = document.getParagraphsCache().get(WtOfficeTools.CACHE_AI);
+    CacheEntry cEntry = aiCache.getCacheEntry(nFPara);
+    boolean isMatch = cEntry != null && cEntry.errorArray.length > 0;
     if (ruleMatches == null || ruleMatches.length == 0) {
       aiCache.put(nFPara, null, new SingleProofreadingError[0]);
-      return;
-    }
-    List<SingleProofreadingError> errorList = new ArrayList<>();
-    for (RuleMatch myRuleMatch : ruleMatches) {
-      if (debugMode) {
-        WtMessageHandler.printToLogFile("Rule match suggestion: " + myRuleMatch.getSuggestedReplacements().get(0));
+    } else {
+      List<SingleProofreadingError> errorList = new ArrayList<>();
+      for (RuleMatch myRuleMatch : ruleMatches) {
+        if (debugMode) {
+          WtMessageHandler.printToLogFile("Rule match suggestion: " + myRuleMatch.getSuggestedReplacements().get(0));
+        }
+        SingleProofreadingError error = WtSingleCheck.createOOoError(myRuleMatch, 0, footnotePos, null, config);
+        if (debugMode) {
+          WtMessageHandler.printToLogFile("error suggestion: " + error.aSuggestions[0]);
+        }
+        errorList.add(WtSingleCheck.correctRuleMatchWithFootnotes(
+            error, footnotePos, deletedChars));
       }
-      SingleProofreadingError error = WtSingleCheck.createOOoError(myRuleMatch, 0, footnotePos, null, config);
-      if (debugMode) {
-        WtMessageHandler.printToLogFile("error suggestion: " + error.aSuggestions[0]);
-      }
-      errorList.add(WtSingleCheck.correctRuleMatchWithFootnotes(
-          error, footnotePos, deletedChars));
+      aiCache.put(nFPara, null, errorList.toArray(new SingleProofreadingError[0]));
     }
-    aiCache.put(nFPara, null, errorList.toArray(new SingleProofreadingError[0]));
-    List<Integer> changedParas = new ArrayList<>();
-    changedParas.add(nFPara);
-    document.remarkChangedParagraphs(changedParas, changedParas, false);
+    if (isMatch) {
+      List<Integer> changedParas = new ArrayList<>();
+      changedParas.add(nFPara);
+      document.remarkChangedParagraphs(changedParas, changedParas, false);
+    }
   }
     
   private String getAiResult(String para, Locale locale) throws Throwable {
@@ -273,7 +278,7 @@ public class WtAiErrorDetection {
     if (matches == null || matches.length == 0) {
       return matches;
     }
-    List<RuleMatch> resultMatches = lt.check(result, analyzedAiResult, ParagraphHandling.ONLYNONPARA, RemoteCheck.ALL);
+    List<RuleMatch> resultMatches = lt.check(result, analyzedAiResult, ParagraphHandling.NORMAL, RemoteCheck.ALL);
     if (resultMatches == null) {
       return matches;
     }

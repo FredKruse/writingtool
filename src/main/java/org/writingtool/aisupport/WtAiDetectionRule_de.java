@@ -1,17 +1,28 @@
 package org.writingtool.aisupport;
 
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import org.languagetool.AnalyzedSentence;
 import org.writingtool.WtLinguisticServices;
 import com.sun.star.lang.Locale;
 
 public class WtAiDetectionRule_de extends WtAiDetectionRule {
+  
+  private static final String CONFUSION_FILE_1 = "confusion_set_candidates.txt";
+  private static final String CONFUSION_FILE_2 = "confusion_sets.txt";
+
+  private static Map<String, Set<String>> confusionWords = null;
 
   WtAiDetectionRule_de(String aiResultText, List<AnalyzedSentence> analyzedAiResult, WtLinguisticServices linguServices,
       Locale locale, ResourceBundle messages, boolean showStylisticHints) {
     super(aiResultText, analyzedAiResult, linguServices, locale, messages, showStylisticHints);
+    if (confusionWords == null) {
+      confusionWords = WtAiConfusionPairs.getConfusionWordMap(locale, CONFUSION_FILE_1);
+      confusionWords = WtAiConfusionPairs.getConfusionWordMap(locale, CONFUSION_FILE_2, confusionWords);
+    }
   }
   
   @Override
@@ -34,6 +45,8 @@ public class WtAiDetectionRule_de extends WtAiDetectionRule {
         if ("dass".equals(pToken)  || "dass".equals(rToken)) {
           return true;
         } else if (pToken.equalsIgnoreCase(rToken)) {
+          return true;
+        } else if (isConfusionPair(pToken, rToken)) {
           return true;
         }
       } else if (nResultStart == nResultEnd - 1) {
@@ -90,6 +103,16 @@ public class WtAiDetectionRule_de extends WtAiDetectionRule {
       return true;
     }
     return false;   
+  }
+  
+  private boolean isConfusionPair(String wPara, String wResult) {
+    if (confusionWords.containsKey(wPara) && confusionWords.get(wPara).contains(wResult)) {
+      return true;
+    }
+    if (confusionWords.containsKey(wResult) && confusionWords.get(wResult).contains(wPara)) {
+      return true;
+    }
+    return false;
   }
 
 

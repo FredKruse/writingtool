@@ -418,15 +418,25 @@ public class WtAiDetectionRule extends TextLevelRule {
 
   private void setType(int nParaTokenStart, int nParaTokenEnd, int nResultTokenStart, int nResultTokenEnd,
       List<WtAiToken> paraTokens, List<WtAiToken> resultTokens, RuleMatch ruleMatch) {
-    WtMessageHandler.printToLogFile("ParaTokenStart: " + paraTokens.get(nParaTokenStart).getToken()
-        +", ParaTokenEnd: " + paraTokens.get(nParaTokenEnd).getToken()
-        + ", ResultTokenStart: " + resultTokens.get(nResultTokenStart).getToken()
-        +", ResultTokenEnd: " + resultTokens.get(nResultTokenEnd).getToken());
+    if (debugMode) {
+      WtMessageHandler.printToLogFile("ParaTokenStart: " + paraTokens.get(nParaTokenStart).getToken()
+          +", ParaTokenEnd: " + paraTokens.get(nParaTokenEnd).getToken()
+          + ", ResultTokenStart: " + resultTokens.get(nResultTokenStart).getToken()
+          +", ResultTokenEnd: " + resultTokens.get(nResultTokenEnd).getToken());
+    }
+    if (isHintException(nParaTokenStart, nParaTokenEnd, nResultTokenStart, nResultTokenEnd, paraTokens, resultTokens)) {
+      ruleMatch.setType(Type.Hint);
+      return;
+    }
+    if (nParaTokenStart == nParaTokenEnd && nResultTokenStart >= nResultTokenEnd
+        && PUNCTUATION.matcher(paraTokens.get(nParaTokenStart).getToken()).matches()) {
+      ruleMatch.setType(Type.Hint);
+      return;
+    }
     if (nParaTokenStart == nParaTokenEnd && nResultTokenStart == nResultTokenEnd) {
       if (PUNCTUATION.matcher(paraTokens.get(nParaTokenStart).getToken()).matches()) {
         ruleMatch.setType(Type.Hint);
-      } else if (shareLemma(paraTokens.get(nParaTokenStart), resultTokens.get(nResultTokenStart))
-          || isHintException(nParaTokenStart, nParaTokenEnd, nResultTokenStart, nResultTokenEnd, paraTokens, resultTokens)) {
+      } else if (shareLemma(paraTokens.get(nParaTokenStart), resultTokens.get(nResultTokenStart))) {
         ruleMatch.setType(Type.Hint);
       } else {
         ruleMatch.setType(Type.Other);

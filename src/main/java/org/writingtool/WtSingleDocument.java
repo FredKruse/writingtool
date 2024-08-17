@@ -757,7 +757,7 @@ public class WtSingleDocument {
         }
       }
     } catch (Throwable t) {
-      WtMessageHandler.showError(t);
+//      WtMessageHandler.showError(t);
     }
   }
   
@@ -995,6 +995,9 @@ public class WtSingleDocument {
 //                removeResultCache(nPara, false);
                 for (int i = 1; i < mDocHandler.getLanguageTool().getNumMinToCheckParas().size(); i++) {
                   addQueueEntry(nPara, i, mDocHandler.getLanguageTool().getNumMinToCheckParas().get(i), docID, false);
+                }
+                if (mDocHandler.useAi()) {
+                  addAiQueueEntry(nPara, true);
                 }
                 if (!changedParas.isEmpty()) {
                   addQueueEntry(nPara, 0, 0, docID, false);

@@ -210,7 +210,11 @@ public class WtLanguageTool {
    */
   public void activateTextRulesByIndex(int index) {
     if (sortedTextRules != null) {
-      sortedTextRules.activateTextRulesByIndex(index, this);
+      if (index == WtOfficeTools.CACHE_AI) {
+        sortedTextRules.reactivateTextRules(this);
+      } else {
+        sortedTextRules.activateTextRulesByIndex(index, this);
+      }
     }
   }
 
