@@ -23,6 +23,7 @@ import static org.languagetool.JLanguageTool.MESSAGE_BUNDLE;
 import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.OffsetDateTime;
@@ -119,6 +120,8 @@ public class WtOfficeTools {
   public static final String WT_SERVICE_NAME = "org.writingtool.WritingTool";
   public static final String WT_SPELL_SERVICE_NAME = "org.writingtool.WritingToolSpellChecker";
   public static final String WT_DISPLAY_SERVICE_NAME = WT_NAME;
+  private final static String RESOURCE_PATH = "/org/writingtool/resource/";
+  
   
   public static final int PROOFINFO_UNKNOWN = 0;
   public static final int PROOFINFO_GET_PROOFRESULT = 1;
@@ -637,25 +640,15 @@ public class WtOfficeTools {
     return "Java-Version: " + System.getProperty("java.version") + ", max. Heap-Space: " + ((int) (getMaxHeapSpace()/1048576)) +
         " MB, LT Heap Space Limit: " + ((int) (getHeapLimit(getMaxHeapSpace())/1048576)) + " MB";
   }
-
+  
   /**
    * Handles files, jar entries, and deployed jar entries in a zip file (EAR).
    * @return A String with the formated date if it can be determined, or an empty string if not.
    */
   private static String getClassBuildTime() {
       Date date = null;
-//      Class<?> currentClass = new Object() {}.getClass().getEnclosingClass();
-//      URL resource = currentClass.getResource(currentClass.getSimpleName() + ".class");
       WtOfficeTools wtTools = new WtOfficeTools();
       URL resource = wtTools.getClass().getResource(wtTools.getClass().getSimpleName() + ".class");
-/*      
-      Class<?> wtClass;
-      URL resource = null;
-      try {
-        wtClass = Class.forName(WT_NAME);
-        resource = wtClass.getResource(WT_NAME + ".class");
-      } catch (ClassNotFoundException ignored) { }
-*/
       if (resource != null) {
           if (resource.getProtocol().equals("file")) {
               try {
@@ -756,6 +749,14 @@ public class WtOfficeTools {
       url = WtOfficeTools.class.getResource("/images/LanguageToolSmall.png");
     }
     return new ImageIcon(url);
+  }
+
+  /**
+   * Get path to WT resource 
+   */
+  public static InputStream getWtRessourceAsInputStream(String fileName, Locale locale) {
+    String resource = RESOURCE_PATH + locale.Language + "/" + fileName;
+    return WtOfficeTools.class.getResourceAsStream(resource);
   }
 
   /**

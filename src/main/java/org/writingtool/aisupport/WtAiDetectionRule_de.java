@@ -13,6 +13,7 @@ public class WtAiDetectionRule_de extends WtAiDetectionRule {
   
   private static final String CONFUSION_FILE_1 = "confusion_set_candidates.txt";
   private static final String CONFUSION_FILE_2 = "confusion_sets.txt";
+  private static final String WT_CONFUSION_FILE = "confusion_sets.txt";
 
   private static Map<String, Set<String>> confusionWords = null;
 
@@ -22,6 +23,7 @@ public class WtAiDetectionRule_de extends WtAiDetectionRule {
     if (confusionWords == null) {
       confusionWords = WtAiConfusionPairs.getConfusionWordMap(locale, CONFUSION_FILE_1);
       confusionWords = WtAiConfusionPairs.getConfusionWordMap(locale, CONFUSION_FILE_2, confusionWords);
+      confusionWords = WtAiConfusionPairs.getWtConfusionWordMap(locale, WT_CONFUSION_FILE, confusionWords);
     }
   }
   

@@ -18,6 +18,11 @@
  */
 package org.writingtool.aisupport;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -26,14 +31,31 @@ import java.util.Set;
 
 import org.languagetool.JLanguageTool;
 import org.writingtool.tools.WtMessageHandler;
+import org.writingtool.tools.WtOfficeTools;
 
 import com.sun.star.lang.Locale;
 
 public class WtAiConfusionPairs {
 
-  
   private static String getConfusionSetFilePath(Locale locale, String fileName) {
     return "/" + locale.Language + "/" + fileName;
+  }
+  
+  private static void addToWordMap (String word1, String word2, Map<String, Set<String>> words) {
+    if (!word1.equalsIgnoreCase(word2)) {
+      if (words.containsKey(word1)) {
+        Set<String> wList = words.get(word1);
+        wList.add(word2);
+      } else if (words.containsKey(word2)) {
+        Set<String> wList = words.get(word2);
+        wList.add(word1);
+      } else {
+        Set<String> wList = new HashSet<String>();
+        wList.add(word2);
+        words.put(word1, wList);
+      }
+      WtMessageHandler.printToLogFile("Word pair added: " + word1 + ", " + word2);
+    }
   }
   
   /**
@@ -78,20 +100,7 @@ public class WtAiConfusionPairs {
             } else {
               continue;
             }
-            if (!word1.equalsIgnoreCase(word2)) {
-              if (words.containsKey(word1)) {
-                Set<String> wList = words.get(word1);
-                wList.add(word2);
-              } else if (words.containsKey(word2)) {
-                Set<String> wList = words.get(word2);
-                wList.add(word1);
-              } else {
-                Set<String> wList = new HashSet<String>();
-                wList.add(word2);
-                words.put(word1, wList);
-              }
-              WtMessageHandler.printToLogFile("Word pair added: " + word1 + ", " + word2);
-            }
+            addToWordMap(word1, word2, words);
           }
         }
       }
@@ -101,5 +110,33 @@ public class WtAiConfusionPairs {
     }
     return words;
   }
+  
+  public static Map<String, Set<String>> getWtConfusionWordMap(Locale locale, String fileName, Map<String, Set<String>> words) {
+    try {
+      if (words == null) {
+        words = new HashMap<>();
+      }
+      try (InputStream stream = WtOfficeTools.getWtRessourceAsInputStream(fileName, locale);
+          InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8);
+          BufferedReader br = new BufferedReader(reader) ) {
+        String line;
+        while ((line = br.readLine()) != null) {
+          line = line.trim();
+          if (!line.isEmpty() && !line.startsWith("#")) {
+            String[] sWords = line.split(";");
+            if (sWords.length == 2) {
+              addToWordMap(sWords[0].trim(), sWords[1].trim(), words);
+            }
+          }
+        }
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    } catch (Throwable t) {
+      WtMessageHandler.showError(t);
+    }
+    return words;
+  }
+
 
 }
