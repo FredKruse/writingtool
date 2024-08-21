@@ -201,7 +201,7 @@ public class WtAiErrorDetection {
       startTime = System.currentTimeMillis();
     }
     List<AnalyzedSentence> analyzedAiResult =  lt.analyzeText(result.replace("\u00AD", ""));
-    WtAiDetectionRule aiRule = getAiDetectionRule(result, analyzedAiResult, 
+    WtAiDetectionRule aiRule = getAiDetectionRule(result, analyzedAiResult, paraText,
         document.getMultiDocumentsHandler().getLinguisticServices(), locale , messages, config.aiShowStylisticChanges());
     RuleMatch[] matches = aiRule.match(analyzedSentences);
     matches = filterRuleMatches(matches, result, locale, analyzedAiResult);
@@ -303,18 +303,18 @@ public class WtAiErrorDetection {
     return correctMatches.toArray(new RuleMatch[correctMatches.size()]);
   }
   
-  private WtAiDetectionRule getAiDetectionRule(String aiResultText, List<AnalyzedSentence> analyzedAiResult, 
+  private WtAiDetectionRule getAiDetectionRule(String aiResultText, List<AnalyzedSentence> analyzedAiResult, String paraText,
       WtLinguisticServices linguServices, Locale locale, ResourceBundle messages, boolean showStylisticHints) {
     try {
-      Class<?>[] cArgs = { String.class, List.class, WtLinguisticServices.class, Locale.class, ResourceBundle.class, boolean.class };
+      Class<?>[] cArgs = { String.class, List.class, String.class, WtLinguisticServices.class, Locale.class, ResourceBundle.class, boolean.class };
       Class<?> clazz = Class.forName("org.writingtool.aisupport.WtAiDetectionRule_" + locale.Language);
 //      WtMessageHandler.printToLogFile("Use detection rule for: " + locale.Language);
       return (WtAiDetectionRule) clazz.getDeclaredConstructor(cArgs).newInstance(aiResultText, 
-          analyzedAiResult, linguServices, locale, messages, showStylisticHints);
+          analyzedAiResult, paraText, linguServices, locale, messages, showStylisticHints);
     } catch (Exception e) {
       WtMessageHandler.printException(e);
       WtMessageHandler.printToLogFile("Use general detection rule");
-      return new WtAiDetectionRule(aiResultText, analyzedAiResult, linguServices, locale, messages, showStylisticHints);
+      return new WtAiDetectionRule(aiResultText, analyzedAiResult, paraText, linguServices, locale, messages, showStylisticHints);
     }
     
   }

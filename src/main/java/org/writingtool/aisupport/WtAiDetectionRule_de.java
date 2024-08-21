@@ -17,9 +17,9 @@ public class WtAiDetectionRule_de extends WtAiDetectionRule {
 
   private static Map<String, Set<String>> confusionWords = null;
 
-  WtAiDetectionRule_de(String aiResultText, List<AnalyzedSentence> analyzedAiResult, WtLinguisticServices linguServices,
-      Locale locale, ResourceBundle messages, boolean showStylisticHints) {
-    super(aiResultText, analyzedAiResult, linguServices, locale, messages, showStylisticHints);
+  WtAiDetectionRule_de(String aiResultText, List<AnalyzedSentence> analyzedAiResult, String paraText,
+      WtLinguisticServices linguServices, Locale locale, ResourceBundle messages, boolean showStylisticHints) {
+    super(aiResultText, analyzedAiResult, paraText, linguServices, locale, messages, showStylisticHints);
     if (confusionWords == null) {
       confusionWords = WtAiConfusionPairs.getConfusionWordMap(locale, CONFUSION_FILE_1);
       confusionWords = WtAiConfusionPairs.getConfusionWordMap(locale, CONFUSION_FILE_2, confusionWords);

@@ -158,7 +158,7 @@ public class WtSingleCheck {
       int endSentencePos = paragraphsCache.get(0).getNextSentencePosition(paraNum, startOfSentence);
       SingleProofreadingError[] aiErrors = paragraphsCache.get(WtOfficeTools.CACHE_AI).getFromPara(paraNum, startSentencePos, endSentencePos, errType);
       if (aiErrors == null) {
-        singleDocument.addAiQueueEntry(paraNum, false);
+        singleDocument.addAiQueueEntry(paraNum, textIsChanged);
       }
       pErrors.add(aiErrors);
     }

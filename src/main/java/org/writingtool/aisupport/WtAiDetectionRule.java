@@ -58,6 +58,7 @@ public class WtAiDetectionRule extends TextLevelRule {
 
   private final ResourceBundle messages;
   private final String aiResultText;
+  private final String paraText;
   private final List<AnalyzedSentence> analyzedAiResult;
   private final String ruleMessage;
   private final boolean showStylisticHints;
@@ -65,9 +66,10 @@ public class WtAiDetectionRule extends TextLevelRule {
   private final Locale locale;
 
   
-  WtAiDetectionRule(String aiResultText, List<AnalyzedSentence> analyzedAiResult, 
+  WtAiDetectionRule(String aiResultText, List<AnalyzedSentence> analyzedAiResult, String paraText,
       WtLinguisticServices linguServices, Locale locale, ResourceBundle messages, boolean showStylisticHints) {
     this.aiResultText = aiResultText;
+    this.paraText = paraText;
     this.analyzedAiResult = analyzedAiResult;
     this.messages = messages;
     this.showStylisticHints = showStylisticHints;
@@ -502,7 +504,54 @@ public class WtAiDetectionRule extends TextLevelRule {
     return false;
   }
   
+  private boolean mergeRuleMatchesOneTime(List<AiRuleMatch> aiMatches) {
+    for (int i = 0; i < aiMatches.size(); i++) {
+      RuleMatch match1 = aiMatches.get(i).ruleMatch;
+      if(match1.getSuggestedReplacements().get(0).isEmpty()) {
+        String delTxt = paraText.substring(match1.getFromPos(), match1.getToPos()).trim();
+        for (int j = 0; j < aiMatches.size(); j++) {
+          RuleMatch match2 = aiMatches.get(j).ruleMatch;
+          if (match2.getSuggestedReplacements().get(0).contains(delTxt)) {
+            if (i > j) {
+              RuleMatch ruleMatch = new RuleMatch(this, match2.getSentence(), match2.getFromPos(), match1.getToPos(), ruleMessage);
+              String suggestion = aiResultText.substring(aiMatches.get(j).suggestionStart, aiMatches.get(i).suggestionEnd);
+              ruleMatch.addSuggestedReplacement(suggestion);
+              ruleMatch.setType(Type.Other);
+              aiMatches.add(i + 1, new AiRuleMatch(ruleMatch, 
+                  aiMatches.get(j).suggestionStart, aiMatches.get(i).suggestionEnd,
+                  aiMatches.get(j).nParaTokenStart, aiMatches.get(i).nParaTokenEnd, 
+                  aiMatches.get(j).nResultTokenStart, aiMatches.get(i).nResultTokenEnd));
+              for (int k = i; k >= j; k--) {
+                aiMatches.remove(k);
+              }
+              return true;
+            } else if (j > i) {
+              RuleMatch ruleMatch = new RuleMatch(this, match1.getSentence(), match1.getFromPos(), match2.getToPos(), ruleMessage);
+              String suggestion = aiResultText.substring(aiMatches.get(i).suggestionStart, aiMatches.get(j).suggestionEnd);
+              ruleMatch.addSuggestedReplacement(suggestion);
+              ruleMatch.setType(Type.Other);
+              aiMatches.add(j + 1, new AiRuleMatch(ruleMatch, 
+                  aiMatches.get(i).suggestionStart, aiMatches.get(j).suggestionEnd,
+                  aiMatches.get(i).nParaTokenStart, aiMatches.get(j).nParaTokenEnd, 
+                  aiMatches.get(i).nResultTokenStart, aiMatches.get(j).nResultTokenEnd));
+              for (int k = j; k >= i; k--) {
+                aiMatches.remove(k);
+              }
+              return true;
+            }
+          }
+        }
+      }
+    }
+    return false;
+  }
+ 
+  private void mergeRuleMatches(List<AiRuleMatch> aiMatches) {
+    while (mergeRuleMatchesOneTime(aiMatches));
+  }
+  
   private void addAllRuleMatches(List<RuleMatch> matches, List<AiRuleMatch> aiMatches) {
+    mergeRuleMatches(aiMatches);
     for (AiRuleMatch match : aiMatches) {
       matches.add(match.ruleMatch);
     }
