@@ -20,12 +20,16 @@ package org.writingtool.aisupport;
 
 import java.util.List;
 
+import org.languagetool.Language;
+import org.languagetool.UserConfig;
 import org.writingtool.WtDocumentCache;
 import org.writingtool.WtDocumentsHandler;
 import org.writingtool.WtSingleDocument;
 import org.writingtool.WtLanguageTool;
+import org.writingtool.WtLinguisticServices;
 import org.writingtool.WtTextLevelCheckQueue;
 import org.writingtool.WtDocumentCache.TextParagraph;
+import org.writingtool.config.WtConfiguration;
 import org.writingtool.tools.WtMessageHandler;
 import org.writingtool.tools.WtOfficeTools;
 import org.writingtool.tools.WtOfficeTools.DocumentType;
@@ -124,22 +128,30 @@ public class WtAiCheckQueue extends WtTextLevelCheckQueue {
   }
   
   /**
-   *  get language of document by ID
-   *//*
+   * initialize languagetool for text level iteration
+   */
   @Override
-  protected Language getLanguage(String docId, TextParagraph nStart) {
-    Language lang = super.getLanguage(docId, nStart);
-    while (lang == null) {
-      try {
-        Thread.sleep(50);
-      } catch (InterruptedException e) {
-        lang = lastLanguage;
-        MessageHandler.printException(e);
-      }
+  public void initLangtool(Language language) throws Throwable {
+    if (debugMode) {
+      WtMessageHandler.printToLogFile("TextLevelCheckQueue: initLangtool: language = " + (language == null ? "null" : language.getShortCodeWithCountryAndVariant()));
     }
-    return lang;
+    lt = null;
+    try {
+      WtConfiguration config = multiDocHandler.getConfiguration(language);
+      WtLinguisticServices linguServices = multiDocHandler.getLinguisticServices();
+      linguServices.setNoSynonymsAsSuggestions(config.noSynonymsAsSuggestions() || multiDocHandler.isTestMode());
+      Language fixedLanguage = config.getDefaultLanguage();
+      if (fixedLanguage != null) {
+        language = fixedLanguage;
+      }
+      lt = new WtLanguageTool(language, config.getMotherTongue(),
+          new UserConfig(config.getConfigurableValues(), linguServices), config, multiDocHandler.getExtraRemoteRules(), 
+          !config.useLtSpellChecker(), false, multiDocHandler.isTestMode(), true);
+    } catch (Throwable t) {
+      WtMessageHandler.showError(t);
+    }
   }
-*/   
+  
   /**
    *  run a queue entry for the specific document
    */

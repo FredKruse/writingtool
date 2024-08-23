@@ -69,8 +69,15 @@ public class WtLanguageTool {
   private WtConfiguration config;
 
   public WtLanguageTool(Language language, Language motherTongue, UserConfig userConfig, 
-      WtConfiguration config, List<Rule> extraRemoteRules, 
+      WtConfiguration config, List<Rule> extraRemoteRules,
       boolean noLtSpeller, boolean checkImpressDocument, boolean testMode) throws Throwable {
+    this (language, motherTongue, userConfig, config, extraRemoteRules,
+      noLtSpeller, checkImpressDocument, testMode, false);
+  }
+
+  public WtLanguageTool(Language language, Language motherTongue, UserConfig userConfig, 
+      WtConfiguration config, List<Rule> extraRemoteRules,
+      boolean noLtSpeller, boolean checkImpressDocument, boolean testMode, boolean onlyDefault) throws Throwable {
     this.config = config;
     isMultiThread = config.isMultiThread();
     isRemote = config.doRemoteCheck() && !testMode;
@@ -120,7 +127,9 @@ public class WtLanguageTool {
         }
       }
     }
-    initCheck(checkImpressDocument);
+    if (!onlyDefault) {
+      initCheck(checkImpressDocument);
+    }
   }
   
   /**

@@ -736,7 +736,7 @@ public class WtDocumentsHandler {
   /**
    * proofs if test cases
    */
-  boolean isTestMode() {
+  public boolean isTestMode() {
     return testMode;
   }
 
