@@ -187,6 +187,7 @@ public class WtAiErrorDetection {
   private RuleMatch[] getMatchesByAiRule(int nFPara, String paraText, List<AnalyzedSentence> analyzedSentences,
       Locale locale, int[] footnotePos, List<Integer> deletedChars) throws Throwable {
     String result = getAiResult(paraText, locale);
+    WtMessageHandler.printToLogFile("AiErrorDetection: getMatchesByAiRule: get result for para: " + nFPara);
     if (result == null || result.trim().isEmpty()) {
       if (debugMode) {
         WtMessageHandler.printToLogFile("AiErrorDetection: getMatchesByAiRule: result: " + (result == null? "NULL" : "EMPTY"));

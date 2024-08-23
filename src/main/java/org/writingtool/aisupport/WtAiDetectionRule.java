@@ -126,7 +126,7 @@ public class WtAiDetectionRule extends TextLevelRule {
     List<AiRuleMatch> tmpMatches = new ArrayList<>();
     List<WtAiToken> paraTokens = new ArrayList<>();
     List<Integer> sentenceEnds = new ArrayList<>();
-    int nSenTokens = 0;
+    int nRuleTokens = 0;
     int nSentence = 0;
 //    int lastSentenceStart = 0;
     int lastResultStart = 0;
@@ -253,7 +253,7 @@ public class WtAiDetectionRule extends TextLevelRule {
                     nResultTokenEnd = j1 -1;
                   }
                 }
-                nSenTokens += (i1 - i + 1);
+                nRuleTokens += (i1 - i + 1);
                 j = j1;
                 i = i1;
                 break;
@@ -269,6 +269,7 @@ public class WtAiDetectionRule extends TextLevelRule {
           sugEnd = resultTokens.get(resultTokens.size() - 1).getEndPos();
           nResultTokenStart = j;
           nResultTokenEnd = resultTokens.size() - 1;
+          nRuleTokens += (paraTokens.size() - i);
           j = resultTokens.size() - 1;
         }
         suggestion = sugStart >= sugEnd ? "" : aiResultText.substring(sugStart, sugEnd);
@@ -296,9 +297,9 @@ public class WtAiDetectionRule extends TextLevelRule {
         }
       }
       if (i == sentenceEnds.get(nSentence) - 1) {
-        if (nSenTokens > 0) {
-          int allSenTokens = nSentence == 0 ? sentenceEnds.get(nSentence) : sentenceEnds.get(nSentence) - sentenceEnds.get(nSentence - 1);
-          if (mergeSentences || styleHintAssumed(nSenTokens, allSenTokens, tmpMatches, paraTokens, resultTokens)) {
+        if (nRuleTokens > 0) {
+          int nSenTokens = nSentence == 0 ? sentenceEnds.get(nSentence) : sentenceEnds.get(nSentence) - sentenceEnds.get(nSentence - 1);
+          if (mergeSentences || styleHintAssumed(nRuleTokens, nSenTokens, tmpMatches, paraTokens, resultTokens)) {
             if (showStylisticHints && !tmpMatches.isEmpty()) {
               int startPos = tmpMatches.get(0).ruleMatch.getFromPos();
               int endPos = tmpMatches.get(tmpMatches.size() - 1).ruleMatch.getToPos();
@@ -315,7 +316,7 @@ public class WtAiDetectionRule extends TextLevelRule {
             }
             mergeSentences = false;
           } else {
-            addAllRuleMatches(matches, tmpMatches);
+            addAllRuleMatches(matches, tmpMatches, resultTokens);
             if (debugMode) {
               WtMessageHandler.printToLogFile("AiDetectionRule: match: add matches: " + tmpMatches.size()
               + ", total: " + matches.size());
@@ -323,29 +324,44 @@ public class WtAiDetectionRule extends TextLevelRule {
           }
         }
         tmpMatches.clear();
-        nSenTokens = 0;
+        nRuleTokens = 0;
         nSentence++;
 //        lastSentenceStart = i + 1;
         lastResultStart = j;
       }
     }
-    if (tmpMatches.size() > 0 || (j < resultTokens.size() 
+    if (j < resultTokens.size() 
             && (!paraTokens.get(i - 1).getToken().equals(resultTokens.get(j - 1).getToken())
                 || (resultTokens.get(j).isNonWord() && !PUNCTUATION.matcher(resultTokens.get(j).getToken()).matches())
-        ))) {
-//        || (!"}".equals(resultTokens.get(j).getToken()) && !QUOTES.matcher(resultTokens.get(j).getToken()).matches() 
-//            && !OPENING_BRACKETS.matcher(resultTokens.get(j).getToken()).matches())))) {
-      nSenTokens++;
+        )) {
+      nRuleTokens++;
       if (nSentence > 0) {
         nSentence--;
       }
+      int j1;
+      for (j1 = j + 1; j1 < resultTokens.size() && !OPENING_BRACKETS.matcher(resultTokens.get(j1).getToken()).matches(); j1++);
+      if (j1 > resultTokens.size()) {
+        j1 = resultTokens.size();
+      }
+      String suggestion = aiResultText.substring(resultTokens.get(j - 1).getStartPos(), resultTokens.get(j1 - 1).getEndPos());
+      if (suggestion.isEmpty() || j != j1 || resultTokens.get(j - 1).isNonWord() || linguServices.isCorrectSpell(suggestion, locale)) {
+        RuleMatch ruleMatch = new RuleMatch(this, null, paraTokens.get(paraTokens.size() - 1).getStartPos(), 
+            paraTokens.get(paraTokens.size() - 1).getEndPos(), ruleMessage);
+        ruleMatch.addSuggestedReplacement(suggestion);
+        setType(paraTokens.size() - 1, paraTokens.size() - 1, j - 1, j1 - 1, paraTokens, resultTokens, ruleMatch);
+        tmpMatches.add(new AiRuleMatch(ruleMatch, resultTokens.get(j - 1).getStartPos(), resultTokens.get(resultTokens.size() - 1).getEndPos(),
+            paraTokens.size() - 1, paraTokens.size() - 1, j - 1, j1 - 1));
+      }
+    }
+    if (tmpMatches.size() > 0) {
       boolean overSentenceEnd = j < resultTokens.size() && PUNCTUATION.matcher(resultTokens.get(j - 1).getToken()).matches();
-      int allSenTokens = nSentence == 0 ? sentenceEnds.get(nSentence) : sentenceEnds.get(nSentence) - sentenceEnds.get(nSentence - 1);
+      int nSenTokens = nSentence == 0 ? sentenceEnds.get(nSentence) : 
+        sentenceEnds.get(sentenceEnds.size() - 1) - sentenceEnds.get(sentenceEnds.size() - 2);
       if (debugMode) {
         WtMessageHandler.printToLogFile("AiDetectionRule: match: j < resultTokens.size(): mergeSentences: " + mergeSentences
-            + ", nSenTokens: " + nSenTokens + ", allSenTokens: " + allSenTokens);
+            + ", nRuleTokens: " + nRuleTokens + ", nSenTokens: " + nSenTokens);
       }
-      if (mergeSentences || overSentenceEnd || styleHintAssumed(nSenTokens, allSenTokens, tmpMatches, paraTokens, resultTokens)) {
+      if (mergeSentences || overSentenceEnd || styleHintAssumed(nRuleTokens, nSenTokens, tmpMatches, paraTokens, resultTokens)) {
         if (showStylisticHints) {
           int startPos;
           int endPos;
@@ -372,21 +388,7 @@ public class WtAiDetectionRule extends TextLevelRule {
           }
         }
       } else {
-        int j1;
-        for (j1 = j + 1; j1 < resultTokens.size() && !OPENING_BRACKETS.matcher(resultTokens.get(j1).getToken()).matches(); j1++);
-        if (j1 > resultTokens.size()) {
-          j1 = resultTokens.size();
-        }
-        String suggestion = aiResultText.substring(resultTokens.get(j - 1).getStartPos(), resultTokens.get(j1 - 1).getEndPos());
-        if (suggestion.isEmpty() || j != j1 || resultTokens.get(j - 1).isNonWord() || linguServices.isCorrectSpell(suggestion, locale)) {
-          RuleMatch ruleMatch = new RuleMatch(this, null, paraTokens.get(paraTokens.size() - 1).getStartPos(), 
-              paraTokens.get(paraTokens.size() - 1).getEndPos(), ruleMessage);
-          ruleMatch.addSuggestedReplacement(suggestion);
-          setType(paraTokens.size() - 1, paraTokens.size() - 1, j - 1, j1 - 1, paraTokens, resultTokens, ruleMatch);
-          tmpMatches.add(new AiRuleMatch(ruleMatch, resultTokens.get(j - 1).getStartPos(), resultTokens.get(resultTokens.size() - 1).getEndPos(),
-              paraTokens.size() - 1, paraTokens.size() - 1, j - 1, j1 - 1));
-        }
-        addAllRuleMatches(matches, tmpMatches);
+        addAllRuleMatches(matches, tmpMatches, resultTokens);
         if (debugMode) {
           WtMessageHandler.printToLogFile("AiDetectionRule: match: add matches: " + tmpMatches.size()
           + ", total: " + matches.size());
@@ -504,17 +506,19 @@ public class WtAiDetectionRule extends TextLevelRule {
     return false;
   }
   
-  private boolean mergeRuleMatchesOneTime(List<AiRuleMatch> aiMatches) {
+  private boolean mergeRuleMatchesOneTime(List<AiRuleMatch> aiMatches, List<WtAiToken> resultTokens) {
     for (int i = 0; i < aiMatches.size(); i++) {
       RuleMatch match1 = aiMatches.get(i).ruleMatch;
       if(match1.getSuggestedReplacements().get(0).isEmpty()) {
         String delTxt = paraText.substring(match1.getFromPos(), match1.getToPos()).trim();
         for (int j = 0; j < aiMatches.size(); j++) {
           RuleMatch match2 = aiMatches.get(j).ruleMatch;
-          if (match2.getSuggestedReplacements().get(0).contains(delTxt)) {
+          String suggestion = match2.getSuggestedReplacements().get(0);
+          if (suggestion.contains(delTxt)) {
             if (i > j) {
               RuleMatch ruleMatch = new RuleMatch(this, match2.getSentence(), match2.getFromPos(), match1.getToPos(), ruleMessage);
-              String suggestion = aiResultText.substring(aiMatches.get(j).suggestionStart, aiMatches.get(i).suggestionEnd);
+              suggestion = aiResultText.substring(resultTokens.get(aiMatches.get(j).nResultTokenStart).getStartPos(), 
+                  resultTokens.get(aiMatches.get(i).nResultTokenEnd).getEndPos());
               ruleMatch.addSuggestedReplacement(suggestion);
               ruleMatch.setType(Type.Other);
               aiMatches.add(i + 1, new AiRuleMatch(ruleMatch, 
@@ -526,8 +530,11 @@ public class WtAiDetectionRule extends TextLevelRule {
               }
               return true;
             } else if (j > i) {
-              RuleMatch ruleMatch = new RuleMatch(this, match1.getSentence(), match1.getFromPos(), match2.getToPos(), ruleMessage);
-              String suggestion = aiResultText.substring(aiMatches.get(i).suggestionStart, aiMatches.get(j).suggestionEnd);
+              boolean startsWithWhiteChar = paraText.substring(match1.getFromPos(), match1.getFromPos() + 1).trim().isEmpty();
+              int fromPos = startsWithWhiteChar ? match1.getFromPos() + 1 : match1.getFromPos();
+              RuleMatch ruleMatch = new RuleMatch(this, match1.getSentence(), fromPos, match2.getToPos(), ruleMessage);
+              suggestion = aiResultText.substring(resultTokens.get(aiMatches.get(i).nResultTokenStart).getStartPos(), 
+                  resultTokens.get(aiMatches.get(j).nResultTokenEnd).getEndPos());
               ruleMatch.addSuggestedReplacement(suggestion);
               ruleMatch.setType(Type.Other);
               aiMatches.add(j + 1, new AiRuleMatch(ruleMatch, 
@@ -546,12 +553,12 @@ public class WtAiDetectionRule extends TextLevelRule {
     return false;
   }
  
-  private void mergeRuleMatches(List<AiRuleMatch> aiMatches) {
-    while (mergeRuleMatchesOneTime(aiMatches));
+  private void mergeRuleMatches(List<AiRuleMatch> aiMatches, List<WtAiToken> resultTokens) {
+    while (mergeRuleMatchesOneTime(aiMatches, resultTokens));
   }
   
-  private void addAllRuleMatches(List<RuleMatch> matches, List<AiRuleMatch> aiMatches) {
-    mergeRuleMatches(aiMatches);
+  private void addAllRuleMatches(List<RuleMatch> matches, List<AiRuleMatch> aiMatches, List<WtAiToken> resultTokens) {
+    mergeRuleMatches(aiMatches, resultTokens);
     for (AiRuleMatch match : aiMatches) {
       matches.add(match.ruleMatch);
     }

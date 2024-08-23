@@ -54,7 +54,7 @@ public class WtAiConfusionPairs {
         wList.add(word2);
         words.put(word1, wList);
       }
-      WtMessageHandler.printToLogFile("Word pair added: " + word1 + ", " + word2);
+//      WtMessageHandler.printToLogFile("Word pair added: " + word1 + ", " + word2);
     }
   }
   
