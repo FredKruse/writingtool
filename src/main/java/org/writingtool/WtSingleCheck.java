@@ -678,7 +678,7 @@ public class WtSingleCheck {
         .replaceAll("([\r]*\n)", " "); 
     aError.aFullComment = msg;
     // not all rules have short comments
-    if (!StringTools.isEmpty(ruleMatch.getShortMessage())) {
+    if (!config.useLongMessages() && !StringTools.isEmpty(ruleMatch.getShortMessage())) {
       aError.aShortComment = ruleMatch.getShortMessage();
     } else {
       aError.aShortComment = aError.aFullComment;

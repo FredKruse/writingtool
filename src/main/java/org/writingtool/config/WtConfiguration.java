@@ -74,6 +74,7 @@ public class WtConfiguration {
   static final boolean DEFAULT_IS_PREMIUM = false;
   static final boolean DEFAULT_MARK_SINGLE_CHAR_BOLD = false;
   static final boolean DEFAULT_USE_LT_SPELL_CHECKER = true;
+  static final boolean DEFAULT_USE_LONG_MESSAGES = false;
   static final boolean DEFAULT_NO_SYNONYMS_AS_SUGGESTIONS = false;
   static final boolean DEFAULT_INCLUDE_TRACKED_CHANGES = false;
   static final boolean DEFAULT_ENABLE_TMP_OFF_RULES = false;
@@ -141,6 +142,7 @@ public class WtConfiguration {
   private static final String MARK_SINGLE_CHAR_BOLD_KEY = "markSingleCharBold";
   private static final String LOG_LEVEL_KEY = "logLevel";
   private static final String USE_LT_SPELL_CHECKER_KEY = "UseLtSpellChecker";
+  private static final String USE_LONG_MESSAGES_KEY = "UseLongMessages";
   private static final String NO_SYNONYMS_AS_SUGGESTIONS_KEY = "noSynonymsAsSuggestions";
   private static final String INCLUDE_TRACKED_CHANGES_KEY = "includeTrackedChanges";
   private static final String ENABLE_TMP_OFF_RULES_KEY = "enableTmpOffRules";
@@ -222,6 +224,7 @@ public class WtConfiguration {
   private boolean isPremium = DEFAULT_IS_PREMIUM;
   private boolean markSingleCharBold = DEFAULT_MARK_SINGLE_CHAR_BOLD;
   private boolean useLtSpellChecker = DEFAULT_USE_LT_SPELL_CHECKER;
+  private boolean useLongMessages = DEFAULT_USE_LONG_MESSAGES;
   private boolean noSynonymsAsSuggestions = DEFAULT_NO_SYNONYMS_AS_SUGGESTIONS;
   private boolean includeTrackedChanges = DEFAULT_INCLUDE_TRACKED_CHANGES;
   private boolean enableTmpOffRules = DEFAULT_ENABLE_TMP_OFF_RULES;
@@ -326,6 +329,7 @@ public class WtConfiguration {
     isPremium = DEFAULT_IS_PREMIUM;
     markSingleCharBold = DEFAULT_MARK_SINGLE_CHAR_BOLD;
     useLtSpellChecker = DEFAULT_USE_LT_SPELL_CHECKER;
+    useLongMessages = DEFAULT_USE_LONG_MESSAGES;
     noSynonymsAsSuggestions = DEFAULT_NO_SYNONYMS_AS_SUGGESTIONS;
     includeTrackedChanges = DEFAULT_INCLUDE_TRACKED_CHANGES;
     enableTmpOffRules = DEFAULT_ENABLE_TMP_OFF_RULES;
@@ -396,6 +400,7 @@ public class WtConfiguration {
     this.isPremium = configuration.isPremium;
     this.markSingleCharBold = configuration.markSingleCharBold;
     this.useLtSpellChecker = configuration.useLtSpellChecker;
+    this.useLongMessages = configuration.useLongMessages;
     this.noSynonymsAsSuggestions = configuration.noSynonymsAsSuggestions;
     this.includeTrackedChanges = configuration.includeTrackedChanges;
     this.enableTmpOffRules = configuration.enableTmpOffRules;
@@ -726,6 +731,14 @@ public class WtConfiguration {
 
   public boolean useLtSpellChecker() {
     return useLtSpellChecker;
+  }
+  
+  public void setUseLongMessages(boolean useLongMessages) {
+    this.useLongMessages = useLongMessages;
+  }
+
+  public boolean useLongMessages() {
+    return useLongMessages;
   }
   
   public void setNoSynonymsAsSuggestions(boolean noSynonymsAsSuggestions) {
@@ -1540,6 +1553,11 @@ public class WtConfiguration {
       useLtSpellChecker = Boolean.parseBoolean(useLtSpellCheckerString);
     }
     
+    String useLongMessagesString = (String) props.get(prefix + USE_LONG_MESSAGES_KEY);
+    if (useLongMessagesString != null) {
+      useLongMessages = Boolean.parseBoolean(useLongMessagesString);
+    }
+    
     String noSynonymsAsSuggestionsString = (String) props.get(prefix + NO_SYNONYMS_AS_SUGGESTIONS_KEY);
     if (noSynonymsAsSuggestionsString != null) {
       noSynonymsAsSuggestions = Boolean.parseBoolean(noSynonymsAsSuggestionsString);
@@ -1848,6 +1866,7 @@ public class WtConfiguration {
     allProfileKeys.add(REMOTE_APIKEY_KEY);
     allProfileKeys.add(MARK_SINGLE_CHAR_BOLD_KEY);
     allProfileKeys.add(USE_LT_SPELL_CHECKER_KEY);
+    allProfileKeys.add(USE_LONG_MESSAGES_KEY);
     allProfileKeys.add(NO_SYNONYMS_AS_SUGGESTIONS_KEY);
     allProfileKeys.add(INCLUDE_TRACKED_CHANGES_KEY);
     allProfileKeys.add(ENABLE_TMP_OFF_RULES_KEY);
@@ -1964,6 +1983,9 @@ public class WtConfiguration {
     }
     if (useLtSpellChecker != DEFAULT_USE_LT_SPELL_CHECKER) {
       props.setProperty(prefix + USE_LT_SPELL_CHECKER_KEY, Boolean.toString(useLtSpellChecker));
+    }
+    if (useLongMessages != DEFAULT_USE_LONG_MESSAGES) {
+      props.setProperty(prefix + USE_LONG_MESSAGES_KEY, Boolean.toString(useLongMessages));
     }
     if (noSynonymsAsSuggestions != DEFAULT_NO_SYNONYMS_AS_SUGGESTIONS) {
       props.setProperty(prefix + NO_SYNONYMS_AS_SUGGESTIONS_KEY, Boolean.toString(noSynonymsAsSuggestions));

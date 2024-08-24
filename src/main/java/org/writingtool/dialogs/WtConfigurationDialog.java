@@ -306,8 +306,8 @@ public class WtConfigurationDialog implements ActionListener {
 
     cons.gridx = 0;
     cons.gridy = 0;
-    cons.weightx = 10.0f;
-    cons.weighty = 10.0f;
+    cons.weightx = 1.0f;
+    cons.weighty = 15.0f;
     cons.fill = GridBagConstraints.BOTH;
     cons.anchor = GridBagConstraints.NORTHWEST;
     
@@ -987,6 +987,14 @@ public class WtConfigurationDialog implements ActionListener {
     });
     cons.gridy++;
     portPanel.add(useLtSpellCheckerBox, cons);
+
+    JCheckBox useLongMessagesBox = new JCheckBox(WtGeneralTools.getLabel(messages.getString("guiUseLongMessages")));
+    useLongMessagesBox.setSelected(config.useLongMessages());
+    useLongMessagesBox.addItemListener(e -> {
+      config.setUseLongMessages(useLongMessagesBox.isSelected());
+    });
+    cons.gridy++;
+    portPanel.add(useLongMessagesBox, cons);
 
     JCheckBox markSingleCharBold = new JCheckBox(WtGeneralTools.getLabel(messages.getString("guiMarkSingleCharBold")));
     markSingleCharBold.setSelected(config.markSingleCharBold());
