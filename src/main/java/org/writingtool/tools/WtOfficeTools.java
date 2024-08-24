@@ -163,6 +163,7 @@ public class WtOfficeTools {
   public static boolean DEBUG_MODE_MD = false;    //  Activate Debug Mode for MultiDocumentsHandler
   public static boolean DEBUG_MODE_SP = false;    //  Activate Debug Mode for LtSpellChecker
   public static boolean DEBUG_MODE_SR = false;    //  Activate Debug Mode for SortedTextRules
+  public static boolean DEBUG_MODE_TA = false;    //  Activate Debug Mode for time measurements (only AI)
   public static boolean DEBUG_MODE_TM = false;    //  Activate Debug Mode for time measurements
   public static boolean DEBUG_MODE_TQ = false;    //  Activate Debug Mode for TextLevelCheckQueue
   public static boolean DEVELOP_MODE_ST = false;  //  Activate Development Mode to test sorted text IDs
@@ -1022,6 +1023,8 @@ public class WtOfficeTools {
           DEBUG_MODE_SP = true;
         } else if (level.equals("ai")) {
           DEBUG_MODE_AI = true;
+        } else if (level.equals("ta")) {
+          DEBUG_MODE_TA = true;
         } else if (level.startsWith("tm")) {
           String[] levelTm = level.split(":");
           if (levelTm[0].equals("tm")) {

@@ -199,7 +199,7 @@ public class WtAiRemote {
     try {
       conn = getConnection(postData, checkUrl, apiKey);
     } catch (RuntimeException e) {
-      WtMessageHandler.showError(e);
+      WtMessageHandler.printException(e);
       stopAiRemote();
       return null;
     }
@@ -263,10 +263,6 @@ public class WtAiRemote {
     if (size != 128 && size != 256 && size != 512) {
       size = 256;
     }
-//    long startTime = 0;
-//    if (debugModeTm) {
-//      startTime = System.currentTimeMillis();
-//    }
     if (debugMode) {
       WtMessageHandler.printToLogFile("AiRemote: runInstruction: Ask AI started! URL: " + url);
     }

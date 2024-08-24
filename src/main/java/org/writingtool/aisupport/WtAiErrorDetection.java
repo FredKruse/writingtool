@@ -52,6 +52,7 @@ public class WtAiErrorDetection {
   private static final int MIN_WORD = 4;
   
   private boolean debugModeTm = WtOfficeTools.DEBUG_MODE_TM;
+  private boolean debugModeAiTm = WtOfficeTools.DEBUG_MODE_TA || debugModeTm;
   private boolean debugMode = WtOfficeTools.DEBUG_MODE_AI;
   
   private static final ResourceBundle messages = WtOfficeTools.getMessageBundle();
@@ -186,8 +187,16 @@ public class WtAiErrorDetection {
     
   private RuleMatch[] getMatchesByAiRule(int nFPara, String paraText, List<AnalyzedSentence> analyzedSentences,
       Locale locale, int[] footnotePos, List<Integer> deletedChars) throws Throwable {
+    long aiTime = 0;
+    long startTime = 0;
+    if (debugModeAiTm) {
+      startTime = System.currentTimeMillis();
+    }
     String result = getAiResult(paraText, locale);
-    WtMessageHandler.printToLogFile("AiErrorDetection: getMatchesByAiRule: get result for para: " + nFPara);
+    if (debugModeAiTm) {
+      aiTime = System.currentTimeMillis() - startTime;
+    }
+
     if (result == null || result.trim().isEmpty()) {
       if (debugMode) {
         WtMessageHandler.printToLogFile("AiErrorDetection: getMatchesByAiRule: result: " + (result == null? "NULL" : "EMPTY"));
@@ -197,18 +206,15 @@ public class WtAiErrorDetection {
     if (debugMode) {
       WtMessageHandler.printToLogFile("\nAiErrorDetection: getMatchesByAiRule: result: " + result + "\n");
     }
-    long startTime = 0;
-    if (debugModeTm) {
-      startTime = System.currentTimeMillis();
-    }
     List<AnalyzedSentence> analyzedAiResult =  lt.analyzeText(result.replace("\u00AD", ""));
     WtAiDetectionRule aiRule = getAiDetectionRule(result, analyzedAiResult, paraText,
         document.getMultiDocumentsHandler().getLinguisticServices(), locale , messages, config.aiShowStylisticChanges());
     RuleMatch[] matches = aiRule.match(analyzedSentences);
     matches = filterRuleMatches(matches, result, locale, analyzedAiResult);
-    if (debugModeTm) {
+    if (debugModeAiTm) {
       long runTime = System.currentTimeMillis() - startTime;
-      WtMessageHandler.printToLogFile("AiErrorDetection: getMatchesByAiRule: Time to run AI detection rule: " + runTime);
+      WtMessageHandler.printToLogFile("AiErrorDetection: getMatchesByAiRule: Time to run AI detection rule for Para " 
+                                       + nFPara + ": " + runTime + " (AI Time: " + aiTime + ")");
     }
     if (debugMode) {
       WtMessageHandler.printToLogFile("AiErrorDetection: getMatchesByAiRule: matches: " + matches.length);
@@ -263,7 +269,7 @@ public class WtAiErrorDetection {
             (match.getFromPos() >= rMatch.getFromPos() && match.getFromPos() < rMatch.getToPos()) ||
             (match.getToPos() >= rMatch.getFromPos() && match.getToPos() <= rMatch.getToPos())
             ) {
-//          if (debugMode) {
+//          if (debugMode) {  //  enabled for development
             WtMessageHandler.printToLogFile("WtErrorDetection: filterRuleMatches: incorrect match: suggestion: " +
               match.getSuggestedReplacements().get(0) + ", reason: " + rMatch.getMessage());
 //            }
