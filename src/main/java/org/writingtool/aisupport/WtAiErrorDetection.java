@@ -92,7 +92,7 @@ public class WtAiErrorDetection {
       String paraText = docCache.getFlatParagraph(nFPara);
       int[] footnotePos = docCache.getFlatParagraphFootnotes(nFPara);
       List<Integer> deletedChars = docCache.getFlatParagraphDeletedCharacters(nFPara);
-      if (paraText == null || paraText.trim().isEmpty()) {
+      if (paraText == null || paraText.trim().isEmpty() || lt == null) {
         if (debugMode) {
           WtMessageHandler.printToLogFile("AiErrorDetection: addAiRuleMatchesForParagraph: nFPara " + nFPara + " is empty: return");
         }
