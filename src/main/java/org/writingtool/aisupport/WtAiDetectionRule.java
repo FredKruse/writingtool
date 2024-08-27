@@ -20,6 +20,7 @@ package org.writingtool.aisupport;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -442,6 +443,8 @@ public class WtAiDetectionRule extends TextLevelRule {
         ruleMatch.setType(Type.Hint);
       } else if (shareLemma(paraTokens.get(nParaTokenStart), resultTokens.get(nResultTokenStart))) {
         ruleMatch.setType(Type.Hint);
+      } else if (isSimilarWord(paraTokens.get(nParaTokenStart).getToken(), resultTokens.get(nResultTokenStart).getToken())) {
+        ruleMatch.setType(Type.Hint);
       } else {
         ruleMatch.setType(Type.Other);
       } 
@@ -476,6 +479,9 @@ public class WtAiDetectionRule extends TextLevelRule {
   
   private boolean styleHintAssumed(int nRuleTokens, int nSentTokens, 
       List<AiRuleMatch> aiMatches, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) {
+    if (aiMatches.size() <= 2) {
+      return false;
+    }
     if (nRuleTokens >= nSentTokens / 2) {
       return true;
     }
@@ -562,6 +568,37 @@ public class WtAiDetectionRule extends TextLevelRule {
     for (AiRuleMatch match : aiMatches) {
       matches.add(match.ruleMatch);
     }
+  }
+  
+  private boolean hasAllChars (String sFirst, String sSecond, int diffChars) {
+    List<Character> cList = new ArrayList<>();
+    for (char c : sFirst.toCharArray()) {
+        cList.add(c);
+    }
+    for (char c : sSecond.toCharArray()) {
+      int indx = cList.indexOf(c);
+      if (indx >= 0) {
+        cList.remove(indx);
+      } else {
+        if (diffChars <= 0) {
+          return false;
+        } else {
+          diffChars--;
+        }
+      }
+    }
+    return true;
+  }
+  
+  private boolean isSimilarWord (String first, String second) {
+    if (first.length() == second.length()) {
+      return hasAllChars (first, second, 1);
+    } else if (first.length() + 1 == second.length()) {
+      return hasAllChars (first, second, 0);
+    } else if (first.length() == second.length() + 1) {
+      return hasAllChars (second, first, 0);
+    }
+    return false;
   }
   
   /**

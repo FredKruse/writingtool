@@ -214,7 +214,7 @@ public class WtAiErrorDetection {
     if (debugModeAiTm) {
       long runTime = System.currentTimeMillis() - startTime;
       WtMessageHandler.printToLogFile("AiErrorDetection: getMatchesByAiRule: Time to run AI detection rule for Para " 
-                                       + nFPara + ": " + runTime + " (AI Time: " + aiTime + ")");
+                                       + nFPara + ": " + runTime + " (AI Time: " + aiTime + ", number matches: " + matches.length + ")");
     }
     if (debugMode) {
       WtMessageHandler.printToLogFile("AiErrorDetection: getMatchesByAiRule: matches: " + matches.length);
