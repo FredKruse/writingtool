@@ -20,7 +20,6 @@ package org.writingtool.aisupport;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -429,6 +428,10 @@ public class WtAiDetectionRule extends TextLevelRule {
           + ", ResultTokenStart: " + resultTokens.get(nResultTokenStart).getToken()
           +", ResultTokenEnd: " + resultTokens.get(nResultTokenEnd).getToken());
     }
+    if (isNoneHintException(nParaTokenStart, nParaTokenEnd, nResultTokenStart, nResultTokenEnd, paraTokens, resultTokens)) {
+      ruleMatch.setType(Type.Other);
+      return;
+    }
     if (isHintException(nParaTokenStart, nParaTokenEnd, nResultTokenStart, nResultTokenEnd, paraTokens, resultTokens)) {
       ruleMatch.setType(Type.Hint);
       return;
@@ -601,6 +604,14 @@ public class WtAiDetectionRule extends TextLevelRule {
     return false;
   }
   
+  /**
+   * Set language specific exceptions to set Color for specific Languages
+   */
+  public boolean isNoneHintException(int nParaStart, int nParaEnd, 
+      int nResultStart, int nResultEnd, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) {
+    return false;   
+  }
+
   /**
    * Set language specific exceptions to set Color for specific Languages
    */

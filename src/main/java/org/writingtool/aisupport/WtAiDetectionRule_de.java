@@ -1,5 +1,6 @@
 package org.writingtool.aisupport;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -16,6 +17,7 @@ public class WtAiDetectionRule_de extends WtAiDetectionRule {
   private static final String WT_CONFUSION_FILE = "confusion_sets.txt";
 
   private static Map<String, Set<String>> confusionWords = null;
+  private static Map<String, String> noneConfusionWords = null;
 
   WtAiDetectionRule_de(String aiResultText, List<AnalyzedSentence> analyzedAiResult, String paraText,
       WtLinguisticServices linguServices, Locale locale, ResourceBundle messages, boolean showStylisticHints) {
@@ -25,11 +27,43 @@ public class WtAiDetectionRule_de extends WtAiDetectionRule {
       confusionWords = WtAiConfusionPairs.getConfusionWordMap(locale, CONFUSION_FILE_2, confusionWords);
       confusionWords = WtAiConfusionPairs.getWtConfusionWordMap(locale, WT_CONFUSION_FILE, confusionWords);
     }
+    if (noneConfusionWords == null) {
+      noneConfusionWords = getNoneConfusionWords();
+    }
+  }
+  
+  private Map<String, String> getNoneConfusionWords() {
+    Map<String, String> noneConfusionWords = new HashMap<>();
+    noneConfusionWords.put("die", "sie");
+    noneConfusionWords.put("Die", "Sie");
+    return noneConfusionWords;
   }
   
   @Override
   public String getLanguage() {
     return "de";
+  }
+
+  /**
+   * Set Exceptions to set Color for specific Languages
+   */
+  @Override
+  public boolean isNoneHintException(int nParaStart, int nParaEnd, 
+      int nResultStart, int nResultEnd, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) {
+//    WtMessageHandler.printToLogFile("isHintException in: de" 
+//        + ", paraToken: " + paraToken.getToken() + ", resultToken: " + resultToken.getToken());
+    if (nParaStart == nParaEnd && nResultStart == nResultEnd) {
+      String pToken = paraTokens.get(nParaStart).getToken();
+      String rToken = resultTokens.get(nResultStart).getToken();
+      for (String s : noneConfusionWords.keySet()) {
+        if (pToken.equals(s)) {
+          if (rToken.equals(noneConfusionWords.get(s))) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;   
   }
 
   /**
