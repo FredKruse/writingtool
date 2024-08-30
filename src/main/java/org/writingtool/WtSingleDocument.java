@@ -108,7 +108,7 @@ public class WtSingleDocument {
   private WtFlatParagraphTools flatPara = null;     //  Save information for flat paragraphs (including iterator and iterator provider) for the single document
   private Integer numLastVCPara = 0;              //  Save position of ViewCursor for the single documents
   private final List<Integer> numLastFlPara;      //  Save position of FlatParagraph for the single documents
-  private WtCacheIO cacheIO;
+  private WtCacheIO cacheIO = null;
   private int changeFrom = 0;                     //  Change result cache from paragraph
   private int changeTo = 0;                       //  Change result cache to paragraph
   private int paraNum;                            //  Number of current checked paragraph
@@ -710,23 +710,31 @@ public class WtSingleDocument {
    * read caches from file
    */
   void readCaches() {
-    if (numParasToCheck != 0 && docType != DocumentType.CALC) {
-      cacheIO = new WtCacheIO(xComponent);
-      boolean cacheExist = cacheIO.readAllCaches(config, mDocHandler);
-      if (cacheExist) {
-        docCache.put(cacheIO.getDocumentCache());
-        for (int i = 0; i < cacheIO.getParagraphsCache().size(); i++) {
-//        if (debugMode > 0) {
-          WtMessageHandler.printToLogFile("SingleDocument: readCaches: Copy ResultCache " + i + ": Size: " + cacheIO.getParagraphsCache().get(i).size());
-//        }
-          paragraphsCache.get(i).replace(cacheIO.getParagraphsCache().get(i));
+    try {
+      if (numParasToCheck != 0 && docType != DocumentType.CALC) {
+        cacheIO = new WtCacheIO(xComponent);
+        boolean cacheExist = cacheIO.readAllCaches(config, mDocHandler);
+        if (cacheExist) {
+          docCache.put(cacheIO.getDocumentCache());
+          for (int i = 0; i < cacheIO.getParagraphsCache().size(); i++) {
+  //        if (debugMode > 0) {
+            WtMessageHandler.printToLogFile("SingleDocument: readCaches: Copy ResultCache " + i + ": Size: " + cacheIO.getParagraphsCache().get(i).size());
+  //        }
+            paragraphsCache.get(i).replace(cacheIO.getParagraphsCache().get(i));
+          }
+          permanentIgnoredMatches = new WtIgnoredMatches(cacheIO.getIgnoredMatches());
+          if (docType == DocumentType.WRITER && mDocHandler != null) {
+            mDocHandler.runShapeCheck(docCache.hasUnsupportedText(), 9);
+          }
         }
-        permanentIgnoredMatches = new WtIgnoredMatches(cacheIO.getIgnoredMatches());
-        if (docType == DocumentType.WRITER && mDocHandler != null) {
-          mDocHandler.runShapeCheck(docCache.hasUnsupportedText(), 9);
-        }
+        cacheIO.resetAllCache();
       }
-      cacheIO.resetAllCache();
+    } catch (Throwable t) {
+      WtMessageHandler.printException(t);
+    } finally {
+      if (cacheIO != null) {
+        cacheIO.resetAllCache();
+      }
     }
   }
   
@@ -757,7 +765,7 @@ public class WtSingleDocument {
         }
       }
     } catch (Throwable t) {
-//      WtMessageHandler.showError(t);
+      WtMessageHandler.printException(t);
     }
   }
   
@@ -842,8 +850,9 @@ public class WtSingleDocument {
   /**
    * Add an new entry to text level queue
    * nFPara is number of flat paragraph
+   * @throws Throwable 
    */
-  public void addQueueEntry(int nFPara, int nCache, int nCheck, String docId, boolean overrideRunning) {
+  public void addQueueEntry(int nFPara, int nCache, int nCheck, String docId, boolean overrideRunning) throws Throwable {
     if (!disposed && mDocHandler.getTextLevelCheckQueue() != null && mDocHandler.getLanguageTool().isSortedRuleForIndex(nCache) && 
         docCache != null && (nCache == 0 || !docCache.isSingleParagraph(nFPara))) {
       boolean checkOnlyParagraph = docCache.isSingleParagraph(nFPara);
@@ -972,65 +981,69 @@ public class WtSingleDocument {
    * get the queue entry for the first changed paragraph in document cache
    */
   public QueueEntry getQueueEntryForChangedParagraph() {
-    if (!disposed && docCache != null && flatPara != null && !changedParas.isEmpty()) {
-      Set<Integer> nParas = new HashSet<Integer>(changedParas.keySet());
-      if (!nParas.isEmpty()) {
-        try {
-          Thread.sleep(50);
-        } catch (InterruptedException e) {
-          WtMessageHandler.printException(e);
+    try {
+      if (!disposed && docCache != null && flatPara != null && !changedParas.isEmpty()) {
+        Set<Integer> nParas = new HashSet<Integer>(changedParas.keySet());
+        if (!nParas.isEmpty()) {
+          try {
+            Thread.sleep(50);
+          } catch (InterruptedException e) {
+            WtMessageHandler.printException(e);
+          }
         }
-      }
-      for (int nPara : nParas) {
-        WtOfficeTools.waitForLO();
-        XFlatParagraph xFlatParagraph = flatPara.getFlatParagraphAt(nPara);
-        if (xFlatParagraph != null) {
-          String sPara = xFlatParagraph.getText();
-          if (sPara != null) {
-            if (!isRunning(nPara)) {
-              String sChangedPara = changedParas.get(nPara);
-              if (sChangedPara != null && (!sChangedPara.equals(sPara)
-                  || (mDocHandler.useAnalyzedSentencesCache() && !docCache.isCorrectAnalyzedParagraphLength(nPara, sPara)))) {
-                docCache.setFlatParagraph(nPara, sPara);
-//                removeResultCache(nPara, false);
-                for (int i = 1; i < mDocHandler.getLanguageTool().getNumMinToCheckParas().size(); i++) {
-                  addQueueEntry(nPara, i, mDocHandler.getLanguageTool().getNumMinToCheckParas().get(i), docID, false);
-                }
-                if (mDocHandler.useAi()) {
-                  addAiQueueEntry(nPara, true);
-                }
-                if (!changedParas.isEmpty()) {
-                  addQueueEntry(nPara, 0, 0, docID, false);
+        for (int nPara : nParas) {
+          WtOfficeTools.waitForLO();
+          XFlatParagraph xFlatParagraph = flatPara.getFlatParagraphAt(nPara);
+          if (xFlatParagraph != null) {
+            String sPara = xFlatParagraph.getText();
+            if (sPara != null) {
+              if (!isRunning(nPara)) {
+                String sChangedPara = changedParas.get(nPara);
+                if (sChangedPara != null && (!sChangedPara.equals(sPara)
+                    || (mDocHandler.useAnalyzedSentencesCache() && !docCache.isCorrectAnalyzedParagraphLength(nPara, sPara)))) {
+                  docCache.setFlatParagraph(nPara, sPara);
+  //                removeResultCache(nPara, false);
+                  for (int i = 1; i < mDocHandler.getLanguageTool().getNumMinToCheckParas().size(); i++) {
+                    addQueueEntry(nPara, i, mDocHandler.getLanguageTool().getNumMinToCheckParas().get(i), docID, false);
+                  }
+                  if (mDocHandler.useAi()) {
+                    addAiQueueEntry(nPara, true);
+                  }
+                  if (!changedParas.isEmpty()) {
+                    addQueueEntry(nPara, 0, 0, docID, false);
+                  } else {
+                    return createQueueEntry(docCache.getNumberOfTextParagraph(nPara), 0);
+                  }
                 } else {
-                  return createQueueEntry(docCache.getNumberOfTextParagraph(nPara), 0);
+                  changedParas.remove(nPara);  // test it as long there is no change
+                  List<Integer> changedParas = new ArrayList<>();
+                  if (nPara > 0) {
+                    changedParas.add(nPara - 1);                                                          
+                  }
+  //                changedParas.add(nPara);                                                          
+                  if (nPara < docCache.size() - 1) {
+                    changedParas.add(nPara + 1);                                                          
+                  }
+                  remarkChangedParagraphs(changedParas, changedParas, false);
                 }
               } else {
-                changedParas.remove(nPara);  // test it as long there is no change
-                List<Integer> changedParas = new ArrayList<>();
-                if (nPara > 0) {
-                  changedParas.add(nPara - 1);                                                          
+                try {
+                  Thread.sleep(50);
+                } catch (InterruptedException e) {
+                  WtMessageHandler.printException(e);
                 }
-//                changedParas.add(nPara);                                                          
-                if (nPara < docCache.size() - 1) {
-                  changedParas.add(nPara + 1);                                                          
-                }
-                remarkChangedParagraphs(changedParas, changedParas, false);
-              }
-            } else {
-              try {
-                Thread.sleep(50);
-              } catch (InterruptedException e) {
-                WtMessageHandler.printException(e);
               }
             }
           }
         }
       }
+    } catch (Throwable t) {
+      WtMessageHandler.showError(t);
     }
     return null;
   }
   
-  public void addShapeQueueEntries() {
+  public void addShapeQueueEntries() throws Throwable {
     int shapeTextSize = docCache.textSize(WtDocumentCache.CURSOR_TYPE_SHAPE) + docCache.textSize(WtDocumentCache.CURSOR_TYPE_TABLE);
     if (shapeTextSize > 0) {
       if (docCursor == null) {
@@ -1066,11 +1079,15 @@ public class WtSingleDocument {
    * before: remove all marks of all paragraphs of a list of paragraphs to remark
    */
   public void remarkChangedParagraphs(List<Integer> changedParas, List<Integer> toRemarkParas, boolean isIntern) {
-    if (!disposed) {
-      WtSingleCheck singleCheck = new WtSingleCheck(this, paragraphsCache, fixedLanguage, docLanguage, 
-          numParasToCheck, false, false, isIntern);
-      singleCheck.remarkChangedParagraphs(changedParas, toRemarkParas, mDocHandler.getLanguageTool());
-      closeDocumentCursor();
+    try {
+      if (!disposed) {
+        WtSingleCheck singleCheck = new WtSingleCheck(this, paragraphsCache, fixedLanguage, docLanguage, 
+            numParasToCheck, false, false, isIntern);
+        singleCheck.remarkChangedParagraphs(changedParas, toRemarkParas, mDocHandler.getLanguageTool());
+        closeDocumentCursor();
+      }
+    } catch (Throwable t) {
+      WtMessageHandler.showError(t);
     }
   }
 
@@ -1869,14 +1886,22 @@ public class WtSingleDocument {
     @Override
     public void documentEventOccured(DocumentEvent event) {
       if(event.EventName.equals("OnUnload")) {
-        isOnUnload = true;
-        writeCaches();
+        try {
+          isOnUnload = true;
+          writeCaches();
+        } catch (Throwable t) {
+          WtMessageHandler.printException(t);;
+        }
       } else if(event.EventName.equals("OnUnfocus") && !isOnUnload) {
         mDocHandler.getCurrentDocument();
       } else if(event.EventName.equals("OnSave") && config.saveLoCache()) {
           //  save cache before document is saved (xComponent may be null after saving)
-        if (cacheIO != null && xComponent != null) {
-          writeCaches();
+        try {
+          if (cacheIO != null && xComponent != null) {
+            writeCaches();
+          }
+        } catch (Throwable t) {
+          WtMessageHandler.printException(t);;
         }
       } else if(event.EventName.equals("OnSaveAs") && config.saveLoCache()) {
         try {

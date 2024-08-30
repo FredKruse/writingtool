@@ -358,7 +358,7 @@ public class WtSingleCheck {
    * override existing marks
    */
   public void remarkChangedParagraphs(List<Integer> changedParas, List<Integer> toRemarkParas, 
-                                                  WtLanguageTool lt) {
+                                                  WtLanguageTool lt) throws Throwable {
     if (!isDisposed() && !mDocHandler.isBackgroundCheckOff() && (!isDialogRequest || isIntern)) {
       
       Map <Integer, List<SentenceErrors>> changedParasMap = new HashMap<>();

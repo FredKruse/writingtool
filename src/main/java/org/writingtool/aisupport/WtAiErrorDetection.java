@@ -72,23 +72,27 @@ public class WtAiErrorDetection {
   }
   
   public void addAiRuleMatchesForParagraph() {
-    if (docCache != null) {
-      if (debugMode) {
-        WtMessageHandler.printToLogFile("AiErrorDetection: addAiRuleMatchesForParagraph: start");
+    try {
+      if (docCache != null) {
+        if (debugMode) {
+          WtMessageHandler.printToLogFile("AiErrorDetection: addAiRuleMatchesForParagraph: start");
+        }
+        WtViewCursorTools viewCursor = new WtViewCursorTools(document.getXComponent());
+        int nFPara = docCache.getFlatParagraphNumber(viewCursor.getViewCursorParagraph());
+        addAiRuleMatchesForParagraph(nFPara);
+      } else {
+        WtMessageHandler.printToLogFile("AiErrorDetection: addAiRuleMatchesForParagraph: docCache == null");
       }
-      WtViewCursorTools viewCursor = new WtViewCursorTools(document.getXComponent());
-      int nFPara = docCache.getFlatParagraphNumber(viewCursor.getViewCursorParagraph());
-      addAiRuleMatchesForParagraph(nFPara);
-    } else {
-      WtMessageHandler.printToLogFile("AiErrorDetection: addAiRuleMatchesForParagraph: docCache == null");
+    } catch (Throwable t) {
+      WtMessageHandler.showError(t);
     }
   }
 
   public void addAiRuleMatchesForParagraph(int nFPara) {
-    if (docCache == null || nFPara < 0) {
-      return;
-    }
     try {
+      if (docCache == null || nFPara < 0) {
+        return;
+      }
       String paraText = docCache.getFlatParagraph(nFPara);
       int[] footnotePos = docCache.getFlatParagraphFootnotes(nFPara);
       List<Integer> deletedChars = docCache.getFlatParagraphDeletedCharacters(nFPara);
@@ -260,7 +264,7 @@ public class WtAiErrorDetection {
     return output;
   }
   
-  private boolean isCorrectResult(RuleMatch match, List<RuleMatch> resultMatches) {
+  private boolean isCorrectResult(RuleMatch match, List<RuleMatch> resultMatches) throws Throwable {
     if (resultMatches != null) {
       for (RuleMatch rMatch : resultMatches) {
         if (
@@ -318,7 +322,7 @@ public class WtAiErrorDetection {
 //      WtMessageHandler.printToLogFile("Use detection rule for: " + locale.Language);
       return (WtAiDetectionRule) clazz.getDeclaredConstructor(cArgs).newInstance(aiResultText, 
           analyzedAiResult, paraText, linguServices, locale, messages, showStylisticHints);
-    } catch (Exception e) {
+    } catch (Throwable e) {
       WtMessageHandler.printException(e);
       WtMessageHandler.printToLogFile("Use general detection rule");
       return new WtAiDetectionRule(aiResultText, analyzedAiResult, paraText, linguServices, locale, messages, showStylisticHints);

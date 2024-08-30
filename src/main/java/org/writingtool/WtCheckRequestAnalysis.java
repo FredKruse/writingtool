@@ -117,7 +117,8 @@ class WtCheckRequestAnalysis {
   /**
    * get number of paragraph from node index
    */
-  int getNumberOfParagraphFromSortedTextId(int sortedTextId, int documentElementsCount, String paraText, Locale locale, int[] footnotePosition) {
+  int getNumberOfParagraphFromSortedTextId(int sortedTextId, int documentElementsCount, String paraText, 
+      Locale locale, int[] footnotePosition) throws Throwable {
     if (docCache == null) {
       return -1;
     }
@@ -159,7 +160,8 @@ class WtCheckRequestAnalysis {
   /**
    * get number of paragraph
    */
-  int getNumberOfParagraph(int nPara, String chPara, Locale locale, int startPos, int[] footnotePositions) {
+  int getNumberOfParagraph(int nPara, String chPara, Locale locale, 
+      int startPos, int[] footnotePositions) throws Throwable {
     paraNum = getParaPos(nPara, chPara, locale, startPos, footnotePositions);
     if (isDisposed() || paraNum >= docCache.size()) {
       paraNum = -1;
@@ -170,7 +172,7 @@ class WtCheckRequestAnalysis {
   /**
    * Actualize document cache and result cache for given paragraph number
    */
-  void actualizeDocumentCache (int nPara, boolean isIntern) {
+  void actualizeDocumentCache (int nPara, boolean isIntern) throws Throwable {
     if (isDisposed()) {
       return;
     }
@@ -318,7 +320,7 @@ class WtCheckRequestAnalysis {
    * Search for Position of Paragraph
    * gives Back the Position of flat paragraph / -1 if Paragraph can not be found
    */
-  private int getParaPos(int nPara, String chPara, Locale locale, int startPos, int[] footnotePositions) {
+  private int getParaPos(int nPara, String chPara, Locale locale, int startPos, int[] footnotePositions) throws Throwable {
     
     if (isDisposed()) {
       return -1;
@@ -396,7 +398,7 @@ class WtCheckRequestAnalysis {
    * Search for Position of Paragraph if reason for proof is mark paragraph or no proof info
    * returns -1 if Paragraph can not be found
    */
-  private int getParaFromFlatparagraph(String chPara, Locale locale, int startPos, int[] footnotePositions) {
+  private int getParaFromFlatparagraph(String chPara, Locale locale, int startPos, int[] footnotePositions) throws Throwable {
     if (isDisposed() || docCache.isEmpty()) {
       return -1;
     }
@@ -568,7 +570,7 @@ class WtCheckRequestAnalysis {
    * Get the Position of Paragraph if result is ordered by right mouse click or spelling dialog
    * returns -1 if it fails
    */
-  private int getParaFromViewCursorOrDialog(String chParaWithFootnotes, Locale locale, int[] footnotePositions) {
+  private int getParaFromViewCursorOrDialog(String chParaWithFootnotes, Locale locale, int[] footnotePositions) throws Throwable {
     // try to get ViewCursor position (proof initiated by mouse click)
     if (isDisposed() || !docCache.isFinished() || docCache.isEmpty()) {
       return -1;
@@ -656,7 +658,7 @@ class WtCheckRequestAnalysis {
    * Handle the changed document cache
    * adjust the result cache to changes
    */
-  private boolean handleCacheChanges() {
+  private boolean handleCacheChanges() throws Throwable {
     if (useQueue && mDocHandler.getTextLevelCheckQueue() != null) {
       mDocHandler.getTextLevelCheckQueue().interruptCheck(docID, true);
     }
@@ -722,7 +724,7 @@ class WtCheckRequestAnalysis {
    * returns Flat paragraph number
    * returns -1 if the tested paragraph should be tested for view cursor position
    */
-  private int changesInNumberOfParagraph(boolean getCurNum) {
+  private int changesInNumberOfParagraph(boolean getCurNum) throws Throwable {
     // Test if Size of allParas is correct; Reset if not
     long startTime = 0;
     if (debugModeTm) {
@@ -824,8 +826,9 @@ class WtCheckRequestAnalysis {
   
   /**
    * Handle caches for changed paragraph
+   * @throws Throwable 
    */
-  private void handleChangedPara(int nPara, String chPara, Locale locale, int[] footnotePos, List<Integer> deletedChars) {
+  private void handleChangedPara(int nPara, String chPara, Locale locale, int[] footnotePos, List<Integer> deletedChars) throws Throwable {
     if (!docCache.isAutomaticGenerated(nPara, false)) {
       if (debugMode > 0) {
         WtMessageHandler.printToLogFile("CheckRequestAnalysis: handleChangedPara: flat praragraph changed: nPara: " + nPara + "; docID: " + docID
@@ -864,8 +867,9 @@ class WtCheckRequestAnalysis {
   
   /**
    * find position from changed paragraph
+   * @throws Throwable 
    */
-  private int getPosFromChangedPara(String chPara, Locale locale, int nPara, int[] footnotePos) {
+  private int getPosFromChangedPara(String chPara, Locale locale, int nPara, int[] footnotePos) throws Throwable {
     if (docCache.isEmpty() || nPara < 0 || isDisposed()) {
       return -1;
     }

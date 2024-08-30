@@ -422,9 +422,10 @@ public class WtCheckDialog extends Thread {
   
   /**
    * change the text of a paragraph independent of the type of document
+   * @throws Throwable 
    */
   private void changeTextOfParagraph(int nFPara, int nStart, int nLength, String replace, 
-      WtSingleDocument document, WtViewCursorTools viewCursor) {
+      WtSingleDocument document, WtViewCursorTools viewCursor) throws Throwable {
     String sPara = docCache.getFlatParagraph(nFPara);
     String sEnd = (nStart + nLength < sPara.length() ? sPara.substring(nStart + nLength) : "");
     sPara = sPara.substring(0, nStart) + replace + sEnd;
@@ -450,9 +451,10 @@ public class WtCheckDialog extends Thread {
 
   /**
    * change the text of a paragraph independent of the type of document
+   * @throws Throwable 
    */
   private Map<Integer, List<Integer>> changeTextInAllParagraph(String word, String ruleID, String replace, 
-      WtSingleDocument document, WtViewCursorTools viewCursor) {
+      WtSingleDocument document, WtViewCursorTools viewCursor) throws Throwable {
     if (word == null || replace == null || word.isEmpty() || replace.isEmpty() || word.equals(replace)) {
       return null;
     }
@@ -525,8 +527,9 @@ public class WtCheckDialog extends Thread {
 
   /**
    * Get the proofreading result from cache
+   * @throws Throwable 
    */
-  SingleProofreadingError[] getErrorsFromCache(int nFPara) {
+  SingleProofreadingError[] getErrorsFromCache(int nFPara) throws Throwable {
     int nWait = 0;
     boolean noNull = true;
     WtSingleDocument document = null;

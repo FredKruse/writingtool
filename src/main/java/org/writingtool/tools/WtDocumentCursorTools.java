@@ -1203,7 +1203,7 @@ public class WtDocumentCursorTools {
   /** 
    * remove marks of text paragraph
    */
-  public void removeMarks(List<TextParagraph> textParas) {
+  public void removeMarks(List<TextParagraph> textParas) throws Throwable {
     isBusy++;
     try {
       List<List<Integer>> paras = new ArrayList<List<Integer>>();

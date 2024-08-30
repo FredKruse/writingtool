@@ -20,7 +20,7 @@ public class WtAiDetectionRule_de extends WtAiDetectionRule {
   private static Map<String, String> noneConfusionWords = null;
 
   WtAiDetectionRule_de(String aiResultText, List<AnalyzedSentence> analyzedAiResult, String paraText,
-      WtLinguisticServices linguServices, Locale locale, ResourceBundle messages, boolean showStylisticHints) {
+      WtLinguisticServices linguServices, Locale locale, ResourceBundle messages, boolean showStylisticHints) throws Throwable {
     super(aiResultText, analyzedAiResult, paraText, linguServices, locale, messages, showStylisticHints);
     if (confusionWords == null) {
       confusionWords = WtAiConfusionPairs.getConfusionWordMap(locale, CONFUSION_FILE_1);
@@ -49,7 +49,7 @@ public class WtAiDetectionRule_de extends WtAiDetectionRule {
    */
   @Override
   public boolean isNoneHintException(int nParaStart, int nParaEnd, 
-      int nResultStart, int nResultEnd, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) {
+      int nResultStart, int nResultEnd, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) throws Throwable {
 //    WtMessageHandler.printToLogFile("isHintException in: de" 
 //        + ", paraToken: " + paraToken.getToken() + ", resultToken: " + resultToken.getToken());
     if (nParaStart == nParaEnd && nResultStart == nResultEnd) {
@@ -71,7 +71,7 @@ public class WtAiDetectionRule_de extends WtAiDetectionRule {
    */
   @Override
   public boolean isHintException(int nParaStart, int nParaEnd, 
-      int nResultStart, int nResultEnd, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) {
+      int nResultStart, int nResultEnd, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) throws Throwable {
 //    WtMessageHandler.printToLogFile("isHintException in: de" 
 //        + ", paraToken: " + paraToken.getToken() + ", resultToken: " + resultToken.getToken());
     if (nParaStart == nParaEnd) {
@@ -107,7 +107,7 @@ public class WtAiDetectionRule_de extends WtAiDetectionRule {
    * If tokens (from start to end) contains sToken return true 
    * else false
    */
-  private boolean containToken(String sToken, int start, int end, List<WtAiToken> tokens) {
+  private boolean containToken(String sToken, int start, int end, List<WtAiToken> tokens) throws Throwable {
     for (int i = start; i <= end; i++) {
       if (sToken.equals(tokens.get(i).getToken())) {
         return true;
@@ -118,10 +118,11 @@ public class WtAiDetectionRule_de extends WtAiDetectionRule {
 
   /**
    * Set language specific exceptions to handle change as a match
+   * @throws Throwable 
    */
   @Override
   public boolean isMatchException(int nParaStart, int nParaEnd,
-      int nResultStart, int nResultEnd, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) {
+      int nResultStart, int nResultEnd, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) throws Throwable {
     if (nResultStart < 0 || nResultStart >= resultTokens.size() - 1) {
       return false;
     }

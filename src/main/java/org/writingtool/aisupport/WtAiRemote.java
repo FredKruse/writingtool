@@ -20,7 +20,6 @@ package org.writingtool.aisupport;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.ConnectException;
@@ -78,7 +77,7 @@ public class WtAiRemote {
   private final String imgUrl;
   private final AiType aiType;
   
-  public WtAiRemote(WtDocumentsHandler documents, WtConfiguration config) {
+  public WtAiRemote(WtDocumentsHandler documents, WtConfiguration config) throws Throwable {
     this.documents = documents;
     this.config = config;
     apiKey = config.aiApiKey();
@@ -98,7 +97,7 @@ public class WtAiRemote {
     }
   }
   
-  HttpURLConnection getConnection(byte[] postData, URL url, String apiKey) throws RuntimeException {
+  HttpURLConnection getConnection(byte[] postData, URL url, String apiKey) throws Throwable {
     int trials = 0;
     while (trials < REMOTE_TRIALS) {
       trials++;
@@ -126,7 +125,7 @@ public class WtAiRemote {
   }
 
   public String runInstruction(String instruction, String text, float temperature, 
-      int seed, Locale locale, boolean onlyOneParagraph) {
+      int seed, Locale locale, boolean onlyOneParagraph) throws Throwable {
     if (instruction == null || text == null) {
       return null;
     }
@@ -248,7 +247,7 @@ public class WtAiRemote {
     return null;
   }
   
-  public String runImgInstruction(String instruction, String exclude, int step, int seed, int size) {
+  public String runImgInstruction(String instruction, String exclude, int step, int seed, int size) throws Throwable {
     if (instruction == null || exclude == null) {
       return null;
     }
@@ -313,7 +312,7 @@ public class WtAiRemote {
     return null;
   }
   
-  private String removeSurroundingBrackets(String out, String org) {
+  private String removeSurroundingBrackets(String out, String org) throws Throwable {
     if (out.startsWith("{") && out.endsWith("}")) {
       if (!org.startsWith("{") || !org.endsWith("}")) {
         return out.substring(1, out.length() - 1);
@@ -322,7 +321,7 @@ public class WtAiRemote {
     return out;
   }
   
-  private String filterOutput (String out, String org, String instruction, boolean onlyOneParagraph) {
+  private String filterOutput (String out, String org, String instruction, boolean onlyOneParagraph) throws Throwable {
     out = removeSurroundingBrackets(out, org);
     out = out.replace("\n", "\r").replace("\r\r", "\r").replace("\\\"", "\"").trim();
     if (onlyOneParagraph) {
@@ -353,7 +352,7 @@ public class WtAiRemote {
     return out;
   }
   
-  private String readStream(InputStream stream, String encoding) throws IOException {
+  private String readStream(InputStream stream, String encoding) throws Throwable {
     StringBuilder sb = new StringBuilder();
     try (InputStreamReader isr = new InputStreamReader(stream, encoding);
          BufferedReader br = new BufferedReader(isr)) {
@@ -365,7 +364,7 @@ public class WtAiRemote {
     return sb.toString();
   }
   
-  String parseJasonOutput(String text) {
+  String parseJasonOutput(String text) throws Throwable {
     try {
       JSONObject jsonObject = new JSONObject(text);
       JSONArray choices;
@@ -419,7 +418,7 @@ public class WtAiRemote {
     }
   }
   
-  String parseJasonImgOutput(String text) {
+  String parseJasonImgOutput(String text) throws Throwable {
     try {
       JSONObject jsonObject = new JSONObject(text);
       JSONArray data;
@@ -444,7 +443,7 @@ public class WtAiRemote {
     }
   }
   
-  private String getString(JSONObject contentObject) {
+  private String getString(JSONObject contentObject) throws Throwable {
     try {
       JSONObject subObject = new JSONObject(contentObject);
       return subObject.toString();
@@ -453,7 +452,7 @@ public class WtAiRemote {
     return contentObject.toString();
   }
   
-  public static String getInstruction(String mess, Locale locale) {
+  public static String getInstruction(String mess, Locale locale) throws Throwable {
     if (locale == null || locale.Language == null || locale.Language.isEmpty()) {
       locale = new Locale("en", "US", "");
     }
@@ -472,18 +471,18 @@ public class WtAiRemote {
     return instruction;
   }
   
-  public static String getLanguageName(Locale locale) {
+  public static String getLanguageName(Locale locale) throws Throwable {
     String lang = (locale == null || locale.Language == null || locale.Language.isEmpty()) ? "en" : locale.Language;
     Locale langLocale = new Locale(lang, "", "");
     return WtDocumentsHandler.getLanguage(langLocale).getName();
   }
   
-  public static String addLanguageName(String instruction, Locale locale) {
+  public static String addLanguageName(String instruction, Locale locale) throws Throwable {
     String langName = getLanguageName(locale);
     return instruction + " (language - " + langName + ")";
   }
   
-  private void stopAiRemote() {
+  private void stopAiRemote() throws Throwable {
     config.setUseAiSupport(false);
     if (documents.getAiCheckQueue() != null) {
       documents.getAiCheckQueue().setStop();
@@ -492,7 +491,7 @@ public class WtAiRemote {
     WtMessageHandler.showMessage(messages.getString("loAiServerConnectionError"));
   }
   
-  private void stopAiImgRemote() {
+  private void stopAiImgRemote() throws Throwable {
     config.setUseAiImgSupport(false);
     WtMessageHandler.showMessage(messages.getString("loAiServerConnectionError"));
   }

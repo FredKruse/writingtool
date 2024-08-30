@@ -53,42 +53,46 @@ public class WtAiCheckQueue extends WtTextLevelCheckQueue {
    * add it only if the new entry is not identical with the last entry or the running
    */
    public void addQueueEntry(TextParagraph nTPara, String docId, boolean next) {
-     if (nTPara == null || nTPara.type < 0  || nTPara.number < 0 || docId == null || interruptCheck) {
-       if (debugMode) {
-         WtMessageHandler.printToLogFile("AiCheckQueue: addQueueEntry: Return without add to queue: nCache = " + WtOfficeTools.CACHE_AI
-             + ", nTPara = " + (nTPara == null ? "null" : ("(" + nTPara.number + "/" + nTPara.type + ")")) + ", docId = " + docId);
+     try {
+       if (nTPara == null || nTPara.type < 0  || nTPara.number < 0 || docId == null || interruptCheck) {
+         if (debugMode) {
+           WtMessageHandler.printToLogFile("AiCheckQueue: addQueueEntry: Return without add to queue: nCache = " + WtOfficeTools.CACHE_AI
+               + ", nTPara = " + (nTPara == null ? "null" : ("(" + nTPara.number + "/" + nTPara.type + ")")) + ", docId = " + docId);
+         }
+         return;
        }
-       return;
-     }
-     QueueEntry queueEntry = new QueueEntry(nTPara, nTPara, WtOfficeTools.CACHE_AI, 0, docId, false);
-     if (!textRuleQueue.isEmpty()) {
-       synchronized(textRuleQueue) {
-         for (int i = 0; i < textRuleQueue.size(); i++) {
-           QueueEntry entry = textRuleQueue.get(i);
-           if (entry.equals(queueEntry)) {
-             if (debugMode) {
-               WtMessageHandler.printToLogFile("AiCheckQueue: addQueueEntry: Entry removed: nCache = " + WtOfficeTools.CACHE_AI
-                   + ", nTPara = (" + nTPara.number + "/" + nTPara.type + "), docId = " + docId);
+       QueueEntry queueEntry = new QueueEntry(nTPara, nTPara, WtOfficeTools.CACHE_AI, 0, docId, false);
+       if (!textRuleQueue.isEmpty()) {
+         synchronized(textRuleQueue) {
+           for (int i = 0; i < textRuleQueue.size(); i++) {
+             QueueEntry entry = textRuleQueue.get(i);
+             if (entry.equals(queueEntry)) {
+               if (debugMode) {
+                 WtMessageHandler.printToLogFile("AiCheckQueue: addQueueEntry: Entry removed: nCache = " + WtOfficeTools.CACHE_AI
+                     + ", nTPara = (" + nTPara.number + "/" + nTPara.type + "), docId = " + docId);
+               }
+               textRuleQueue.remove(i);
+               break;
              }
-             textRuleQueue.remove(i);
-             break;
            }
          }
        }
-     }
-     synchronized(textRuleQueue) {
-       if (next) {
-         textRuleQueue.add(0, queueEntry);
-       } else {
-         textRuleQueue.add(queueEntry);
+       synchronized(textRuleQueue) {
+         if (next) {
+           textRuleQueue.add(0, queueEntry);
+         } else {
+           textRuleQueue.add(queueEntry);
+         }
+         if (debugMode) {
+           WtMessageHandler.printToLogFile("AiCheckQueue: addQueueEntry: Entry added: nCache = " + WtOfficeTools.CACHE_AI
+               + ", nTPara = (" + nTPara.number + "/" + nTPara.type + "), docId = " + docId);
+         }
        }
-       if (debugMode) {
-         WtMessageHandler.printToLogFile("AiCheckQueue: addQueueEntry: Entry added: nCache = " + WtOfficeTools.CACHE_AI
-             + ", nTPara = (" + nTPara.number + "/" + nTPara.type + "), docId = " + docId);
-       }
+       interruptCheck = false;
+       wakeupQueue();
+     } catch (Throwable t) {
+       WtMessageHandler.showError(t);
      }
-     interruptCheck = false;
-     wakeupQueue();
    }
   
    /**
@@ -96,33 +100,37 @@ public class WtAiCheckQueue extends WtTextLevelCheckQueue {
     */
   @Override
   protected QueueEntry getNextQueueEntry(TextParagraph nPara, String docId) {
-    List<WtSingleDocument> documents = multiDocHandler.getDocuments();
-    int nDoc = 0;
-    for (int n = 0; n < documents.size(); n++) {
-      if ((docId == null || docId.equals(documents.get(n).getDocID())) && !documents.get(n).isDisposed() && documents.get(n).getDocumentType() == DocumentType.WRITER) {
-        QueueEntry queueEntry = documents.get(n).getNextAiQueueEntry(nPara);
-        if (queueEntry != null) {
-          return queueEntry;
-        }
-        nDoc = n;
-        break;
-      }
-    }
-    for (int i = nDoc + 1; i < documents.size(); i++) {
-      if (!documents.get(i).isDisposed() && documents.get(i).getDocumentType() == DocumentType.WRITER) {
-        QueueEntry queueEntry = documents.get(i).getNextAiQueueEntry(null);
-        if (queueEntry != null) {
-          return queueEntry;
+    try {
+      List<WtSingleDocument> documents = multiDocHandler.getDocuments();
+      int nDoc = 0;
+      for (int n = 0; n < documents.size(); n++) {
+        if ((docId == null || docId.equals(documents.get(n).getDocID())) && !documents.get(n).isDisposed() && documents.get(n).getDocumentType() == DocumentType.WRITER) {
+          QueueEntry queueEntry = documents.get(n).getNextAiQueueEntry(nPara);
+          if (queueEntry != null) {
+            return queueEntry;
+          }
+          nDoc = n;
+          break;
         }
       }
-    }
-    for (int i = 0; i < nDoc; i++) {
-      if (!documents.get(i).isDisposed() && documents.get(i).getDocumentType() == DocumentType.WRITER) {
-        QueueEntry queueEntry = documents.get(i).getNextAiQueueEntry(null);
-        if (queueEntry != null) {
-          return queueEntry;
+      for (int i = nDoc + 1; i < documents.size(); i++) {
+        if (!documents.get(i).isDisposed() && documents.get(i).getDocumentType() == DocumentType.WRITER) {
+          QueueEntry queueEntry = documents.get(i).getNextAiQueueEntry(null);
+          if (queueEntry != null) {
+            return queueEntry;
+          }
         }
       }
+      for (int i = 0; i < nDoc; i++) {
+        if (!documents.get(i).isDisposed() && documents.get(i).getDocumentType() == DocumentType.WRITER) {
+          QueueEntry queueEntry = documents.get(i).getNextAiQueueEntry(null);
+          if (queueEntry != null) {
+            return queueEntry;
+          }
+        }
+      }
+    } catch (Throwable t) {
+      WtMessageHandler.showError(t);
     }
     return null;
   }
@@ -132,11 +140,11 @@ public class WtAiCheckQueue extends WtTextLevelCheckQueue {
    */
   @Override
   public void initLangtool(Language language) throws Throwable {
-    if (debugMode) {
-      WtMessageHandler.printToLogFile("TextLevelCheckQueue: initLangtool: language = " + (language == null ? "null" : language.getShortCodeWithCountryAndVariant()));
-    }
     lt = null;
     try {
+      if (debugMode) {
+        WtMessageHandler.printToLogFile("TextLevelCheckQueue: initLangtool: language = " + (language == null ? "null" : language.getShortCodeWithCountryAndVariant()));
+      }
       WtConfiguration config = multiDocHandler.getConfiguration(language);
       WtLinguisticServices linguServices = multiDocHandler.getLinguisticServices();
       linguServices.setNoSynonymsAsSuggestions(config.noSynonymsAsSuggestions() || multiDocHandler.isTestMode());
@@ -157,23 +165,27 @@ public class WtAiCheckQueue extends WtTextLevelCheckQueue {
    */
   @Override
   protected void runQueueEntry(QueueEntry qEntry, WtDocumentsHandler multiDocHandler, WtLanguageTool lt) throws Throwable {
-    if (debugMode) {
-      WtMessageHandler.printToLogFile("Try to run AI Queue Entry for " + qEntry.nStart.number);
-    }
-    WtSingleDocument document = getSingleDocument(qEntry.docId);
-    TextParagraph nTPara = qEntry.nStart;
-    if (document != null && !document.isDisposed() && nTPara != null) {
-      WtDocumentCache docCache = document.getDocumentCache();
-      if (docCache != null) {
-        int nFPara = docCache.getFlatParagraphNumber(nTPara);
-        if (debugMode) {
-          WtMessageHandler.printToLogFile("Run AI Queue Entry for " 
-              + ", nTPara = (" + nTPara.number + "/" + nTPara.type + "), docId = " + qEntry.docId
-              + ", nFPara = " + nFPara);
-        }
-        WtAiErrorDetection aiError = new WtAiErrorDetection(document, multiDocHandler.getConfiguration(), lt);
-        aiError.addAiRuleMatchesForParagraph(nFPara);
+    try {
+      if (debugMode) {
+        WtMessageHandler.printToLogFile("Try to run AI Queue Entry for " + qEntry.nStart.number);
       }
+      WtSingleDocument document = getSingleDocument(qEntry.docId);
+      TextParagraph nTPara = qEntry.nStart;
+      if (document != null && !document.isDisposed() && nTPara != null) {
+        WtDocumentCache docCache = document.getDocumentCache();
+        if (docCache != null) {
+          int nFPara = docCache.getFlatParagraphNumber(nTPara);
+          if (debugMode) {
+            WtMessageHandler.printToLogFile("Run AI Queue Entry for " 
+                + ", nTPara = (" + nTPara.number + "/" + nTPara.type + "), docId = " + qEntry.docId
+                + ", nFPara = " + nFPara);
+          }
+          WtAiErrorDetection aiError = new WtAiErrorDetection(document, multiDocHandler.getConfiguration(), lt);
+          aiError.addAiRuleMatchesForParagraph(nFPara);
+        }
+      }
+    } catch (Throwable t) {
+      WtMessageHandler.showError(t);
     }
   }
 

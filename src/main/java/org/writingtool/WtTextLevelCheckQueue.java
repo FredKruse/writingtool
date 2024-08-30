@@ -79,7 +79,8 @@ public class WtTextLevelCheckQueue {
   * Add a new entry to queue
   * add it only if the new entry is not identical with the last entry or the running
   */
-  public void addQueueEntry(TextParagraph nStart, TextParagraph nEnd, int nCache, int nCheck, String docId, boolean overrideRunning) {
+  public void addQueueEntry(TextParagraph nStart, TextParagraph nEnd, int nCache, int nCheck,
+      String docId, boolean overrideRunning) throws Throwable {
     if (nStart == null || nEnd == null || nStart.type != nEnd.type || nStart.number < 0 
         || nEnd.number <= nStart.number || nCache < 0 || docId == null
         || interruptCheck) {
@@ -155,6 +156,7 @@ public class WtTextLevelCheckQueue {
    * wake up the waiting iteration of the queue
    */
   protected void wakeupQueue() {
+    try {
 //    synchronized(queueWakeup) {
       if (debugMode) {
         WtMessageHandler.printToLogFile("TextLevelCheckQueue: wakeupQueue: wake queue");
@@ -165,12 +167,15 @@ public class WtTextLevelCheckQueue {
         queueIterator = new QueueIterator();
         queueIterator.start();
       }
+    } catch (Throwable t) {
+      WtMessageHandler.showError(t);
+    }
   }
 
   /**
    * wake up the waiting iteration of the queue for a specific document
    */
-  public void wakeupQueue(String docId) {
+  public void wakeupQueue(String docId) throws Throwable {
     if (lastDocId == null) {
       lastDocId = docId;
     }
@@ -180,7 +185,7 @@ public class WtTextLevelCheckQueue {
   /**
    * Set a stop flag to get a definite ending of the iteration
    */
-  public void setStop() {
+  public void setStop() throws Throwable {
     if (queueRuns) {
       interruptCheck = true;
       QueueEntry queueEntry = new QueueEntry();
@@ -197,7 +202,7 @@ public class WtTextLevelCheckQueue {
    * Reset the queue
    * all entries are removed; LanguageTool is new initialized
    */
-  public void setReset() {
+  public void setReset() throws Throwable {
     if (queueRuns) {
       interruptCheck = true;
       QueueEntry queueEntry = new QueueEntry();
@@ -218,7 +223,7 @@ public class WtTextLevelCheckQueue {
    * remove all entries for the disposed docId (gone document)
    * @param docId
    */
-  public void interruptCheck(String docId, boolean wait) {
+  public void interruptCheck(String docId, boolean wait) throws Throwable {
     if (debugMode) {
       WtMessageHandler.printToLogFile("TextLevelCheckQueue: interruptCheck: interrupt queue");
     }
@@ -241,7 +246,7 @@ public class WtTextLevelCheckQueue {
   /**
    *  get the document by ID
    */
-  protected WtSingleDocument getSingleDocument(String docId) {
+  protected WtSingleDocument getSingleDocument(String docId) throws Throwable {
     for (WtSingleDocument document : multiDocHandler.getDocuments()) {
       if (docId.equals(document.getDocID())) {
         return document;
@@ -253,7 +258,7 @@ public class WtTextLevelCheckQueue {
   /**
    *  get language of document by ID
    */
-  protected Language getLanguage(String docId, TextParagraph nStart) {
+  protected Language getLanguage(String docId, TextParagraph nStart) throws Throwable {
     WtSingleDocument document = getSingleDocument(docId);
     WtDocumentCache docCache = null;
     if (document != null) {

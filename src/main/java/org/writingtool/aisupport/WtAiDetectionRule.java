@@ -94,19 +94,7 @@ public class WtAiDetectionRule extends TextLevelRule {
     return "zzz";
   }
   
-  private boolean isIgnoredToken(String paraToken, String resultToken) {
-/*
-    if (resultToken.equals("\"")) {
-      return QUOTES.matcher(paraToken).matches();
-    }
-    if (resultToken.equals("'")) {
-      return SINGLE_QUOTES.matcher(paraToken).matches();
-    }
-*//*
-    if (resultToken.equals("\"") || resultToken.equals("'")) {
-      return QUOTES.matcher(paraToken).matches() || SINGLE_QUOTES.matcher(paraToken).matches();
-    }
-*/
+  private boolean isIgnoredToken(String paraToken, String resultToken) throws Throwable {
     if (QUOTES.matcher(resultToken).matches() || SINGLE_QUOTES.matcher(resultToken).matches()) {
       return QUOTES.matcher(paraToken).matches() || SINGLE_QUOTES.matcher(paraToken).matches();
     }
@@ -116,312 +104,308 @@ public class WtAiDetectionRule extends TextLevelRule {
     return false;
   }
 
-  public boolean isQuote(String token) {
+  public boolean isQuote(String token) throws Throwable {
     return (QUOTES.matcher(token).matches() || SINGLE_QUOTES.matcher(token).matches());
   }
 
   @Override
   public RuleMatch[] match(List<AnalyzedSentence> sentences) throws IOException {
-    List<RuleMatch> matches = new ArrayList<>();
-    List<AiRuleMatch> tmpMatches = new ArrayList<>();
-    List<WtAiToken> paraTokens = new ArrayList<>();
-    List<Integer> sentenceEnds = new ArrayList<>();
-    int nRuleTokens = 0;
-    int nSentence = 0;
-//    int lastSentenceStart = 0;
-    int lastResultStart = 0;
-    int pos = 0;
-    int sEnd = 0;
-    int sugStart = 0;
-    int sugEnd = 0;
-    boolean mergeSentences = false;
-    for (AnalyzedSentence sentence : sentences) {
-      AnalyzedTokenReadings[] tokens = sentence.getTokensWithoutWhitespace();
-      for (int i = 1; i < tokens.length; i++) {
-        paraTokens.add(new WtAiToken(tokens[i], pos, sentence));
-        sEnd++;
-      }
-      pos += sentence.getCorrectedTextLength();
-      sentenceEnds.add(sEnd);
-    }
-    List<WtAiToken> resultTokens = new ArrayList<>();
-    pos = 0;
-    for (AnalyzedSentence sentence : analyzedAiResult) {
-      AnalyzedTokenReadings[] tokens = sentence.getTokensWithoutWhitespace();
-      for (int i = 1; i < tokens.length; i++) {
-        resultTokens.add(new WtAiToken(tokens[i], pos, sentence));
-      }
-      pos += sentence.getCorrectedTextLength();
-    }
-    int i;
-    int j = 0;
-    for (i = 0; i < paraTokens.size() && j < resultTokens.size(); i++) {
-      if (!paraTokens.get(i).getToken().equals(resultTokens.get(j).getToken()) 
-          && !isIgnoredToken(paraTokens.get(i).getToken(), resultTokens.get(j).getToken())) {
-        if ((i == 0 && ("{".equals(resultTokens.get(j).getToken()) || QUOTES.matcher(resultTokens.get(j).getToken()).matches()))
-            && j + 1 < resultTokens.size() && paraTokens.get(i).getToken().equals(resultTokens.get(j + 1).getToken())) {
-          j += 2;
-          continue;
+    try {
+      List<RuleMatch> matches = new ArrayList<>();
+      List<AiRuleMatch> tmpMatches = new ArrayList<>();
+      List<WtAiToken> paraTokens = new ArrayList<>();
+      List<Integer> sentenceEnds = new ArrayList<>();
+      int nRuleTokens = 0;
+      int nSentence = 0;
+  //    int lastSentenceStart = 0;
+      int lastResultStart = 0;
+      int pos = 0;
+      int sEnd = 0;
+      int sugStart = 0;
+      int sugEnd = 0;
+      boolean mergeSentences = false;
+      for (AnalyzedSentence sentence : sentences) {
+        AnalyzedTokenReadings[] tokens = sentence.getTokensWithoutWhitespace();
+        for (int i = 1; i < tokens.length; i++) {
+          paraTokens.add(new WtAiToken(tokens[i], pos, sentence));
+          sEnd++;
         }
-        if (isQuote(paraTokens.get(i).getToken())
-            && i + 1 < paraTokens.size() && paraTokens.get(i + 1).getToken().equals(resultTokens.get(j).getToken())) {
-          continue;
+        pos += sentence.getCorrectedTextLength();
+        sentenceEnds.add(sEnd);
+      }
+      List<WtAiToken> resultTokens = new ArrayList<>();
+      pos = 0;
+      for (AnalyzedSentence sentence : analyzedAiResult) {
+        AnalyzedTokenReadings[] tokens = sentence.getTokensWithoutWhitespace();
+        for (int i = 1; i < tokens.length; i++) {
+          resultTokens.add(new WtAiToken(tokens[i], pos, sentence));
         }
-        int posStart = paraTokens.get(i).getStartPos();
-        int nParaTokenStart = i;
-        int nParaTokenEnd = 0;
-        int nResultTokenStart = 0;
-        int nResultTokenEnd = 0;
-        AnalyzedSentence sentence = paraTokens.get(i).getSentence();
-        int posEnd = 0;
-        String suggestion = null;
-        WtAiToken singleWordToken = null;
-        boolean endFound = false;
-        for (int n = 1; !endFound && i + n < paraTokens.size() && j + n < resultTokens.size(); n++) {
-          for (int i1 = i + n; !endFound && i1 >= i; i1--) {
-            for(int j1 = j + n; j1 >= j; j1--) {
-              if (paraTokens.get(i1).getToken().equals(resultTokens.get(j1).getToken()) 
-                  || isIgnoredToken(paraTokens.get(i1).getToken(), resultTokens.get(j1).getToken())) {
-                endFound = true;
-                if (i1 - 1 < i) {
-                  // suggest to insert some words
-                  if (i > 0) {
-                    //  add them to the word before
-                    posStart = paraTokens.get(i - 1).getStartPos();
+        pos += sentence.getCorrectedTextLength();
+      }
+      int i;
+      int j = 0;
+      for (i = 0; i < paraTokens.size() && j < resultTokens.size(); i++) {
+        if (!paraTokens.get(i).getToken().equals(resultTokens.get(j).getToken()) 
+            && !isIgnoredToken(paraTokens.get(i).getToken(), resultTokens.get(j).getToken())) {
+          if ((i == 0 && ("{".equals(resultTokens.get(j).getToken()) || QUOTES.matcher(resultTokens.get(j).getToken()).matches()))
+              && j + 1 < resultTokens.size() && paraTokens.get(i).getToken().equals(resultTokens.get(j + 1).getToken())) {
+            j += 2;
+            continue;
+          }
+          if (isQuote(paraTokens.get(i).getToken())
+              && i + 1 < paraTokens.size() && paraTokens.get(i + 1).getToken().equals(resultTokens.get(j).getToken())) {
+            continue;
+          }
+          int posStart = paraTokens.get(i).getStartPos();
+          int nParaTokenStart = i;
+          int nParaTokenEnd = 0;
+          int nResultTokenStart = 0;
+          int nResultTokenEnd = 0;
+          AnalyzedSentence sentence = paraTokens.get(i).getSentence();
+          int posEnd = 0;
+          String suggestion = null;
+          WtAiToken singleWordToken = null;
+          boolean endFound = false;
+          for (int n = 1; !endFound && i + n < paraTokens.size() && j + n < resultTokens.size(); n++) {
+            for (int i1 = i + n; !endFound && i1 >= i; i1--) {
+              for(int j1 = j + n; j1 >= j; j1--) {
+                if (paraTokens.get(i1).getToken().equals(resultTokens.get(j1).getToken()) 
+                    || isIgnoredToken(paraTokens.get(i1).getToken(), resultTokens.get(j1).getToken())) {
+                  endFound = true;
+                  if (i1 - 1 < i) {
+                    // suggest to insert some words
+                    if (i > 0) {
+                      //  add them to the word before
+                      posStart = paraTokens.get(i - 1).getStartPos();
+                      posEnd = paraTokens.get(i1 - 1).getEndPos();
+                      sugStart = resultTokens.get(j - 1).getStartPos();
+                      sugEnd = resultTokens.get(j1 - 1).getEndPos();
+                      singleWordToken = j == j1 ? resultTokens.get(j1 - 1) : null;
+                      nParaTokenStart = i - 1;
+                      nParaTokenEnd = i1 - 1;
+                      nResultTokenStart = j - 1;
+                      nResultTokenEnd = j1 -1;
+                    } else {
+                      //  add them to the word after (i == 0)
+                      posEnd = paraTokens.get(i1).getEndPos();
+                      nParaTokenEnd = i1;
+                      if (j < 1) {
+                        j = 1;
+                      }
+                      if (j1 < 0) {
+                        j1 = 0;
+                      }
+                      sugStart = resultTokens.get(j - 1).getStartPos();
+                      sugEnd = resultTokens.get(j1).getEndPos();
+                      nResultTokenStart = j - 1;
+                      nResultTokenEnd = j1;
+                      singleWordToken = j - 1 == j1 ? resultTokens.get(j1) : null;
+                    }
+                  } else {
+                    //  suggest to replace or delete some tokens
                     posEnd = paraTokens.get(i1 - 1).getEndPos();
-                    sugStart = resultTokens.get(j - 1).getStartPos();
-                    sugEnd = resultTokens.get(j1 - 1).getEndPos();
-                    singleWordToken = j == j1 ? resultTokens.get(j1 - 1) : null;
-                    nParaTokenStart = i - 1;
                     nParaTokenEnd = i1 - 1;
-                    nResultTokenStart = j - 1;
-                    nResultTokenEnd = j1 -1;
-                  } else {
-                    //  add them to the word after (i == 0)
-                    posEnd = paraTokens.get(i1).getEndPos();
-                    nParaTokenEnd = i1;
-                    if (j < 1) {
-                      j = 1;
+                    if (j < 0) {
+                      j = 0;
                     }
-                    if (j1 < 0) {
-                      j1 = 0;
+                    if (j1 < 1) {
+                      j1 = 1;
                     }
-                    sugStart = resultTokens.get(j - 1).getStartPos();
-                    sugEnd = resultTokens.get(j1).getEndPos();
-                    nResultTokenStart = j - 1;
-                    nResultTokenEnd = j1;
-                    singleWordToken = j - 1 == j1 ? resultTokens.get(j1) : null;
-                  }
-                } else {
-                  //  suggest to replace or delete some tokens
-                  posEnd = paraTokens.get(i1 - 1).getEndPos();
-                  nParaTokenEnd = i1 - 1;
-                  if (j < 0) {
-                    j = 0;
-                  }
-                  if (j1 < 1) {
-                    j1 = 1;
-                  }
-                  if (j <= j1 - 1) {
-                    //  replace one or more tokens
-                    nResultTokenStart = j;
-                    nResultTokenEnd = j1 -1;
-                    if (j > 0 && PUNCTUATION.matcher(paraTokens.get(i).getToken()).matches() &&
-                        !PUNCTUATION.matcher(resultTokens.get(j).getToken()).matches()) {
-                      //  replace a punctuation by a word
-                      sugStart = resultTokens.get(j - 1).getEndPos();
+                    if (j <= j1 - 1) {
+                      //  replace one or more tokens
+                      nResultTokenStart = j;
+                      nResultTokenEnd = j1 -1;
+                      if (j > 0 && PUNCTUATION.matcher(paraTokens.get(i).getToken()).matches() &&
+                          !PUNCTUATION.matcher(resultTokens.get(j).getToken()).matches()) {
+                        //  replace a punctuation by a word
+                        sugStart = resultTokens.get(j - 1).getEndPos();
+                      } else {
+                        sugStart = resultTokens.get(j).getStartPos();
+                      }
+                      sugEnd = resultTokens.get(j1 - 1).getEndPos();
+                      singleWordToken = j == j1 - 1 ? resultTokens.get(j) : null;
+                      if (i > 0 && PUNCTUATION.matcher(resultTokens.get(j).getToken()).matches() &&
+                          !PUNCTUATION.matcher(paraTokens.get(i).getToken()).matches()) {
+                        //  replace a word by a punctuation
+                        posStart = paraTokens.get(i - 1).getEndPos();
+                      }
                     } else {
-                      sugStart = resultTokens.get(j).getStartPos();
+                      //  delete some tokens
+                      if (i > 0 && !PUNCTUATION.matcher(paraTokens.get(i - 1).getToken()).matches()) {
+                        posStart = paraTokens.get(i - 1).getEndPos();
+                      } else {
+                        posEnd = paraTokens.get(i1).getStartPos();
+                      }
+                      sugStart = resultTokens.get(j1).getEndPos();
+                      sugEnd = resultTokens.get(j1).getEndPos();
+                      nResultTokenStart = j1;
+                      nResultTokenEnd = j1 -1;
                     }
-                    sugEnd = resultTokens.get(j1 - 1).getEndPos();
-                    singleWordToken = j == j1 - 1 ? resultTokens.get(j) : null;
-                    if (i > 0 && PUNCTUATION.matcher(resultTokens.get(j).getToken()).matches() &&
-                        !PUNCTUATION.matcher(paraTokens.get(i).getToken()).matches()) {
-                      //  replace a word by a punctuation
-                      posStart = paraTokens.get(i - 1).getEndPos();
-                    }
-                  } else {
-                    //  delete some tokens
-                    if (i > 0 && !PUNCTUATION.matcher(paraTokens.get(i - 1).getToken()).matches()) {
-                      posStart = paraTokens.get(i - 1).getEndPos();
-                    } else {
-                      posEnd = paraTokens.get(i1).getStartPos();
-                    }
-                    sugStart = resultTokens.get(j1).getEndPos();
-                    sugEnd = resultTokens.get(j1).getEndPos();
-                    nResultTokenStart = j1;
-                    nResultTokenEnd = j1 -1;
                   }
+                  nRuleTokens += (i1 - i + 1);
+                  j = j1;
+                  i = i1;
+                  break;
                 }
-                nRuleTokens += (i1 - i + 1);
-                j = j1;
-                i = i1;
-                break;
               }
             }
           }
-        }
-        if (!endFound) {
-          //  replace all tokens from i to end of paragraph by the suggestion from j to end of suggestion
-          posEnd = paraTokens.get(paraTokens.size() - 1).getEndPos();
-          nParaTokenEnd = paraTokens.size() - 1;
-          sugStart = resultTokens.get(j).getStartPos();
-          sugEnd = resultTokens.get(resultTokens.size() - 1).getEndPos();
-          nResultTokenStart = j;
-          nResultTokenEnd = resultTokens.size() - 1;
-          nRuleTokens += (paraTokens.size() - i);
-          j = resultTokens.size() - 1;
-        }
-        suggestion = sugStart >= sugEnd ? "" : aiResultText.substring(sugStart, sugEnd);
-        if (!isEndQoute(j, resultTokens) && isCorrectSuggestion(suggestion, singleWordToken)
-            && !isMatchException(nParaTokenStart, nParaTokenEnd, nResultTokenStart, nResultTokenEnd, paraTokens, resultTokens)) {
-          RuleMatch ruleMatch = new RuleMatch(this, sentence, posStart, posEnd, ruleMessage);
-          ruleMatch.addSuggestedReplacement(suggestion);
-          ruleMatch.setType(Type.Hint);
-          setType(nParaTokenStart, nParaTokenEnd, nResultTokenStart, nResultTokenEnd, paraTokens, resultTokens, ruleMatch);
-          tmpMatches.add(new AiRuleMatch(ruleMatch, sugStart, sugEnd, nParaTokenStart, nParaTokenEnd, nResultTokenStart, nResultTokenEnd));
-          if (debugMode) {
-            WtMessageHandler.printToLogFile("AiDetectionRule: match: found: start: " + posStart + ", end: " + posEnd
+          if (!endFound) {
+            //  replace all tokens from i to end of paragraph by the suggestion from j to end of suggestion
+            posEnd = paraTokens.get(paraTokens.size() - 1).getEndPos();
+            nParaTokenEnd = paraTokens.size() - 1;
+            sugStart = resultTokens.get(j).getStartPos();
+            sugEnd = resultTokens.get(resultTokens.size() - 1).getEndPos();
+            nResultTokenStart = j;
+            nResultTokenEnd = resultTokens.size() - 1;
+            nRuleTokens += (paraTokens.size() - i);
+            j = resultTokens.size() - 1;
+          }
+          suggestion = sugStart >= sugEnd ? "" : aiResultText.substring(sugStart, sugEnd);
+          if (!isEndQoute(j, resultTokens) && isCorrectSuggestion(suggestion, singleWordToken)
+              && !isMatchException(nParaTokenStart, nParaTokenEnd, nResultTokenStart, nResultTokenEnd, paraTokens, resultTokens)) {
+            RuleMatch ruleMatch = new RuleMatch(this, sentence, posStart, posEnd, ruleMessage);
+            ruleMatch.addSuggestedReplacement(suggestion);
+            ruleMatch.setType(Type.Hint);
+            setType(nParaTokenStart, nParaTokenEnd, nResultTokenStart, nResultTokenEnd, paraTokens, resultTokens, ruleMatch);
+            tmpMatches.add(new AiRuleMatch(ruleMatch, sugStart, sugEnd, nParaTokenStart, nParaTokenEnd, nResultTokenStart, nResultTokenEnd));
+            if (debugMode) {
+              WtMessageHandler.printToLogFile("AiDetectionRule: match: found: start: " + posStart + ", end: " + posEnd
+                  + ", suggestion: " + suggestion);
+            }
+          } else if (debugMode) {
+            WtMessageHandler.printToLogFile("AiDetectionRule: match: not correct spell: locale: " + WtOfficeTools.localeToString(locale)
                 + ", suggestion: " + suggestion);
           }
-        } else if (debugMode) {
-          WtMessageHandler.printToLogFile("AiDetectionRule: match: not correct spell: locale: " + WtOfficeTools.localeToString(locale)
-              + ", suggestion: " + suggestion);
         }
-      }
-      j++;
-      if (i >= sentenceEnds.get(nSentence)) {
-        mergeSentences = true;
-        while (i >= sentenceEnds.get(nSentence)) {
-          nSentence++;
+        j++;
+        if (i >= sentenceEnds.get(nSentence)) {
+          mergeSentences = true;
+          while (i >= sentenceEnds.get(nSentence)) {
+            nSentence++;
+          }
         }
-      }
-      if (i == sentenceEnds.get(nSentence) - 1) {
-        if (nRuleTokens > 0) {
-          int nSenTokens = nSentence == 0 ? sentenceEnds.get(nSentence) : sentenceEnds.get(nSentence) - sentenceEnds.get(nSentence - 1);
-          if (mergeSentences || styleHintAssumed(nRuleTokens, nSenTokens, tmpMatches, paraTokens, resultTokens)) {
-            if (showStylisticHints && !tmpMatches.isEmpty()) {
-              int startPos = tmpMatches.get(0).ruleMatch.getFromPos();
-              int endPos = tmpMatches.get(tmpMatches.size() - 1).ruleMatch.getToPos();
-              RuleMatch ruleMatch = new RuleMatch(this, null, startPos, endPos, ruleMessage);
-              int suggestionStart = tmpMatches.get(0).suggestionStart;
-              int suggestionEnd = tmpMatches.get(tmpMatches.size() - 1).suggestionEnd;
-              String suggestion = aiResultText.substring(suggestionStart, suggestionEnd);
-              ruleMatch.addSuggestedReplacement(suggestion);
-              ruleMatch.setType(Type.Other);
-              matches.add(ruleMatch);
+        if (i == sentenceEnds.get(nSentence) - 1) {
+          if (nRuleTokens > 0) {
+            int nSenTokens = nSentence == 0 ? sentenceEnds.get(nSentence) : sentenceEnds.get(nSentence) - sentenceEnds.get(nSentence - 1);
+            if (mergeSentences || styleHintAssumed(nRuleTokens, nSenTokens, tmpMatches, paraTokens, resultTokens)) {
+              if (showStylisticHints && !tmpMatches.isEmpty()) {
+                int startPos = tmpMatches.get(0).ruleMatch.getFromPos();
+                int endPos = tmpMatches.get(tmpMatches.size() - 1).ruleMatch.getToPos();
+                RuleMatch ruleMatch = new RuleMatch(this, null, startPos, endPos, ruleMessage);
+                int suggestionStart = tmpMatches.get(0).suggestionStart;
+                int suggestionEnd = tmpMatches.get(tmpMatches.size() - 1).suggestionEnd;
+                String suggestion = aiResultText.substring(suggestionStart, suggestionEnd);
+                ruleMatch.addSuggestedReplacement(suggestion);
+                ruleMatch.setType(Type.Other);
+                matches.add(ruleMatch);
+                if (debugMode) {
+                  WtMessageHandler.printToLogFile("AiDetectionRule: match: Stylistic hint: suggestion: " + suggestion);
+                }
+              }
+              mergeSentences = false;
+            } else {
+              addAllRuleMatches(matches, tmpMatches, resultTokens);
               if (debugMode) {
-                WtMessageHandler.printToLogFile("AiDetectionRule: match: Stylistic hint: suggestion: " + suggestion);
+                WtMessageHandler.printToLogFile("AiDetectionRule: match: add matches: " + tmpMatches.size()
+                + ", total: " + matches.size());
               }
             }
-            mergeSentences = false;
-          } else {
-            addAllRuleMatches(matches, tmpMatches, resultTokens);
+          }
+          tmpMatches.clear();
+          nRuleTokens = 0;
+          nSentence++;
+  //        lastSentenceStart = i + 1;
+          lastResultStart = j;
+        }
+      }
+      if (j < resultTokens.size() 
+              && (!paraTokens.get(i - 1).getToken().equals(resultTokens.get(j - 1).getToken())
+                  || (resultTokens.get(j).isNonWord() && !PUNCTUATION.matcher(resultTokens.get(j).getToken()).matches())
+          )) {
+        nRuleTokens++;
+        if (nSentence > 0) {
+          nSentence--;
+        }
+        int j1;
+        for (j1 = j + 1; j1 < resultTokens.size() && !OPENING_BRACKETS.matcher(resultTokens.get(j1).getToken()).matches(); j1++);
+        if (j1 > resultTokens.size()) {
+          j1 = resultTokens.size();
+        }
+        String suggestion = aiResultText.substring(resultTokens.get(j - 1).getStartPos(), resultTokens.get(j1 - 1).getEndPos());
+        if (suggestion.isEmpty() || j != j1 || resultTokens.get(j - 1).isNonWord() || linguServices.isCorrectSpell(suggestion, locale)) {
+          RuleMatch ruleMatch = new RuleMatch(this, null, paraTokens.get(paraTokens.size() - 1).getStartPos(), 
+              paraTokens.get(paraTokens.size() - 1).getEndPos(), ruleMessage);
+          ruleMatch.addSuggestedReplacement(suggestion);
+          setType(paraTokens.size() - 1, paraTokens.size() - 1, j - 1, j1 - 1, paraTokens, resultTokens, ruleMatch);
+          tmpMatches.add(new AiRuleMatch(ruleMatch, resultTokens.get(j - 1).getStartPos(), resultTokens.get(resultTokens.size() - 1).getEndPos(),
+              paraTokens.size() - 1, paraTokens.size() - 1, j - 1, j1 - 1));
+        }
+      }
+      if (tmpMatches.size() > 0) {
+        boolean overSentenceEnd = j < resultTokens.size() && PUNCTUATION.matcher(resultTokens.get(j - 1).getToken()).matches();
+        int nSenTokens = nSentence == 0 ? sentenceEnds.get(nSentence) : 
+          sentenceEnds.get(sentenceEnds.size() - 1) - sentenceEnds.get(sentenceEnds.size() - 2);
+        if (debugMode) {
+          WtMessageHandler.printToLogFile("AiDetectionRule: match: j < resultTokens.size(): mergeSentences: " + mergeSentences
+              + ", nRuleTokens: " + nRuleTokens + ", nSenTokens: " + nSenTokens);
+        }
+        if (mergeSentences || overSentenceEnd || styleHintAssumed(nRuleTokens, nSenTokens, tmpMatches, paraTokens, resultTokens)) {
+          if (showStylisticHints) {
+            int startPos;
+            int endPos;
+            int suggestionStart;
+            int suggestionEnd;
+            if (tmpMatches.size() > 0) {
+              startPos = tmpMatches.get(0).ruleMatch.getFromPos();
+              endPos = tmpMatches.get(tmpMatches.size() - 1).ruleMatch.getToPos();
+              suggestionStart = tmpMatches.get(0).suggestionStart;
+              suggestionEnd = tmpMatches.get(tmpMatches.size() - 1).suggestionEnd;
+            } else {
+              startPos = nSentence == 0 ? paraTokens.get(0).getStartPos() : paraTokens.get(sentenceEnds.get(nSentence - 1)).getStartPos();
+              endPos = paraTokens.get(paraTokens.size() - 1).getEndPos();
+              suggestionStart = resultTokens.get(lastResultStart).getStartPos();
+              suggestionEnd = resultTokens.get(resultTokens.size() - 1).getEndPos();
+            }
+            RuleMatch ruleMatch = new RuleMatch(this, null, startPos, endPos, ruleMessage);
+            String suggestion = aiResultText.substring(suggestionStart, suggestionEnd);
+            ruleMatch.addSuggestedReplacement(suggestion);
+            ruleMatch.setType(Type.Other);
+            matches.add(ruleMatch);
             if (debugMode) {
-              WtMessageHandler.printToLogFile("AiDetectionRule: match: add matches: " + tmpMatches.size()
-              + ", total: " + matches.size());
+              WtMessageHandler.printToLogFile("AiDetectionRule: match: Stylistic hint: suggestion: " + suggestion);
             }
           }
-        }
-        tmpMatches.clear();
-        nRuleTokens = 0;
-        nSentence++;
-//        lastSentenceStart = i + 1;
-        lastResultStart = j;
-      }
-    }
-    if (j < resultTokens.size() 
-            && (!paraTokens.get(i - 1).getToken().equals(resultTokens.get(j - 1).getToken())
-                || (resultTokens.get(j).isNonWord() && !PUNCTUATION.matcher(resultTokens.get(j).getToken()).matches())
-        )) {
-      nRuleTokens++;
-      if (nSentence > 0) {
-        nSentence--;
-      }
-      int j1;
-      for (j1 = j + 1; j1 < resultTokens.size() && !OPENING_BRACKETS.matcher(resultTokens.get(j1).getToken()).matches(); j1++);
-      if (j1 > resultTokens.size()) {
-        j1 = resultTokens.size();
-      }
-      String suggestion = aiResultText.substring(resultTokens.get(j - 1).getStartPos(), resultTokens.get(j1 - 1).getEndPos());
-      if (suggestion.isEmpty() || j != j1 || resultTokens.get(j - 1).isNonWord() || linguServices.isCorrectSpell(suggestion, locale)) {
-        RuleMatch ruleMatch = new RuleMatch(this, null, paraTokens.get(paraTokens.size() - 1).getStartPos(), 
-            paraTokens.get(paraTokens.size() - 1).getEndPos(), ruleMessage);
-        ruleMatch.addSuggestedReplacement(suggestion);
-        setType(paraTokens.size() - 1, paraTokens.size() - 1, j - 1, j1 - 1, paraTokens, resultTokens, ruleMatch);
-        tmpMatches.add(new AiRuleMatch(ruleMatch, resultTokens.get(j - 1).getStartPos(), resultTokens.get(resultTokens.size() - 1).getEndPos(),
-            paraTokens.size() - 1, paraTokens.size() - 1, j - 1, j1 - 1));
-      }
-    }
-    if (tmpMatches.size() > 0) {
-      boolean overSentenceEnd = j < resultTokens.size() && PUNCTUATION.matcher(resultTokens.get(j - 1).getToken()).matches();
-      int nSenTokens = nSentence == 0 ? sentenceEnds.get(nSentence) : 
-        sentenceEnds.get(sentenceEnds.size() - 1) - sentenceEnds.get(sentenceEnds.size() - 2);
-      if (debugMode) {
-        WtMessageHandler.printToLogFile("AiDetectionRule: match: j < resultTokens.size(): mergeSentences: " + mergeSentences
-            + ", nRuleTokens: " + nRuleTokens + ", nSenTokens: " + nSenTokens);
-      }
-      if (mergeSentences || overSentenceEnd || styleHintAssumed(nRuleTokens, nSenTokens, tmpMatches, paraTokens, resultTokens)) {
-        if (showStylisticHints) {
-          int startPos;
-          int endPos;
-          int suggestionStart;
-          int suggestionEnd;
-          if (tmpMatches.size() > 0) {
-            startPos = tmpMatches.get(0).ruleMatch.getFromPos();
-            endPos = tmpMatches.get(tmpMatches.size() - 1).ruleMatch.getToPos();
-            suggestionStart = tmpMatches.get(0).suggestionStart;
-            suggestionEnd = tmpMatches.get(tmpMatches.size() - 1).suggestionEnd;
-          } else {
-            startPos = nSentence == 0 ? paraTokens.get(0).getStartPos() : paraTokens.get(sentenceEnds.get(nSentence - 1)).getStartPos();
-            endPos = paraTokens.get(paraTokens.size() - 1).getEndPos();
-            suggestionStart = resultTokens.get(lastResultStart).getStartPos();
-            suggestionEnd = resultTokens.get(resultTokens.size() - 1).getEndPos();
-          }
-          RuleMatch ruleMatch = new RuleMatch(this, null, startPos, endPos, ruleMessage);
-          String suggestion = aiResultText.substring(suggestionStart, suggestionEnd);
-          ruleMatch.addSuggestedReplacement(suggestion);
-          ruleMatch.setType(Type.Other);
-          matches.add(ruleMatch);
+        } else {
+          addAllRuleMatches(matches, tmpMatches, resultTokens);
           if (debugMode) {
-            WtMessageHandler.printToLogFile("AiDetectionRule: match: Stylistic hint: suggestion: " + suggestion);
+            WtMessageHandler.printToLogFile("AiDetectionRule: match: add matches: " + tmpMatches.size()
+            + ", total: " + matches.size());
           }
         }
-      } else {
-        addAllRuleMatches(matches, tmpMatches, resultTokens);
-        if (debugMode) {
-          WtMessageHandler.printToLogFile("AiDetectionRule: match: add matches: " + tmpMatches.size()
-          + ", total: " + matches.size());
-        }
       }
-    }
-    if (debugMode && j < resultTokens.size()) {
-      WtMessageHandler.printToLogFile("AiDetectionRule: match: j < resultTokens.size(): paraTokens.get(i - 1): " + paraTokens.get(i - 1).getToken()
-          + ", resultTokens.get(j - 1): " + resultTokens.get(j - 1).getToken());
-    }
-    return toRuleMatchArray(matches);
-  }
-/*  
-  private AnalyzedSentence getSentence(int n, List<Integer> sentenceEnds, List<AnalyzedSentence> sentences) {
-    for (int i = 0; i < sentenceEnds.size(); i++) {
-      if (n >= i) {
-        return (i == 0) ? sentences.get(0) : sentences.get(i - 1);
+      if (debugMode && j < resultTokens.size()) {
+        WtMessageHandler.printToLogFile("AiDetectionRule: match: j < resultTokens.size(): paraTokens.get(i - 1): " + paraTokens.get(i - 1).getToken()
+            + ", resultTokens.get(j - 1): " + resultTokens.get(j - 1).getToken());
       }
+      return toRuleMatchArray(matches);
+    } catch (Throwable t) {
+      WtMessageHandler.printException(t);
+      return null;
     }
-    return sentences.get(sentences.size() - 1);
   }
-*/
-  private boolean isCorrectSuggestion(String suggestion, WtAiToken singleWordToken) {
+
+  private boolean isCorrectSuggestion(String suggestion, WtAiToken singleWordToken) throws Throwable {
     return (suggestion.isEmpty() || singleWordToken == null || singleWordToken.isNonWord()
         || linguServices.isCorrectSpell(suggestion, locale));
   }
 
-  private boolean isEndQoute(int j, List<WtAiToken> resultTokens) {
+  private boolean isEndQoute(int j, List<WtAiToken> resultTokens) throws Throwable {
     return (j == resultTokens.size() - 1 && QUOTES.matcher(resultTokens.get(j).getToken()).matches());
   }
 
   private void setType(int nParaTokenStart, int nParaTokenEnd, int nResultTokenStart, int nResultTokenEnd,
-      List<WtAiToken> paraTokens, List<WtAiToken> resultTokens, RuleMatch ruleMatch) {
+      List<WtAiToken> paraTokens, List<WtAiToken> resultTokens, RuleMatch ruleMatch) throws Throwable {
     if (debugMode) {
       WtMessageHandler.printToLogFile("ParaTokenStart: " + paraTokens.get(nParaTokenStart).getToken()
           +", ParaTokenEnd: " + paraTokens.get(nParaTokenEnd).getToken()
@@ -469,7 +453,7 @@ public class WtAiDetectionRule extends TextLevelRule {
   }
   
   private boolean matchesShareLemma(int nParaTokenStart, int nParaTokenEnd, int nResultTokenStart, int nResultTokenEnd,
-      List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) {
+      List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) throws Throwable {
     for (int i = nParaTokenStart; i <= nParaTokenEnd; i++) {
       for (int j = nResultTokenStart; j <= nResultTokenStart; j++) {
         if (shareLemma(paraTokens.get(i), resultTokens.get(j))) {
@@ -481,7 +465,7 @@ public class WtAiDetectionRule extends TextLevelRule {
   }
   
   private boolean styleHintAssumed(int nRuleTokens, int nSentTokens, 
-      List<AiRuleMatch> aiMatches, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) {
+      List<AiRuleMatch> aiMatches, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) throws Throwable {
     if (aiMatches.size() <= 2) {
       return false;
     }
@@ -505,7 +489,7 @@ public class WtAiDetectionRule extends TextLevelRule {
     return false;
   }
   
-  private boolean shareLemma(WtAiToken a, WtAiToken b) {
+  private boolean shareLemma(WtAiToken a, WtAiToken b) throws Throwable {
     for (AnalyzedToken t : a.getReadings()) {
       String lemma = t.getLemma();
       if (lemma != null && !lemma.isEmpty() && b.hasLemma(lemma)) {
@@ -515,7 +499,7 @@ public class WtAiDetectionRule extends TextLevelRule {
     return false;
   }
   
-  private boolean mergeRuleMatchesOneTime(List<AiRuleMatch> aiMatches, List<WtAiToken> resultTokens) {
+  private boolean mergeRuleMatchesOneTime(List<AiRuleMatch> aiMatches, List<WtAiToken> resultTokens) throws Throwable {
     for (int i = 0; i < aiMatches.size(); i++) {
       RuleMatch match1 = aiMatches.get(i).ruleMatch;
       if(match1.getSuggestedReplacements().get(0).isEmpty()) {
@@ -562,18 +546,18 @@ public class WtAiDetectionRule extends TextLevelRule {
     return false;
   }
  
-  private void mergeRuleMatches(List<AiRuleMatch> aiMatches, List<WtAiToken> resultTokens) {
+  private void mergeRuleMatches(List<AiRuleMatch> aiMatches, List<WtAiToken> resultTokens) throws Throwable {
     while (mergeRuleMatchesOneTime(aiMatches, resultTokens));
   }
   
-  private void addAllRuleMatches(List<RuleMatch> matches, List<AiRuleMatch> aiMatches, List<WtAiToken> resultTokens) {
+  private void addAllRuleMatches(List<RuleMatch> matches, List<AiRuleMatch> aiMatches, List<WtAiToken> resultTokens) throws Throwable {
     mergeRuleMatches(aiMatches, resultTokens);
     for (AiRuleMatch match : aiMatches) {
       matches.add(match.ruleMatch);
     }
   }
   
-  private boolean hasAllChars (String sFirst, String sSecond, int diffChars) {
+  private boolean hasAllChars (String sFirst, String sSecond, int diffChars) throws Throwable {
     List<Character> cList = new ArrayList<>();
     for (char c : sFirst.toCharArray()) {
         cList.add(c);
@@ -593,7 +577,10 @@ public class WtAiDetectionRule extends TextLevelRule {
     return true;
   }
   
-  private boolean isSimilarWord (String first, String second) {
+  private boolean isSimilarWord (String first, String second) throws Throwable {
+    if (first.length() < 2 || second.length() < 2) {
+      return false;
+    }
     if (first.length() == second.length()) {
       return hasAllChars (first, second, 1);
     } else if (first.length() + 1 == second.length()) {
@@ -608,7 +595,7 @@ public class WtAiDetectionRule extends TextLevelRule {
    * Set language specific exceptions to set Color for specific Languages
    */
   public boolean isNoneHintException(int nParaStart, int nParaEnd, 
-      int nResultStart, int nResultEnd, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) {
+      int nResultStart, int nResultEnd, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) throws Throwable {
     return false;   
   }
 
@@ -616,7 +603,7 @@ public class WtAiDetectionRule extends TextLevelRule {
    * Set language specific exceptions to set Color for specific Languages
    */
   public boolean isHintException(int nParaStart, int nParaEnd, 
-      int nResultStart, int nResultEnd, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) {
+      int nResultStart, int nResultEnd, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) throws Throwable {
     return false;   
   }
 
@@ -624,7 +611,7 @@ public class WtAiDetectionRule extends TextLevelRule {
    * Set language specific exceptions to handle change as a match
    */
   public boolean isMatchException(int nParaStart, int nParaEnd, 
-      int nResultStart, int nResultEnd, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) {
+      int nResultStart, int nResultEnd, List<WtAiToken> paraTokens, List<WtAiToken> resultTokens) throws Throwable {
     return false;   
   }
 

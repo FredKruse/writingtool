@@ -781,7 +781,7 @@ public class WtFlatParagraphTools {
    * else the marks are added to the existing marks
    */
 
-  public void markParagraphs(Map<Integer, List<SentenceErrors>> changedParas) {
+  public void markParagraphs(Map<Integer, List<SentenceErrors>> changedParas) throws Throwable {
     isBusy++;
     try {
       if (changedParas == null || changedParas.isEmpty()) {
@@ -855,42 +855,49 @@ public class WtFlatParagraphTools {
    * if override: existing marks will be overridden
    */
   private void addMarksToOneParagraph(XFlatParagraph flatPara, List<SentenceErrors> errorList) throws Throwable {
-    boolean isChecked = flatPara.isChecked(TextMarkupType.PROOFREADING);
-    if (debugMode) {
-      WtMessageHandler.printToLogFile("FlatParagraphTools: addMarksToOneParagraph: xMarkingAccess: isChecked = " + isChecked);
-    }
-    for (SentenceErrors errors : errorList) {
-      XStringKeyMap props;
-      for (SingleProofreadingError pError : errors.sentenceErrors) {
-        props = flatPara.getMarkupInfoContainer();
-        PropertyValue[] properties = pError.aProperties;
-        int color = -1;
-        short type = -1;
-        for (PropertyValue property : properties) {
-          if ("LineColor".equals(property.Name)) {
-            color = (int) property.Value;
-          } else if ("LineType".equals(property.Name)) {
-            type = (short) property.Value;
-          }
-        }
-        try {
-          if (color >= 0) {
-            props.insertValue("LineColor", color);
-          }
-          if (type > 0) {
-            props.insertValue("LineType", type);
-          }
-        } catch (Throwable t) {
-          WtMessageHandler.printException(t);
-        }
-        flatPara.commitStringMarkup(TextMarkupType.PROOFREADING, pError.aRuleIdentifier, 
-            pError.nErrorStart, pError.nErrorLength, props);
+    try {
+      boolean isChecked = flatPara.isChecked(TextMarkupType.PROOFREADING);
+      if (debugMode) {
+        WtMessageHandler.printToLogFile("FlatParagraphTools: addMarksToOneParagraph: xMarkingAccess: isChecked = " + isChecked);
       }
-//      props = flatPara.getMarkupInfoContainer();
-//      flatPara.commitStringMarkup(TextMarkupType.SENTENCE, "Sentence", errors.sentenceStart, errors.sentenceEnd - errors.sentenceStart, props);
-    }
-    if (isChecked) {
-      flatPara.setChecked(TextMarkupType.PROOFREADING, true);
+      int paraLen = flatPara.getText().length();
+      for (SentenceErrors errors : errorList) {
+        XStringKeyMap props;
+        for (SingleProofreadingError pError : errors.sentenceErrors) {
+          if (pError.nErrorStart < paraLen - 1) {
+            props = flatPara.getMarkupInfoContainer();
+            PropertyValue[] properties = pError.aProperties;
+            int color = -1;
+            short type = -1;
+            for (PropertyValue property : properties) {
+              if ("LineColor".equals(property.Name)) {
+                color = (int) property.Value;
+              } else if ("LineType".equals(property.Name)) {
+                type = (short) property.Value;
+              }
+            }
+            if (color >= 0) {
+              props.insertValue("LineColor", color);
+            }
+            if (type > 0) {
+              props.insertValue("LineType", type);
+            }
+            int errLen = pError.nErrorLength;
+            if (errLen + pError.nErrorStart >= paraLen) {
+              errLen = paraLen - pError.nErrorStart;
+            }
+            flatPara.commitStringMarkup(TextMarkupType.PROOFREADING, pError.aRuleIdentifier, 
+              pError.nErrorStart, errLen, props);
+          }
+        }
+  //      props = flatPara.getMarkupInfoContainer();
+  //      flatPara.commitStringMarkup(TextMarkupType.SENTENCE, "Sentence", errors.sentenceStart, errors.sentenceEnd - errors.sentenceStart, props);
+      }
+      if (isChecked) {
+        flatPara.setChecked(TextMarkupType.PROOFREADING, true);
+      }
+    } catch (Throwable t) {
+      WtMessageHandler.printException(t);
     }
   }
 
