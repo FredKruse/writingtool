@@ -174,9 +174,13 @@ public class WtStatAnDialog extends Thread  {
   }
   
   private void closeDialog(WaitDialogThread waitdialog) {
-    cache.setNewResultcache(null, null);
-    dialog.setVisible(false);
-    document.getMultiDocumentsHandler().setStatAnDialogRunning(false);
+    try {
+      cache.setNewResultcache(null, null);
+      dialog.setVisible(false);
+      document.getMultiDocumentsHandler().setStatAnDialogRunning(false);
+    } catch (Throwable e) {
+      WtMessageHandler.showError(e);
+    }
     waitdialog.close();
   }
   
@@ -298,16 +302,20 @@ public class WtStatAnDialog extends Thread  {
     cons2.weighty = 10.0f;
     leftPanel = new JPanel();
     rightPanel = new JPanel();
-    if(isLevelRule) {
-      levelRule = new WtLevelRule(selectedRule, cache);
-      configRule();
-      levelRule.generateBasicNumbers(cache);
-      setLeftLevelRulePanel();
-    } else {
-      usedWordRule = new WtUsedWordRule(selectedRule, cache);
-      configRule();
-      usedWordRule.generateBasicNumbers(cache);
-      setLeftUsedWordRulePanel();
+    try {
+      if(isLevelRule) {
+        levelRule = new WtLevelRule(selectedRule, cache);
+        configRule();
+        levelRule.generateBasicNumbers(cache);
+        setLeftLevelRulePanel();
+      } else {
+        usedWordRule = new WtUsedWordRule(selectedRule, cache);
+        configRule();
+        usedWordRule.generateBasicNumbers(cache);
+        setLeftUsedWordRulePanel();
+      }
+    } catch (Throwable e) {
+      WtMessageHandler.showError(e);
     }
     setRightRulePanel();
     mainPanel.add(leftPanel, cons2);
@@ -418,7 +426,7 @@ public class WtStatAnDialog extends Thread  {
     }
   }
   
-  private void setLeftLevelRulePanel() {
+  private void setLeftLevelRulePanel() throws Throwable {
     if (chapter == null && WtLevelRule.hasStatisticalOptions(selectedRule)) {
       levelRule.setWithDirectSpeach(!config.isWithoutDirectSpeech(selectedRule), cache);
       levelRule.setCurrentStep(config.getLevelStep(selectedRule));
@@ -869,7 +877,7 @@ public class WtStatAnDialog extends Thread  {
     }
   }
   
-  private void configRule() {
+  private void configRule() throws Throwable {
     if (debugMode) {
       WtMessageHandler.printToLogFile("New configuration set");
     }

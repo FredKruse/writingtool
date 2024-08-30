@@ -60,7 +60,7 @@ public class WtLevelRule {
     unitFactor = getUnitFactor();
   }
   
-  public void generateBasicNumbers(WtStatAnCache cache) {
+  public void generateBasicNumbers(WtStatAnCache cache) throws Throwable {
     try {
       WtResultCache statAnalysisCache = new WtResultCache();
       numFound.clear();
@@ -211,7 +211,7 @@ public class WtLevelRule {
     return defStep;
   }
   
-  public void setWithDirectSpeach(boolean wDirectSpeech, WtStatAnCache cache) {
+  public void setWithDirectSpeach(boolean wDirectSpeech, WtStatAnCache cache) throws Throwable {
     if (debugMode) {
       WtMessageHandler.printToLogFile("withDirectSpeech: " + withDirectSpeech + ", wDirectSpeech: " + wDirectSpeech);
     }

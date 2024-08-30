@@ -66,7 +66,7 @@ public class WtUsedWordRule {
     optimalNumberWords = 3 * procentualStep;
   }
   
-  public void generateBasicNumbers(WtStatAnCache cache) {
+  public void generateBasicNumbers(WtStatAnCache cache) throws Throwable {
     try {
       if (rule instanceof AbstractStyleTooOftenUsedWordRule) {
         if (debugMode) {
@@ -92,7 +92,7 @@ public class WtUsedWordRule {
     }
   }
 
-  public void setWithDirectSpeach(boolean wDirectSpeech, WtStatAnCache cache) {
+  public void setWithDirectSpeach(boolean wDirectSpeech, WtStatAnCache cache) throws Throwable {
     if (debugMode) {
       WtMessageHandler.printToLogFile("withDirectSpeech: " + withDirectSpeech + ", wDirectSpeech: " + wDirectSpeech);
     }
@@ -291,8 +291,9 @@ public class WtUsedWordRule {
   
   /**
    * set the Cache for one paragraph
+   * @throws Throwable 
    */
-  public void setCacheForParagraph(int nFPara, int nTPara, WtStatAnCache cache) {
+  public void setCacheForParagraph(int nFPara, int nTPara, WtStatAnCache cache) throws Throwable {
     WtResultCache statAnalysisCache = new WtResultCache();
     List<AnalyzedSentence> analyzedSentences = cache.getAnalysedParagraph(nTPara);
     if (analyzedSentences != null) {

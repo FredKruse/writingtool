@@ -323,8 +323,9 @@ public class WtStatAnCache {
   /**
    * Set a new result cache
    * reset a paragraph if necessary
+   * @throws Throwable 
    */
-  public void setNewResultcache(String ruleId, WtResultCache sCache) {
+  public void setNewResultcache(String ruleId, WtResultCache sCache) throws Throwable {
     if (actRuleId != null && lastPara >= 0) {
       remarkChangedParagraph(lastPara, null, (short) 0, null, null);
       lastPara = -1;
@@ -337,8 +338,9 @@ public class WtStatAnCache {
   /**
    * remark a paragraph
    * reset a paragraph if necessary
+   * @throws Throwable 
    */
-  public void markParagraph (int nPara, short lineType, Color lineColor) {
+  public void markParagraph (int nPara, short lineType, Color lineColor) throws Throwable {
     if (actRuleId != null) {
       if (lastPara >= 0) {
         remarkChangedParagraph(lastPara, null, (short) 0, null, null);
@@ -371,8 +373,9 @@ public class WtStatAnCache {
   /**
    * remark changed paragraph
    * override existing marks
+   * @throws Throwable 
    */
-  private void remarkChangedParagraph(int nFPara, String sRuleId, short lineType, Color lineColor, WtResultCache sCache) {
+  private void remarkChangedParagraph(int nFPara, String sRuleId, short lineType, Color lineColor, WtResultCache sCache) throws Throwable {
     if (sCache == null) {
       document.setStatAnRuleId(null);
     }
