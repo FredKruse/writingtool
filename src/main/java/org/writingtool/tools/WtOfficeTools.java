@@ -44,7 +44,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.jetbrains.annotations.Nullable;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
-import org.languagetool.LtBuildInfo;
+// import org.languagetool.LtBuildInfo;
 import org.languagetool.rules.AbstractStatisticSentenceStyleRule;
 import org.languagetool.rules.AbstractStatisticStyleRule;
 import org.languagetool.rules.AbstractStyleTooOftenUsedWordRule;
@@ -696,23 +696,29 @@ public class WtOfficeTools {
   
   /**
    * get LanguageTool version
+   * NOTE: The recommended method doesn't work in WritingTool
    */
   public static String ltVersion() {
-    return LtBuildInfo.OS.getVersion();
+    return JLanguageTool.VERSION;
+//    return LtBuildInfo.OS.getVersion();
   }
 
   /**
    * get LanguageTool build date
+   * NOTE: The recommended method doesn't work in WritingTool
    */
   public static String ltBuildDate() {
-    return LtBuildInfo.OS.getBuildDate();
+    return JLanguageTool.BUILD_DATE;
+//    return LtBuildInfo.OS.getBuildDate();
   }
 
   /**
    * get LanguageTool short git id
+   * NOTE: The recommended method doesn't work in WritingTool
    */
   public static String ltShortGitId() {
-    return LtBuildInfo.OS.getShortGitId();
+    return JLanguageTool.GIT_SHORT_ID;
+//    return LtBuildInfo.OS.getShortGitId();
   }
 
   /**
