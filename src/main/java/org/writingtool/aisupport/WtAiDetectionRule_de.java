@@ -20,7 +20,7 @@ public class WtAiDetectionRule_de extends WtAiDetectionRule {
   private static Map<String, String> noneConfusionWords = null;
 
   WtAiDetectionRule_de(String aiResultText, List<AnalyzedSentence> analyzedAiResult, String paraText,
-      WtLinguisticServices linguServices, Locale locale, ResourceBundle messages, boolean showStylisticHints) throws Throwable {
+      WtLinguisticServices linguServices, Locale locale, ResourceBundle messages, int showStylisticHints) throws Throwable {
     super(aiResultText, analyzedAiResult, paraText, linguServices, locale, messages, showStylisticHints);
     if (confusionWords == null) {
       confusionWords = WtAiConfusionPairs.getConfusionWordMap(locale, CONFUSION_FILE_1);

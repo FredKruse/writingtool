@@ -61,13 +61,13 @@ public class WtAiDetectionRule extends TextLevelRule {
   private final String paraText;
   private final List<AnalyzedSentence> analyzedAiResult;
   private final String ruleMessage;
-  private final boolean showStylisticHints;
+  private final int showStylisticHints;
   private final WtLinguisticServices linguServices;
   private final Locale locale;
 
   
   WtAiDetectionRule(String aiResultText, List<AnalyzedSentence> analyzedAiResult, String paraText,
-      WtLinguisticServices linguServices, Locale locale, ResourceBundle messages, boolean showStylisticHints) {
+      WtLinguisticServices linguServices, Locale locale, ResourceBundle messages, int showStylisticHints) {
     this.aiResultText = aiResultText;
     this.paraText = paraText;
     this.analyzedAiResult = analyzedAiResult;
@@ -289,7 +289,7 @@ public class WtAiDetectionRule extends TextLevelRule {
           if (nRuleTokens > 0) {
             int nSenTokens = nSentence == 0 ? sentenceEnds.get(nSentence) : sentenceEnds.get(nSentence) - sentenceEnds.get(nSentence - 1);
             if (mergeSentences || styleHintAssumed(nRuleTokens, nSenTokens, tmpMatches, paraTokens, resultTokens)) {
-              if (showStylisticHints && !tmpMatches.isEmpty()) {
+              if (showStylisticHints == 2 && !tmpMatches.isEmpty()) {
                 int startPos = tmpMatches.get(0).ruleMatch.getFromPos();
                 int endPos = tmpMatches.get(tmpMatches.size() - 1).ruleMatch.getToPos();
                 RuleMatch ruleMatch = new RuleMatch(this, null, startPos, endPos, ruleMessage);
@@ -351,7 +351,7 @@ public class WtAiDetectionRule extends TextLevelRule {
               + ", nRuleTokens: " + nRuleTokens + ", nSenTokens: " + nSenTokens);
         }
         if (mergeSentences || overSentenceEnd || styleHintAssumed(nRuleTokens, nSenTokens, tmpMatches, paraTokens, resultTokens)) {
-          if (showStylisticHints) {
+          if (showStylisticHints == 2) {
             int startPos;
             int endPos;
             int suggestionStart;
@@ -553,7 +553,9 @@ public class WtAiDetectionRule extends TextLevelRule {
   private void addAllRuleMatches(List<RuleMatch> matches, List<AiRuleMatch> aiMatches, List<WtAiToken> resultTokens) throws Throwable {
     mergeRuleMatches(aiMatches, resultTokens);
     for (AiRuleMatch match : aiMatches) {
-      matches.add(match.ruleMatch);
+      if (showStylisticHints > 0 || match.ruleMatch.getType() == Type.Hint) {
+        matches.add(match.ruleMatch);
+      }
     }
   }
   

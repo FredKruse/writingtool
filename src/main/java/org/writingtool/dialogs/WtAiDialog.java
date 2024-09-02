@@ -505,6 +505,7 @@ public class WtAiDialog extends Thread implements ActionListener {
               if (debugMode) {
                 WtMessageHandler.printToLogFile("CheckDialog: LtCheckDialog: Window Focus gained: new docType = " + currentDocument.getDocumentType());
               }
+              mainPanel.setSelectedIndex(0);
               setText();
               focusLost = false;
             } catch (Throwable t) {

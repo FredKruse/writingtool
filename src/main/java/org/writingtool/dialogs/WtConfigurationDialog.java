@@ -2352,17 +2352,38 @@ public class WtConfigurationDialog implements ActionListener {
       }
     });
     
-    JCheckBox showStylisticChangesBox = new JCheckBox(messages.getString("guiAiShowStylisticChanges"));
-    showStylisticChangesBox.setSelected(config.aiShowStylisticChanges());
-    showStylisticChangesBox.addItemListener(e -> {
-      config.setAiShowStylisticChanges(showStylisticChangesBox.isSelected());
+    JRadioButton[] radioButtons = new JRadioButton[3];
+    ButtonGroup showStylisticChangesGroup = new ButtonGroup();
+    radioButtons[0] = new JRadioButton(WtGeneralTools.getLabel(messages.getString("guiAiShowNoStylisticChanges")));
+    radioButtons[0].addActionListener(e -> {
+      config.setAiShowStylisticChanges(0);
     });
+    radioButtons[1] = new JRadioButton(WtGeneralTools.getLabel(messages.getString("guiAiShowSmallStylisticChanges")));
+    radioButtons[1].addActionListener(e -> {
+      config.setAiShowStylisticChanges(1);
+    });
+    radioButtons[2] = new JRadioButton(WtGeneralTools.getLabel(messages.getString("guiAiShowAllStylisticChanges")));
+    radioButtons[2].addActionListener(e -> {
+      config.setAiShowStylisticChanges(2);
+    });
+
+    for (int i = 0; i < 3; i++) {
+      if (config.aiShowStylisticChanges() == i) {
+        radioButtons[i].setSelected(true);
+      } else {
+        radioButtons[i].setSelected(false);
+      }
+      showStylisticChangesGroup.add(radioButtons[i]);
+    }
+    
 
     JCheckBox autoCorrectBox = new JCheckBox(messages.getString("guiAiAutoCorrect"));
     autoCorrectBox.setSelected(config.aiAutoCorrect());
     autoCorrectBox.addItemListener(e -> {
       config.setAiAutoCorrect(autoCorrectBox.isSelected());
-      showStylisticChangesBox.setEnabled(autoCorrectBox.isSelected());
+      for (JRadioButton rButton : radioButtons) {
+        rButton.setEnabled(autoCorrectBox.isSelected());
+      }
     });
 
     JCheckBox useAiSupportBox = new JCheckBox(messages.getString("guiUseAiSupport"));
@@ -2373,14 +2394,18 @@ public class WtConfigurationDialog implements ActionListener {
       modelField.setEnabled(useAiSupportBox.isSelected());
       apiKeyField.setEnabled(useAiSupportBox.isSelected());
       autoCorrectBox.setEnabled(useAiSupportBox.isSelected());
-      showStylisticChangesBox.setEnabled(useAiSupportBox.isSelected() && autoCorrectBox.isSelected());
+      for (JRadioButton rButton : radioButtons) {
+        rButton.setEnabled(useAiSupportBox.isSelected() && autoCorrectBox.isSelected());
+      }
     });
     
     aiUrlField.setEnabled(config.useAiSupport());
     modelField.setEnabled(config.useAiSupport());
     apiKeyField.setEnabled(config.useAiSupport());
     autoCorrectBox.setEnabled(config.useAiSupport());
-    showStylisticChangesBox.setEnabled(config.useAiSupport() && config.aiAutoCorrect());
+    for (JRadioButton rButton : radioButtons) {
+      rButton.setEnabled(config.useAiSupport() && config.aiAutoCorrect());
+    }
 
     JLabel experimentalHint = new JLabel(messages.getString("guiAiExperimentalHint"));
     experimentalHint.setForeground(Color.red);
@@ -2422,9 +2447,12 @@ public class WtConfigurationDialog implements ActionListener {
     cons.gridy++;
     aiOptionPanel.add(autoCorrectBox, cons);
     
-    cons.gridy++;
     cons.insets = new Insets(0, SHIFT3, 0, 0);
-    aiOptionPanel.add(showStylisticChangesBox, cons);
+    
+    for (JRadioButton rButton : radioButtons) {
+      cons.gridy++;
+      aiOptionPanel.add(rButton, cons);
+    }
 
     cons.insets = new Insets(16, SHIFT2, 0, 0);
     cons.gridy++;

@@ -84,7 +84,7 @@ public class WtConfiguration {
   static final boolean DEFAULT_USE_AI_SUPPORT = false;
   static final boolean DEFAULT_USE_AI_IMG_SUPPORT = false;
   static final boolean DEFAULT_AI_AUTO_CORRECT = false;
-  static final boolean DEFAULT_AI_SHOW_STYLISTIC_CHANGES = false;
+  static final int DEFAULT_AI_SHOW_STYLISTIC_CHANGES = 0;
   
   static final String DEFAULT_AI_MODEL = "gpt-4";
   static final String DEFAULT_AI_URL = "http://localhost:8080/v1/chat/completions/";
@@ -155,7 +155,7 @@ public class WtConfiguration {
   private static final String AI_MODEL_KEY = "aiModel";
   private static final String AI_USE_AI_SUPPORT_KEY = "useAiSupport";
   private static final String AI_AUTO_CORRECT_KEY = "aiAutoCorrect";
-  private static final String AI_SHOW_STYLISTIC_CHANGES_KEY = "aiShowStylisticChanges";
+  private static final String AI_SHOW_STYLISTIC_CHANGES_KEY = "aiShowStylisticChangesInt";
   private static final String AI_IMG_URL_KEY = "aiImgUrl";
   private static final String AI_IMG_APIKEY_KEY = "aiImgApiKey";
   private static final String AI_IMG_MODEL_KEY = "aiImgModel";
@@ -247,7 +247,7 @@ public class WtConfiguration {
   private String aiModel = DEFAULT_AI_MODEL;
   private boolean useAiSupport = DEFAULT_USE_AI_SUPPORT;
   private boolean aiAutoCorrect = DEFAULT_AI_AUTO_CORRECT;
-  private boolean aiShowStylisticChanges = DEFAULT_AI_SHOW_STYLISTIC_CHANGES;
+  private int aiShowStylisticChanges = DEFAULT_AI_SHOW_STYLISTIC_CHANGES;
   private String aiImgUrl = DEFAULT_AI_IMG_URL;
   private String aiImgApiKey = DEFAULT_AI_IMG_APIKEY;
   private String aiImgModel = DEFAULT_AI_IMG_MODEL;
@@ -669,11 +669,11 @@ public class WtConfiguration {
     this.aiAutoCorrect = aiAutoCorrect;
   }
 
-  public boolean aiShowStylisticChanges() {
+  public int aiShowStylisticChanges() {
     return aiShowStylisticChanges;
   }
 
-  public void setAiShowStylisticChanges(boolean aiShowStylisticChanges) {
+  public void setAiShowStylisticChanges(int aiShowStylisticChanges) {
     this.aiShowStylisticChanges = aiShowStylisticChanges;
   }
 
@@ -1615,7 +1615,7 @@ public class WtConfiguration {
     
     aiString = (String) props.get(prefix + AI_SHOW_STYLISTIC_CHANGES_KEY);
     if (aiString != null) {
-      aiShowStylisticChanges = Boolean.parseBoolean(aiString);
+      aiShowStylisticChanges = Integer.parseInt(aiString);
     }
     
     
@@ -2033,7 +2033,7 @@ public class WtConfiguration {
       props.setProperty(prefix + AI_AUTO_CORRECT_KEY, Boolean.toString(aiAutoCorrect));
     }
     if (this.aiShowStylisticChanges != DEFAULT_AI_SHOW_STYLISTIC_CHANGES) {
-      props.setProperty(prefix + AI_SHOW_STYLISTIC_CHANGES_KEY, Boolean.toString(aiShowStylisticChanges));
+      props.setProperty(prefix + AI_SHOW_STYLISTIC_CHANGES_KEY, Integer.toString(aiShowStylisticChanges));
     }
     if (aiImgUrl != null) {
       props.setProperty(prefix + AI_IMG_URL_KEY, aiImgUrl);

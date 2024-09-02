@@ -315,9 +315,9 @@ public class WtAiErrorDetection {
   }
   
   private WtAiDetectionRule getAiDetectionRule(String aiResultText, List<AnalyzedSentence> analyzedAiResult, String paraText,
-      WtLinguisticServices linguServices, Locale locale, ResourceBundle messages, boolean showStylisticHints) {
+      WtLinguisticServices linguServices, Locale locale, ResourceBundle messages, int showStylisticHints) {
     try {
-      Class<?>[] cArgs = { String.class, List.class, String.class, WtLinguisticServices.class, Locale.class, ResourceBundle.class, boolean.class };
+      Class<?>[] cArgs = { String.class, List.class, String.class, WtLinguisticServices.class, Locale.class, ResourceBundle.class, int.class };
       Class<?> clazz = Class.forName("org.writingtool.aisupport.WtAiDetectionRule_" + locale.Language);
 //      WtMessageHandler.printToLogFile("Use detection rule for: " + locale.Language);
       return (WtAiDetectionRule) clazz.getDeclaredConstructor(cArgs).newInstance(aiResultText, 
