@@ -56,6 +56,8 @@ public class WtAiRemote {
   public final static String EXPAND_INSTRUCTION = "loAiExpandInstruction";
   
   public static enum AiCommand { CorrectGrammar, ImproveStyle, ExpandText, GeneralAi };
+  
+  private static boolean isRunning = false;
 
 /*
   public final static String CORRECT_INSTRUCTION = "Correct following text";
@@ -96,35 +98,48 @@ public class WtAiRemote {
       aiType = AiType.CHAT;
     }
   }
-  
-  HttpURLConnection getConnection(byte[] postData, URL url, String apiKey) throws Throwable {
-    int trials = 0;
-    while (trials < REMOTE_TRIALS) {
-      trials++;
-      try {
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setDoOutput(true);
-        conn.setInstanceFollowRedirects(false);
-        conn.setRequestMethod("POST");
-        conn.setRequestProperty("Content-Type", "application/json");
-        conn.setRequestProperty("charset", "utf-8");
-        conn.setRequestProperty("Authorization", apiKey);
-        conn.setRequestProperty("Content-Length", Integer.toString(postData.length));
-        
-        try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream())) {
-          wr.write(postData);
-        }
-        return conn;
-      } catch (Exception e) {
-        if (trials >= REMOTE_TRIALS) {
-          throw new RuntimeException(e);
-        }
-      }
-    }
-    return null;
-  }
 
   public String runInstruction(String instruction, String text, float temperature, 
+      int seed, Locale locale, boolean onlyOneParagraph) throws Throwable {
+    try {
+      while (isRunning) {
+        try {
+          Thread.sleep(100);
+        } catch (InterruptedException e) {
+          WtMessageHandler.printException(e);
+        }
+      }
+      isRunning = true;
+      return runInstruction_intern(instruction, text, temperature, seed, locale, onlyOneParagraph);
+    } catch (Throwable t) {
+      WtMessageHandler.showError(t);
+      return null;
+    } finally {
+      isRunning = false;
+    }
+  }
+  
+  public String runImgInstruction(String instruction, String exclude, int step, int seed, int size) throws Throwable {
+    try {
+      while (isRunning) {
+        try {
+          Thread.sleep(100);
+        } catch (InterruptedException e) {
+          WtMessageHandler.printException(e);
+        }
+      }
+      isRunning = true;
+      return runImgInstruction_intern(instruction, exclude, step, seed, size);
+    } catch (Throwable t) {
+      WtMessageHandler.showError(t);
+      return null;
+    } finally {
+      isRunning = false;
+    }
+  }
+
+  
+  private String runInstruction_intern(String instruction, String text, float temperature, 
       int seed, Locale locale, boolean onlyOneParagraph) throws Throwable {
     if (instruction == null || text == null) {
       return null;
@@ -247,7 +262,7 @@ public class WtAiRemote {
     return null;
   }
   
-  public String runImgInstruction(String instruction, String exclude, int step, int seed, int size) throws Throwable {
+  private String runImgInstruction_intern(String instruction, String exclude, int step, int seed, int size) throws Throwable {
     if (instruction == null || exclude == null) {
       return null;
     }
@@ -312,6 +327,33 @@ public class WtAiRemote {
     return null;
   }
   
+  private HttpURLConnection getConnection(byte[] postData, URL url, String apiKey) throws Throwable {
+    int trials = 0;
+    while (trials < REMOTE_TRIALS) {
+      trials++;
+      try {
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setDoOutput(true);
+        conn.setInstanceFollowRedirects(false);
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "application/json");
+        conn.setRequestProperty("charset", "utf-8");
+        conn.setRequestProperty("Authorization", apiKey);
+        conn.setRequestProperty("Content-Length", Integer.toString(postData.length));
+        
+        try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream())) {
+          wr.write(postData);
+        }
+        return conn;
+      } catch (Exception e) {
+        if (trials >= REMOTE_TRIALS) {
+          throw new RuntimeException(e);
+        }
+      }
+    }
+    return null;
+  }
+
   private String removeSurroundingBrackets(String out, String org) throws Throwable {
     if (out.startsWith("{") && out.endsWith("}")) {
       if (!org.startsWith("{") || !org.endsWith("}")) {
@@ -364,7 +406,7 @@ public class WtAiRemote {
     return sb.toString();
   }
   
-  String parseJasonOutput(String text) throws Throwable {
+  private String parseJasonOutput(String text) throws Throwable {
     try {
       JSONObject jsonObject = new JSONObject(text);
       JSONArray choices;
@@ -418,7 +460,7 @@ public class WtAiRemote {
     }
   }
   
-  String parseJasonImgOutput(String text) throws Throwable {
+  private String parseJasonImgOutput(String text) throws Throwable {
     try {
       JSONObject jsonObject = new JSONObject(text);
       JSONArray data;
@@ -452,20 +494,24 @@ public class WtAiRemote {
     return contentObject.toString();
   }
   
+  private void stopAiRemote() throws Throwable {
+    config.setUseAiSupport(false);
+    if (documents.getAiCheckQueue() != null) {
+      documents.getAiCheckQueue().setStop();
+      documents.setAiCheckQueue(null);
+    }
+    WtMessageHandler.showMessage(messages.getString("loAiServerConnectionError"));
+  }
+  
+  private void stopAiImgRemote() throws Throwable {
+    config.setUseAiImgSupport(false);
+    WtMessageHandler.showMessage(messages.getString("loAiServerConnectionError"));
+  }
+  
   public static String getInstruction(String mess, Locale locale) throws Throwable {
     if (locale == null || locale.Language == null || locale.Language.isEmpty()) {
       locale = new Locale("en", "US", "");
     }
-/*
-//    MessageHandler.printToLogFile("Get instruction for mess: " + mess + ", locale.Language: " + locale.Language);
-    setCommands(locale);
-    String instruction = commands.get(mess);
-    if (instruction == null) {
-      MessageHandler.showMessage("getInstruction: Instruction == null");
-    }
-    return (instruction);
-*/
-//    ResourceBundle messages = WtOfficeTools.getMessageBundle(WtDocumentsHandler.getLanguage(locale));
     ResourceBundle messages = WtOfficeTools.getMessageBundle(WtDocumentsHandler.getLanguage(new Locale("en", "", "")));
     String instruction = messages.getString(mess) + " (language: " + locale.Language + ")"; 
     return instruction;
@@ -480,20 +526,6 @@ public class WtAiRemote {
   public static String addLanguageName(String instruction, Locale locale) throws Throwable {
     String langName = getLanguageName(locale);
     return instruction + " (language - " + langName + ")";
-  }
-  
-  private void stopAiRemote() throws Throwable {
-    config.setUseAiSupport(false);
-    if (documents.getAiCheckQueue() != null) {
-      documents.getAiCheckQueue().setStop();
-      documents.setAiCheckQueue(null);
-    }
-    WtMessageHandler.showMessage(messages.getString("loAiServerConnectionError"));
-  }
-  
-  private void stopAiImgRemote() throws Throwable {
-    config.setUseAiImgSupport(false);
-    WtMessageHandler.showMessage(messages.getString("loAiServerConnectionError"));
   }
   
 }

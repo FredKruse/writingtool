@@ -95,6 +95,8 @@ import com.sun.star.lang.XComponent;
  */
 public class WtAiDialog extends Thread implements ActionListener {
   
+  private final static String TRANSLATE_INSTRUCTION = "Print the translation of the following text in English (without comments)";
+  
   private final static float DEFAULT_TEMPERATURE = 0.7f;
   private final static int DEFAULT_STEP = 30;
   private final static String TEMP_IMAGE_FILE_NAME = "tmpImage.jpg";
@@ -936,7 +938,7 @@ public class WtAiDialog extends Thread implements ActionListener {
     reset.setEnabled(isImpress ? false : enabled);
     clear.setEnabled(paraText == null || paraText.isEmpty() ? false : enabled);
     undo.setEnabled(saveText == null ? false : enabled);
-    createImage.setEnabled(resultText == null  || resultText.isEmpty() || !config.useAiImgSupport() ? false : enabled);
+    createImage.setEnabled(paraText == null  || paraText.isEmpty() || !config.useAiImgSupport() ? false : enabled);
     overrideParagraph.setEnabled(resultText == null || resultText.isEmpty() || isImpress ? false : enabled);
     addToParagraph.setEnabled(resultText == null  || resultText.isEmpty() ? false : enabled);
     help.setEnabled(enabled);
@@ -1140,9 +1142,21 @@ public class WtAiDialog extends Thread implements ActionListener {
     }
   }
 
-  private void createImageFromText() {
-    resultText = result.getText();
-    String parsedText = resultText.replace("\n", "\r").replace("\r", " ").replace("\"", "\\\"").replace("\t", " ");
+  private void createImageFromText() throws Throwable {
+    String text = result.getText();
+    if (text == null || text.trim().isEmpty()) {
+      text = paragraph.getText();
+    }
+    if (!locale.Language.equals("en")) {
+      setAtWorkState(true);
+      setButtonState(false);
+      WtAiRemote aiRemote = new WtAiRemote(documents, config);
+      text = aiRemote.runInstruction(TRANSLATE_INSTRUCTION, text, 0, 0, locale, true);
+    }
+    if (text == null || text.trim().isEmpty()) {
+      return;
+    }
+    String parsedText = text.replace("\n", "\r").replace("\r", " ").replace("\"", "\\\"").replace("\t", " ");
     imgInstruction.setText(parsedText);
     exclude.setText("");
     createImage();
