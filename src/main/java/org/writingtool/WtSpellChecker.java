@@ -25,10 +25,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.languagetool.JLanguageTool;
-import org.languagetool.JLanguageTool.ParagraphHandling;
+import org.languagetool.AnalyzedSentence;
+import org.languagetool.AnalyzedTokenReadings;
+// import org.languagetool.JLanguageTool;
+// import org.languagetool.JLanguageTool.ParagraphHandling;
 import org.languagetool.Language;
-import org.languagetool.rules.Rule;
+// import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleMatch;
 import org.languagetool.rules.spelling.SpellingCheckRule;
 import org.languagetool.rules.spelling.hunspell.HunspellRule;
@@ -60,7 +62,7 @@ import com.sun.star.uno.XComponentContext;
 public class WtSpellChecker extends WeakBase implements XServiceInfo, 
   XServiceDisplayName, XSpellChecker {
 
-  private static boolean DEBUG_MODE = false;  // set to true for debug output
+  private static boolean DEBUG_MODE = true;  // set to true for debug output
   
   private static final int MAX_WRONG = 10000;
   private static final String PROB_CHARS = ".*[~<>].*";
@@ -70,8 +72,9 @@ public class WtSpellChecker extends WeakBase implements XServiceInfo,
           "com.sun.star.linguistic2.SpellChecker",
           WtOfficeTools.WT_SPELL_SERVICE_NAME };
   
-  private static JLanguageTool lt = null;
+//  private static JLanguageTool lt = null;
   private static Locale lastLocale = null;                //  locale for spell check
+  private Language lang;
   private static SpellingCheckRule spellingCheckRule = null;
   private static MorfologikSpellerRule mSpellRule = null;
   private static HunspellRule hSpellRule = null;
@@ -244,8 +247,11 @@ public class WtSpellChecker extends WeakBase implements XServiceInfo,
           }
           return true;
         }
-        List<RuleMatch> matches = lt.check(word,true, ParagraphHandling.ONLYNONPARA);
-        if (matches == null || matches.size() == 0) {
+
+//        List<RuleMatch> matches = lt.check(word,true, ParagraphHandling.ONLYNONPARA);
+        RuleMatch matches[] = spellingCheckRule.match(getAnalyzedSentence(word));
+
+        if (matches == null || matches.length == 0) {
           if (DEBUG_MODE) {
             WtMessageHandler.printToLogFile("LtSpellChecker: isValid: valid word found (matches == 0): " + (word == null ? "null" : word));
           }
@@ -257,7 +263,7 @@ public class WtSpellChecker extends WeakBase implements XServiceInfo,
         }
         if (!lastWrongWords.get(localeStr).contains(word)) {
           lastWrongWords.get(localeStr).add(new String(word));
-          lastSuggestions.get(localeStr).add(suggestionsToArray(matches.get(0).getSuggestedReplacements()));
+          lastSuggestions.get(localeStr).add(suggestionsToArray(matches[0].getSuggestedReplacements()));
           if (lastWrongWords.get(localeStr).size() >= MAX_WRONG) {
             lastWrongWords.get(localeStr).remove(0);
             lastSuggestions.get(localeStr).remove(0);
@@ -289,9 +295,10 @@ public class WtSpellChecker extends WeakBase implements XServiceInfo,
    */
   private void initSpellChecker(Locale locale) {
     try {
-      if (lastLocale == null || !WtOfficeTools.isEqualLocale(lastLocale, locale)) {
+      if (lastLocale == null || lang == null || !WtOfficeTools.isEqualLocale(lastLocale, locale)) {
         lastLocale = locale;
-        Language lang = WtDocumentsHandler.getLanguage(locale);
+        lang = WtDocumentsHandler.getLanguage(locale);
+/*
         lt = new JLanguageTool(lang);
         for (Rule rule : lt.getAllRules()) {
           if (rule.isDictionaryBasedSpellingRule()) {
@@ -307,12 +314,57 @@ public class WtSpellChecker extends WeakBase implements XServiceInfo,
             lt.disableRule(rule.getId());
           }
         }
+*/
+        spellingCheckRule = lang.getDefaultSpellingRule();
+        if (spellingCheckRule instanceof MorfologikSpellerRule) {
+          mSpellRule = (MorfologikSpellerRule) spellingCheckRule;
+          hSpellRule = null;
+        } else if (spellingCheckRule instanceof HunspellRule) {
+          hSpellRule = (HunspellRule) spellingCheckRule;
+          mSpellRule = null;
+        }
       }
     } catch (Throwable e) {
       WtMessageHandler.showError(e);
     }
   }
   
+  /**
+   * get an analysed sentences from string
+   * @throws IOException 
+   */
+  public AnalyzedSentence getAnalyzedSentence(String sentence) throws IOException {
+    List<String> tokens = lang.getWordTokenizer().tokenize(sentence);
+
+    List<AnalyzedTokenReadings> aTokens = lang.getTagger().tag(tokens);
+
+    if (DEBUG_MODE) {
+      WtMessageHandler.printToLogFile("LtSpellChecker: getAnalyzedSentence: sentence: " + sentence + ", num tokens: " + tokens.size());
+    }
+    AnalyzedTokenReadings[] tokenArray = new AnalyzedTokenReadings[tokens.size()];
+    int toArrayCount = 0;
+    int startPos = 0;
+    for (AnalyzedTokenReadings posTag : aTokens) {
+      posTag.setStartPos(startPos);
+      tokenArray[toArrayCount++] = posTag;
+      startPos += posTag.getToken().length();
+    }
+
+    int numTokens = aTokens.size();
+    int posFix = 0;
+    for (int i = 0; i < numTokens; i++) {
+      if (i > 0) {
+        aTokens.get(i).setWhitespaceBefore(aTokens.get(i - 1).getToken());
+        aTokens.get(i).setStartPos(aTokens.get(i).getStartPos() + posFix);
+        aTokens.get(i).setPosFix(posFix);
+      }
+    }
+    if (DEBUG_MODE) {
+      WtMessageHandler.printToLogFile("LtSpellChecker: getAnalyzedSentence: tokenArray length: " + tokenArray.length);
+    }
+    return new AnalyzedSentence(tokenArray);
+  }
+
   /**
    * Convert list of suggestions to array and reduce it size
    */
