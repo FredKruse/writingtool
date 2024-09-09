@@ -585,9 +585,9 @@ public class WtAiDetectionRule extends TextLevelRule {
     }
     if (first.length() == second.length()) {
       return hasAllChars (first, second, 1);
-    } else if (first.length() + 1 == second.length()) {
-      return hasAllChars (first, second, 0);
     } else if (first.length() == second.length() + 1) {
+      return hasAllChars (first, second, 0);
+    } else if (first.length() + 1 == second.length()) {
       return hasAllChars (second, first, 0);
     }
     return false;

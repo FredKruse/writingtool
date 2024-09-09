@@ -18,8 +18,6 @@
  */
 package org.writingtool;
 
-import com.sun.star.linguistic2.SingleProofreadingError;
-
 import java.util.Comparator;
 
 /**
