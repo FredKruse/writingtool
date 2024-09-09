@@ -1521,7 +1521,9 @@ public class WtSingleDocument {
     if (overlaps.isEmpty()) {
       return errors;
     }
-//    WtMessageHandler.printToLogFile("overlaps: " + overlaps.size() + ", filterOverlap: " + filterOverlap);
+    if (debugMode > 0) {
+      WtMessageHandler.printToLogFile("overlaps: " + overlaps.size() + ", filterOverlap: " + filterOverlap);
+    }
     List<WtProofreadingError> filteredErrors = new ArrayList<>();
     if (!filterOverlap) {
       for (int i = 0; i < overlaps.size(); i++) {
@@ -1578,8 +1580,10 @@ public class WtSingleDocument {
           filteredErrors.add(error1);
         }
       }
-      for (int i : filtered) {
-        WtMessageHandler.printToLogFile("Filtered Rule: " + errors[i].aRuleIdentifier);
+      if (debugMode > 0) {
+        for (int i : filtered) {
+          WtMessageHandler.printToLogFile("Filtered Rule: " + errors[i].aRuleIdentifier);
+        }
       }
     }
     for(int i = 0; i < errors.length; i++) {
