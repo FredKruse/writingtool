@@ -43,10 +43,9 @@ import org.writingtool.tools.WtOfficeTools.DocumentType;
 
 import com.sun.star.lang.Locale;
 import com.sun.star.lang.XComponent;
-import com.sun.star.linguistic2.SingleProofreadingError;
 
 /**
- * Class to store the Text of a LO document (document cache)
+ * Class to store the Text WtProofreadingErrorent cache)
  * 
  * @since 5.0
  * @author Fred Kruse
@@ -1151,7 +1150,7 @@ public class WtDocumentCache implements Serializable {
     for (int i = 0; i < paragraphs.size(); i++) {
       if (isSingleParagraph_intern(i)) {
         for (int n = 1; n < paragraphsCache.size(); n++) {
-          paragraphsCache.get(n).put(i, new SingleProofreadingError[0]);
+          paragraphsCache.get(n).put(i, new WtProofreadingError[0]);
         }
       }
     }
@@ -1165,7 +1164,7 @@ public class WtDocumentCache implements Serializable {
     try {
       if (isSingleParagraph_intern(numberFlatParagraph)) {
         for (int n = 1; n < paragraphsCache.size(); n++) {
-          paragraphsCache.get(n).put(numberFlatParagraph, new SingleProofreadingError[0]);
+          paragraphsCache.get(n).put(numberFlatParagraph, new WtProofreadingError[0]);
         }
         return true;
       } else {

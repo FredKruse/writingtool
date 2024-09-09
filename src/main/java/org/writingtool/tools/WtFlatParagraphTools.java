@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
+import org.writingtool.WtProofreadingError;
+import org.writingtool.WtPropertyValue;
 import org.writingtool.WtSingleCheck.SentenceErrors;
 
 import com.sun.star.beans.Property;
@@ -35,7 +37,6 @@ import com.sun.star.container.XStringKeyMap;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.Locale;
 import com.sun.star.lang.XComponent;
-import com.sun.star.linguistic2.SingleProofreadingError;
 import com.sun.star.text.TextMarkupType;
 import com.sun.star.text.XFlatParagraph;
 import com.sun.star.text.XFlatParagraphIterator;
@@ -863,17 +864,17 @@ public class WtFlatParagraphTools {
       int paraLen = flatPara.getText().length();
       for (SentenceErrors errors : errorList) {
         XStringKeyMap props;
-        for (SingleProofreadingError pError : errors.sentenceErrors) {
+        for (WtProofreadingError pError : errors.sentenceErrors) {
           if (pError.nErrorStart < paraLen - 1) {
             props = flatPara.getMarkupInfoContainer();
-            PropertyValue[] properties = pError.aProperties;
+            WtPropertyValue[] properties = pError.aProperties;
             int color = -1;
             short type = -1;
-            for (PropertyValue property : properties) {
-              if ("LineColor".equals(property.Name)) {
-                color = (int) property.Value;
-              } else if ("LineType".equals(property.Name)) {
-                type = (short) property.Value;
+            for (WtPropertyValue property : properties) {
+              if ("LineColor".equals(property.name)) {
+                color = (int) property.value;
+              } else if ("LineType".equals(property.name)) {
+                type = (short) property.value;
               }
             }
             if (color >= 0) {

@@ -43,11 +43,8 @@ import org.writingtool.tools.WtOfficeTools;
 import org.writingtool.tools.WtOfficeTools.DocumentType;
 import org.writingtool.tools.WtOfficeTools.LoErrorType;
 
-import com.sun.star.beans.PropertyState;
-import com.sun.star.beans.PropertyValue;
 import com.sun.star.lang.Locale;
 import com.sun.star.lang.XComponent;
-import com.sun.star.linguistic2.SingleProofreadingError;
 import com.sun.star.text.TextMarkupType;
 
 /**
@@ -123,11 +120,11 @@ public class WtSingleCheck {
   /**
    *   get the result for a check of a single document 
    */
-  public SingleProofreadingError[] getCheckResults(String paraText, int[] footnotePositions, Locale locale, WtLanguageTool lt, 
+  public WtProofreadingError[] getCheckResults(String paraText, int[] footnotePositions, Locale locale, WtLanguageTool lt, 
       int paraNum, int startOfSentence, boolean textIsChanged, int changeFrom, int changeTo, String lastSinglePara, 
       int lastChangedPara, LoErrorType errType) throws Throwable {
     if (isDisposed()) {
-      return new SingleProofreadingError[0];
+      return new WtProofreadingError[0];
     }
     if (docType == DocumentType.WRITER && !isIntern && lastChangedPara >= 0 && !useQueue) {
 //      if (docCursor == null) {
@@ -151,18 +148,18 @@ public class WtSingleCheck {
       paraText = docCache.getFlatParagraph(paraNum);
     }
 */
-    List<SingleProofreadingError[]> pErrors = checkTextRules(paraText, locale, footnotePositions, paraNum, 
+    List<WtProofreadingError[]> pErrors = checkTextRules(paraText, locale, footnotePositions, paraNum, 
                                                                       startOfSentence, lt, textIsChanged, isIntern, errType);
     if (config.useAiSupport() && config.aiAutoCorrect() && paraNum >= 0) {
       int startSentencePos = paragraphsCache.get(0).getStartSentencePosition(paraNum, startOfSentence);
       int endSentencePos = paragraphsCache.get(0).getNextSentencePosition(paraNum, startOfSentence);
-      SingleProofreadingError[] aiErrors = paragraphsCache.get(WtOfficeTools.CACHE_AI).getFromPara(paraNum, startSentencePos, endSentencePos, errType);
+      WtProofreadingError[] aiErrors = paragraphsCache.get(WtOfficeTools.CACHE_AI).getFromPara(paraNum, startSentencePos, endSentencePos, errType);
       if (aiErrors == null) {
         singleDocument.addAiQueueEntry(paraNum, textIsChanged);
       }
       pErrors.add(aiErrors);
     }
-    SingleProofreadingError[] errors = singleDocument.mergeErrors(pErrors, paraNum);
+    WtProofreadingError[] errors = singleDocument.mergeErrors(pErrors, paraNum);
     if (debugMode > 1) {
       WtMessageHandler.printToLogFile("SingleCheck: getCheckResults: paRes.aErrors.length: " + errors.length 
           + "; docID: " + singleDocument.getDocID());
@@ -213,7 +210,7 @@ public class WtSingleCheck {
         if (tPara.type < 0 || tPara.number < 0) {
           WtMessageHandler.printToLogFile("Error: doc cache problem: error cache(" + cacheNum 
               + ") set empty for nFpara = " + nFPara + "!");
-          paragraphsCache.get(cacheNum).put(nFPara, null, new SingleProofreadingError[0]);
+          paragraphsCache.get(cacheNum).put(nFPara, null, new WtProofreadingError[0]);
           oldCache = null;
           return;
         }
@@ -261,13 +258,13 @@ public class WtSingleCheck {
           endPos = textToCheck.length();
         }
         if (paragraphMatches == null || paragraphMatches.isEmpty() || lt == null) {
-          paragraphsCache.get(cacheNum).put(docCache.getFlatParagraphNumber(textPara), nextSentencePositions, new SingleProofreadingError[0]);
+          paragraphsCache.get(cacheNum).put(docCache.getFlatParagraphNumber(textPara), nextSentencePositions, new WtProofreadingError[0]);
           if (debugMode > 1) {
             WtMessageHandler.printToLogFile("SingleCheck: addParaErrorsToCache: Enter to para cache(" + cacheNum + "): Paragraph(" 
                 + docCache.getFlatParagraphNumber(textPara) + "): " + docCache.getTextParagraph(textPara) + "; Error number: 0");
           }
         } else {
-          List<SingleProofreadingError> errorList = new ArrayList<>();
+          List<WtProofreadingError> errorList = new ArrayList<>();
           int textPos = startPos;
           if (textPos < 0) textPos = 0;
           for (RuleMatch myRuleMatch : paragraphMatches) {
@@ -288,14 +285,14 @@ public class WtSingleCheck {
             }
           }
           if (!errorList.isEmpty()) {
-            paragraphsCache.get(cacheNum).put(docCache.getFlatParagraphNumber(textPara), nextSentencePositions, errorList.toArray(new SingleProofreadingError[0]));
+            paragraphsCache.get(cacheNum).put(docCache.getFlatParagraphNumber(textPara), nextSentencePositions, errorList.toArray(new WtProofreadingError[0]));
             if (debugMode > 1) {
               WtMessageHandler.printToLogFile("SingleCheck: addParaErrorsToCache: Enter to para cache(" + cacheNum + "): Paragraph(" 
                   + docCache.getFlatParagraphNumber(textPara) + "): " + docCache.getTextParagraph(textPara) 
                   + "; Error number: " + errorList.size());
             }
           } else {
-            paragraphsCache.get(cacheNum).put(docCache.getFlatParagraphNumber(textPara), nextSentencePositions, new SingleProofreadingError[0]);
+            paragraphsCache.get(cacheNum).put(docCache.getFlatParagraphNumber(textPara), nextSentencePositions, new WtProofreadingError[0]);
             if (debugMode > 1) {
               WtMessageHandler.printToLogFile("SingleCheck: addParaErrorsToCache: Enter to para cache(" + cacheNum + "): Paragraph(" 
                   + docCache.getFlatParagraphNumber(textPara) + "): " + docCache.getTextParagraph(textPara) + "; Error number: 0");
@@ -365,7 +362,8 @@ public class WtSingleCheck {
       List <TextParagraph> toRemarkTextParas = new ArrayList<>();
       for (int i = 0; i < changedParas.size(); i++) {
         if (!singleDocument.isRunning(i)) {
-          List<SentenceErrors> sentencesErrors = getSentencesErrosAsList(changedParas.get(i), lt, LoErrorType.GRAMMAR, true);
+          List<SentenceErrors> sentencesErrors = getSentencesErrosAsList(changedParas.get(i), 
+              lt, LoErrorType.GRAMMAR, config.filterOverlappingMatches());
           changedParasMap.put(changedParas.get(i), sentencesErrors);
           if (debugMode > 1) {
             String message = "SingleCheck: remarkChangedParagraphs: Mark errors: Paragraph: " + changedParas.get(i) 
@@ -434,9 +432,9 @@ public class WtSingleCheck {
    * different caches are supported for check of different number of paragraphs at once 
    * (for different kinds of text level rules)
    */
-  private List<SingleProofreadingError[]> checkTextRules( String paraText, Locale locale, int[] footnotePos, int paraNum, 
+  private List<WtProofreadingError[]> checkTextRules( String paraText, Locale locale, int[] footnotePos, int paraNum, 
       int startSentencePos, WtLanguageTool lt, boolean textIsChanged, boolean isIntern, LoErrorType errType) throws Throwable{
-    List<SingleProofreadingError[]> pErrors = new ArrayList<>();
+    List<WtProofreadingError[]> pErrors = new ArrayList<>();
     if (isDisposed()) {
       return pErrors;
     }
@@ -485,7 +483,7 @@ public class WtSingleCheck {
             }
           } 
         } else {
-          pErrors.add(new SingleProofreadingError[0]);
+          pErrors.add(new WtProofreadingError[0]);
         }
       }
       lt.reactivateTextRules();
@@ -519,11 +517,11 @@ public class WtSingleCheck {
    * check the text level rules associated with a given cache (cacheNum)
    */
   @Nullable
-  public SingleProofreadingError[] checkParaRules(String paraText, Locale locale, int[] footnotePos, int nFPara, int sentencePos, 
+  public WtProofreadingError[] checkParaRules(String paraText, Locale locale, int[] footnotePos, int nFPara, int sentencePos, 
           WtLanguageTool lt, int cacheNum, int parasToCheck, boolean textIsChanged, boolean isIntern, LoErrorType errType) {
 
     List<RuleMatch> paragraphMatches;
-    SingleProofreadingError[] pErrors = null;
+    WtProofreadingError[] pErrors = null;
     int startSentencePos = 0;
     int endSentencePos = 0;
     try {
@@ -539,7 +537,7 @@ public class WtSingleCheck {
           pErrors = paragraphsCache.get(cacheNum).getFromPara(nFPara, startSentencePos, endSentencePos, errType);
           if (debugMode > 0 && pErrors != null) {
             String eInfo = ", ";
-            for (SingleProofreadingError error : pErrors) {
+            for (WtProofreadingError error : pErrors) {
               eInfo += "(" + error.nErrorStart + "/" + error.nErrorLength + "), ";
             }
             WtMessageHandler.printToLogFile("SingleCheck: checkParaRules: Para: " + nFPara + "; pErrors from cache(" + cacheNum + "): " + pErrors.length
@@ -586,13 +584,13 @@ public class WtSingleCheck {
           return null;
         }
         if (paragraphMatches == null || paragraphMatches.isEmpty()) {
-          paragraphsCache.get(cacheNum).put(nFPara, nextSentencePositions, new SingleProofreadingError[0]);
+          paragraphsCache.get(cacheNum).put(nFPara, nextSentencePositions, new WtProofreadingError[0]);
           if (debugMode > 1) {
             WtMessageHandler.printToLogFile("SingleCheck: checkParaRules: Enter " + (isMultiLingual ? "only para " : " ") + "errors to cache(" 
                 + cacheNum + "): Paragraph(" + nFPara + "): " + paraText + "; Error number: " + 0);
           }
         } else {
-          List<SingleProofreadingError> errorList = new ArrayList<>();
+          List<WtProofreadingError> errorList = new ArrayList<>();
           for (RuleMatch myRuleMatch : paragraphMatches) {
             if (isCorrectRuleMatch(myRuleMatch, paraText, lt.getLanguage())) {
               int toPos = myRuleMatch.getToPos();
@@ -608,13 +606,13 @@ public class WtSingleCheck {
               WtMessageHandler.printToLogFile("SingleCheck: checkParaRules: Enter " + (isMultiLingual ? "only para " : " ") + "errors to cache(" 
                   + cacheNum + "): Paragraph(" + nFPara + "): " + paraText + "; Error number: " + errorList.size());
             }
-            paragraphsCache.get(cacheNum).put(nFPara, nextSentencePositions, errorList.toArray(new SingleProofreadingError[0]));
+            paragraphsCache.get(cacheNum).put(nFPara, nextSentencePositions, errorList.toArray(new WtProofreadingError[0]));
           } else {
             if (debugMode > 1) {
               WtMessageHandler.printToLogFile("SingleCheck: checkParaRules: Enter " + (isMultiLingual ? "only para " : " ") + "errors to cache(" 
                   + cacheNum + "): Paragraph(" + nFPara + "): " + nFPara + "): " + paraText + "; Error number: " + 0);
             }
-            paragraphsCache.get(cacheNum).put(nFPara, nextSentencePositions, new SingleProofreadingError[0]);
+            paragraphsCache.get(cacheNum).put(nFPara, nextSentencePositions, new WtProofreadingError[0]);
           }
         }
         startSentencePos = paragraphsCache.get(cacheNum).getStartSentencePosition(nFPara, sentencePos);
@@ -660,14 +658,20 @@ public class WtSingleCheck {
   /**
    * Creates a SingleGrammarError object for use in LO/OO.
    */
-  public static SingleProofreadingError createOOoError(RuleMatch ruleMatch, int startIndex, int[] footnotes,
+  public static WtProofreadingError createOOoError(RuleMatch ruleMatch, int startIndex, int[] footnotes,
       Language docLanguage, WtConfiguration config) {
-    SingleProofreadingError aError = new SingleProofreadingError();
+    WtProofreadingError aError = new WtProofreadingError();
     if (ruleMatch.getRule().isDictionaryBasedSpellingRule()) {
       aError.nErrorType = TextMarkupType.SPELLCHECK;
     } else {
       aError.nErrorType = TextMarkupType.PROOFREADING;
     }
+    if (ruleMatch.getRule().isDefaultOff()) {
+      aError.bDefaultRule = false;
+    } else {
+      aError.bDefaultRule = true;
+    }
+    
     // the API currently has no support for formatting text in comments
     String msg = ruleMatch.getMessage();
     if (docLanguage != null) {
@@ -766,15 +770,15 @@ public class WtSingleCheck {
       //  handle should always be -1
       //  property state should always be PropertyState.DIRECT_VALUE
       //  otherwise result cache handling has to be adapted
-      PropertyValue[] propertyValues = new PropertyValue[nDim];
+      WtPropertyValue[] propertyValues = new WtPropertyValue[nDim];
       int n = 0;
       if (url != null) {
-        propertyValues[n] = new PropertyValue("FullCommentURL", -1, url.toString(), PropertyState.DIRECT_VALUE);
+        propertyValues[n] = new WtPropertyValue("FullCommentURL", url.toString());
         n++;
       }
       if (ruleMatch.getRule().isDictionaryBasedSpellingRule()) {
         int ucolor = Color.red.getRGB() & 0xFFFFFF;
-        propertyValues[n] = new PropertyValue("LineColor", -1, ucolor, PropertyState.DIRECT_VALUE);
+        propertyValues[n] = new WtPropertyValue("LineColor", ucolor);
         n++;
 /*        
       } else if (ruleMatch.getRule() instanceof WtAiDetectionRule) {
@@ -790,18 +794,18 @@ public class WtSingleCheck {
       } else {
         if (underlineColor != Color.blue) {
           int ucolor = underlineColor.getRGB() & 0xFFFFFF;
-          propertyValues[n] = new PropertyValue("LineColor", -1, ucolor, PropertyState.DIRECT_VALUE);
+          propertyValues[n] = new WtPropertyValue("LineColor", ucolor);
           n++;
         }
       }
       if (underlineType != WtConfiguration.UNDERLINE_WAVE) {
-        propertyValues[n] = new PropertyValue("LineType", -1, underlineType, PropertyState.DIRECT_VALUE);
+        propertyValues[n] = new WtPropertyValue("LineType", underlineType);
       } else if (config.markSingleCharBold() && aError.nErrorLength == 1) {
-        propertyValues[n] = new PropertyValue("LineType", -1, WtConfiguration.UNDERLINE_BOLDWAVE, PropertyState.DIRECT_VALUE);
+        propertyValues[n] = new WtPropertyValue("LineType", WtConfiguration.UNDERLINE_BOLDWAVE);
       }
       aError.aProperties = propertyValues;
     } else {
-        aError.aProperties = new PropertyValue[0];
+        aError.aProperties = new WtPropertyValue[0];
     }
     return aError;
   }
@@ -892,10 +896,10 @@ public class WtSingleCheck {
   }
   
   /**
-   * Correct SingleProofreadingError by footnote positions
+   * Correct WtProofreadingError by footnote positions
    * footnotes before is the sum of all footnotes before the checked paragraph
    */
-  public static SingleProofreadingError correctRuleMatchWithFootnotes(SingleProofreadingError pError, int[] footnotes, List<Integer> deletedChars) {
+  public static WtProofreadingError correctRuleMatchWithFootnotes(WtProofreadingError pError, int[] footnotes, List<Integer> deletedChars) {
     if (deletedChars == null || deletedChars.isEmpty()) {
       if (footnotes == null || footnotes.length == 0) {
         return pError;
@@ -947,7 +951,8 @@ public class WtSingleCheck {
   /**
    * get all errors of a Paragraph as list
    */
-  private List<SentenceErrors> getSentencesErrosAsList(int numberOfParagraph, WtLanguageTool lt, LoErrorType errType, boolean noOverlap) {
+  private List<SentenceErrors> getSentencesErrosAsList(int numberOfParagraph, WtLanguageTool lt, 
+            LoErrorType errType, boolean filterOverlap) {
     List<SentenceErrors> sentenceErrors = new ArrayList<SentenceErrors>();
     if (!isDisposed()) {
       CacheEntry entry = paragraphsCache.get(0).getCacheEntry(numberOfParagraph);
@@ -964,22 +969,20 @@ public class WtSingleCheck {
       }
       int startPosition = 0;
       if (nextSentencePositions.size() == 1) {
-        List<SingleProofreadingError[]> errorList = new ArrayList<SingleProofreadingError[]>();
+        List<WtProofreadingError[]> errorList = new ArrayList<WtProofreadingError[]>();
         for (WtResultCache cache : paragraphsCache) {
           errorList.add(cache.getMatches(numberOfParagraph, errType));
         }
         sentenceErrors.add(new SentenceErrors(startPosition, nextSentencePositions.get(0), 
-            (noOverlap ? singleDocument.filterOverlappingErrors(singleDocument.mergeErrors(errorList, numberOfParagraph)) :
-            singleDocument.mergeErrors(errorList, numberOfParagraph))));
+              singleDocument.filterOverlappingErrors(singleDocument.mergeErrors(errorList, numberOfParagraph), filterOverlap)));
       } else {
         for (int nextPosition : nextSentencePositions) {
-          List<SingleProofreadingError[]> errorList = new ArrayList<SingleProofreadingError[]>();
+          List<WtProofreadingError[]> errorList = new ArrayList<WtProofreadingError[]>();
           for (WtResultCache cache : paragraphsCache) {
             errorList.add(cache.getFromPara(numberOfParagraph, startPosition, nextPosition, errType));
           }
           sentenceErrors.add(new SentenceErrors(startPosition, nextPosition, 
-              (noOverlap ? singleDocument.filterOverlappingErrors(singleDocument.mergeErrors(errorList, numberOfParagraph)) :
-                singleDocument.mergeErrors(errorList, numberOfParagraph))));
+              singleDocument.filterOverlappingErrors(singleDocument.mergeErrors(errorList, numberOfParagraph), filterOverlap)));
           startPosition = nextPosition;
         }
       }
@@ -993,9 +996,9 @@ public class WtSingleCheck {
   public static class SentenceErrors {
     public final int sentenceStart;
     public final int sentenceEnd;
-    public final SingleProofreadingError[] sentenceErrors;
+    public final WtProofreadingError[] sentenceErrors;
     
-    public SentenceErrors(int start, int end, SingleProofreadingError[] errors) {
+    public SentenceErrors(int start, int end, WtProofreadingError[] errors) {
       sentenceStart = start;
       sentenceEnd = end;
       sentenceErrors = errors;

@@ -25,10 +25,10 @@ import java.util.Comparator;
 /**
  * A simple comparator for sorting errors by their position.
  */
-public class WtErrorPositionComparator implements Comparator<SingleProofreadingError> {
+public class WtErrorPositionComparator implements Comparator<WtProofreadingError> {
 
   @Override
-  public int compare(SingleProofreadingError match1, SingleProofreadingError match2) {
+  public int compare(WtProofreadingError match1, WtProofreadingError match2) {
     int error1pos = match1.nErrorStart;
     int error2pos = match2.nErrorStart;
     if (match2.nErrorStart == match1.nErrorStart) {

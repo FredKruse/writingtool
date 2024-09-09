@@ -40,6 +40,8 @@ import org.writingtool.WtResultCache;
 import org.writingtool.WtSingleCheck;
 import org.writingtool.WtSingleDocument;
 import org.writingtool.WtLanguageTool;
+import org.writingtool.WtProofreadingError;
+import org.writingtool.WtPropertyValue;
 import org.writingtool.WtDocumentCache.TextParagraph;
 import org.writingtool.WtDocumentsHandler.WaitDialogThread;
 import org.writingtool.WtResultCache.CacheEntry;
@@ -50,10 +52,7 @@ import org.writingtool.tools.WtMessageHandler;
 import org.writingtool.tools.WtOfficeTools;
 import org.writingtool.tools.WtOfficeTools.LoErrorType;
 
-import com.sun.star.beans.PropertyState;
-import com.sun.star.beans.PropertyValue;
 import com.sun.star.lang.Locale;
-import com.sun.star.linguistic2.SingleProofreadingError;
 import com.sun.star.text.TextMarkupType;
 
 /**
@@ -251,9 +250,9 @@ public class WtStatAnCache {
   /**
    * Merge errors from different checks (paragraphs and sentences)
    */
-  private SingleProofreadingError[] mergeErrors(List<SingleProofreadingError[]> pErrors, 
-      SingleProofreadingError[] statAnErrors, String statAnRuleId, int nPara) {
-    SingleProofreadingError[] errorArray = document.mergeErrors(pErrors, nPara);
+  private WtProofreadingError[] mergeErrors(List<WtProofreadingError[]> pErrors, 
+      WtProofreadingError[] statAnErrors, String statAnRuleId, int nPara) {
+    WtProofreadingError[] errorArray = document.mergeErrors(pErrors, nPara);
     if (debugMode) {
       WtMessageHandler.printToLogFile("StatAnCache: mergeErrors: nPara: " + nPara + ", statAnRuleId: " 
           + (statAnRuleId == null ? "null" : statAnRuleId));
@@ -289,10 +288,10 @@ public class WtStatAnCache {
         && numberOfParagraph >= 0 && numberOfParagraph < docCache.size()) {
       nextSentencePositions = WtSingleCheck.getNextSentencePositions(docCache.getFlatParagraph(numberOfParagraph), lt);
     }
-    SingleProofreadingError[] sErrors = null;
+    WtProofreadingError[] sErrors = null;
     int startPosition = 0;
     if (nextSentencePositions.size() == 1) {
-      List<SingleProofreadingError[]> errorList = new ArrayList<SingleProofreadingError[]>();
+      List<WtProofreadingError[]> errorList = new ArrayList<WtProofreadingError[]>();
       for (WtResultCache cache : paragraphsCache) {
         errorList.add(cache.getMatches(numberOfParagraph, LoErrorType.GRAMMAR));
       }
@@ -304,7 +303,7 @@ public class WtStatAnCache {
           mergeErrors(errorList, sErrors, sRuleId, numberOfParagraph)));
     } else {
       for (int nextPosition : nextSentencePositions) {
-        List<SingleProofreadingError[]> errorList = new ArrayList<SingleProofreadingError[]>();
+        List<WtProofreadingError[]> errorList = new ArrayList<WtProofreadingError[]>();
         for (WtResultCache cache : paragraphsCache) {
           errorList.add(cache.getFromPara(numberOfParagraph, startPosition, nextPosition, LoErrorType.GRAMMAR));
         }
@@ -361,7 +360,7 @@ public class WtStatAnCache {
       return uRule.isRelevantParagraph(nTPara);
     } else {
       int nFPara = this.getNumFlatParagraph(nTPara);
-      SingleProofreadingError[] sErrors = statAnCache.getSafeMatches(nFPara);
+      WtProofreadingError[] sErrors = statAnCache.getSafeMatches(nFPara);
       if (sErrors == null || sErrors.length == 0) {
         return false;
       }
@@ -395,31 +394,31 @@ public class WtStatAnCache {
   }
   
   /**
-   * create an array of SingleProofreadingErrors from an array of rule matches
+   * create an array of WtProofreadingErrors from an array of rule matches
    */
-  public SingleProofreadingError[] createLoErrors(RuleMatch[] ruleMatches) {
+  public WtProofreadingError[] createLoErrors(RuleMatch[] ruleMatches) {
     if (ruleMatches == null || ruleMatches.length == 0) {
-      return new SingleProofreadingError[0];
+      return new WtProofreadingError[0];
     }
-    SingleProofreadingError[] errors = new SingleProofreadingError[ruleMatches.length];
+    WtProofreadingError[] errors = new WtProofreadingError[ruleMatches.length];
     for (int i = 0; i < ruleMatches.length; i++) {
       errors[i] = createLoError(ruleMatches[i]);
     }
     return errors;
   }
   
-  public SingleProofreadingError[] createLoErrors(List<RuleMatch> ruleMatches) {
+  public WtProofreadingError[] createLoErrors(List<RuleMatch> ruleMatches) {
     if (ruleMatches == null || ruleMatches.size() == 0) {
-      return new SingleProofreadingError[0];
+      return new WtProofreadingError[0];
     }
-    SingleProofreadingError[] errors = new SingleProofreadingError[ruleMatches.size()];
+    WtProofreadingError[] errors = new WtProofreadingError[ruleMatches.size()];
     for (int i = 0; i < ruleMatches.size(); i++) {
       errors[i] = createLoError(ruleMatches.get(i));
     }
     return errors;
   }
   
-  private SingleProofreadingError[] addPropertiesToErrors(SingleProofreadingError[] errors, short lineType, Color lineColor) {
+  private WtProofreadingError[] addPropertiesToErrors(WtProofreadingError[] errors, short lineType, Color lineColor) {
     if (errors == null) {
       return null;
     }
@@ -430,20 +429,20 @@ public class WtStatAnCache {
   }
 
   
-  private SingleProofreadingError addPropertiesToError(SingleProofreadingError error, short lineType, Color lineColor) {
+  private WtProofreadingError addPropertiesToError(WtProofreadingError error, short lineType, Color lineColor) {
     int ucolor = lineColor.getRGB() & 0xFFFFFF;
-    PropertyValue[] propertyValues = new PropertyValue[2];
-    propertyValues[0] = new PropertyValue("LineColor", -1, ucolor, PropertyState.DIRECT_VALUE);
-    propertyValues[1] = new PropertyValue("LineType", -1, lineType, PropertyState.DIRECT_VALUE);
+    WtPropertyValue[] propertyValues = new WtPropertyValue[2];
+    propertyValues[0] = new WtPropertyValue("LineColor", ucolor);
+    propertyValues[1] = new WtPropertyValue("LineType", lineType);
     error.aProperties = propertyValues;
     return error;
   }
   
   /**
-   * create a SingleProofreadingError from a rule match
+   * create a WtProofreadingError from a rule match
    */
-  private SingleProofreadingError createLoError(RuleMatch ruleMatch) {
-    SingleProofreadingError aError = new SingleProofreadingError();
+  private WtProofreadingError createLoError(RuleMatch ruleMatch) {
+    WtProofreadingError aError = new WtProofreadingError();
     aError.nErrorType = TextMarkupType.PROOFREADING;
     // the API currently has no support for formatting text in comments
     String msg = ruleMatch.getMessage();
@@ -479,10 +478,10 @@ public class WtStatAnCache {
   }
 
   /**
-   * create a SingleProofreadingError from necessary data
+   * create a WtProofreadingError from necessary data
    */
-  public SingleProofreadingError createLoError(int errorStart, int errorLength, String ruleId, String msg, String[] allSuggestions) {
-    SingleProofreadingError aError = new SingleProofreadingError();
+  public WtProofreadingError createLoError(int errorStart, int errorLength, String ruleId, String msg, String[] allSuggestions) {
+    WtProofreadingError aError = new WtProofreadingError();
     aError.nErrorType = TextMarkupType.PROOFREADING;
     // the API currently has no support for formatting text in comments
     Language docLanguage = lt.getLanguage();

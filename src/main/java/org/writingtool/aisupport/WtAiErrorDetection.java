@@ -28,6 +28,7 @@ import org.languagetool.JLanguageTool.ParagraphHandling;
 import org.languagetool.rules.RuleMatch;
 import org.writingtool.WtDocumentCache;
 import org.writingtool.WtLinguisticServices;
+import org.writingtool.WtProofreadingError;
 import org.writingtool.WtResultCache;
 import org.writingtool.WtSingleCheck;
 import org.writingtool.WtSingleDocument;
@@ -40,7 +41,6 @@ import org.writingtool.tools.WtOfficeTools.RemoteCheck;
 import org.writingtool.tools.WtViewCursorTools;
 
 import com.sun.star.lang.Locale;
-import com.sun.star.linguistic2.SingleProofreadingError;
 
 /**
  * Class to detect errors by a AI API
@@ -232,21 +232,21 @@ public class WtAiErrorDetection {
     CacheEntry cEntry = aiCache.getCacheEntry(nFPara);
     boolean isMatch = cEntry != null && cEntry.errorArray.length > 0;
     if (ruleMatches == null || ruleMatches.length == 0) {
-      aiCache.put(nFPara, null, new SingleProofreadingError[0]);
+      aiCache.put(nFPara, null, new WtProofreadingError[0]);
     } else {
-      List<SingleProofreadingError> errorList = new ArrayList<>();
+      List<WtProofreadingError> errorList = new ArrayList<>();
       for (RuleMatch myRuleMatch : ruleMatches) {
         if (debugMode) {
           WtMessageHandler.printToLogFile("Rule match suggestion: " + myRuleMatch.getSuggestedReplacements().get(0));
         }
-        SingleProofreadingError error = WtSingleCheck.createOOoError(myRuleMatch, 0, footnotePos, null, config);
+        WtProofreadingError error = WtSingleCheck.createOOoError(myRuleMatch, 0, footnotePos, null, config);
         if (debugMode) {
           WtMessageHandler.printToLogFile("error suggestion: " + error.aSuggestions[0]);
         }
         errorList.add(WtSingleCheck.correctRuleMatchWithFootnotes(
             error, footnotePos, deletedChars));
       }
-      aiCache.put(nFPara, null, errorList.toArray(new SingleProofreadingError[0]));
+      aiCache.put(nFPara, null, errorList.toArray(new WtProofreadingError[0]));
     }
     if (isMatch) {
       List<Integer> changedParas = new ArrayList<>();

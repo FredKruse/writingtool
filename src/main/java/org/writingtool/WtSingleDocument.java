@@ -292,8 +292,8 @@ public class WtSingleDocument {
           //        This causes a hanging of LO when the request isn't answered immediately by a 0 matches result
           WtSingleCheck singleCheck = new WtSingleCheck(this, paragraphsCache, fixedLanguage,
               docLanguage, numParasToCheck, true, isMouseRequest, false);
-          paRes.aErrors = singleCheck.checkParaRules(paraText, locale, 
-                                        footnotePositions, -1, paRes.nStartOfSentencePosition, lt, 0, 0, false, false, errType);
+          paRes.aErrors = WtOfficeTools.wtErrorsToProofreading(singleCheck.checkParaRules(paraText, locale, 
+                            footnotePositions, -1, paRes.nStartOfSentencePosition, lt, 0, 0, false, false, errType));
           closeDocumentCursor();
           return paRes;
         }
@@ -392,8 +392,8 @@ public class WtSingleDocument {
 //      MessageHandler.printToLogFile("Single document: Check Paragraph: " + paraNum);
       WtSingleCheck singleCheck = new WtSingleCheck(this, paragraphsCache, fixedLanguage,
           docLanguage, numParasToCheck, isDialogRequest, isMouseRequest, isIntern);
-      paRes.aErrors = singleCheck.getCheckResults(paraText, footnotePositions, locale, lt, paraNum, 
-          paRes.nStartOfSentencePosition, textIsChanged, changeFrom, changeTo, lastSinglePara, lastChangedPara, errType);
+      paRes.aErrors = WtOfficeTools.wtErrorsToProofreading(singleCheck.getCheckResults(paraText, footnotePositions, locale, lt, paraNum, 
+          paRes.nStartOfSentencePosition, textIsChanged, changeFrom, changeTo, lastSinglePara, lastChangedPara, errType));
 //    MessageHandler.printToLogFile("Single document: Check Paragraph: " + paraNum + " done");
 //      MessageHandler.printToLogFile("Single document: Check Paragraph: resultCache for Para " + paraNum + ": "
 //          + (paragraphsCache.get(0).getCacheEntry(paraNum) == null 
@@ -440,7 +440,8 @@ public class WtSingleDocument {
       }
 */
       if (proofInfo == WtOfficeTools.PROOFINFO_MARK_PARAGRAPH) {
-        paRes.aErrors = filterOverlappingErrors(paRes.aErrors);
+        paRes.aErrors = WtOfficeTools.wtErrorsToProofreading(
+            filterOverlappingErrors(WtOfficeTools.proofreadingToWtErrors(paRes.aErrors), config.filterOverlappingMatches()));
       }
 
     } catch (Throwable t) {
@@ -1113,7 +1114,7 @@ public class WtSingleDocument {
    * test if the range is correct and change it if necessary
    * return null if there is no error or the range is correct
    */
-  public SingleProofreadingError getErrorAndChangeRange(ContextMenuExecuteEvent aEvent, boolean onlyNonRange) {
+  public WtProofreadingError getErrorAndChangeRange(ContextMenuExecuteEvent aEvent, boolean onlyNonRange) {
     try {
       if (disposed) {
         return null;
@@ -1121,7 +1122,7 @@ public class WtSingleDocument {
       WtViewCursorTools viewCursor = new WtViewCursorTools(xComponent);
       int y = docCache.getFlatParagraphNumber(viewCursor.getViewCursorParagraph());
       int x = viewCursor.getViewCursorCharacter();
-      SingleProofreadingError error = getErrorFromCache(y, x);
+      WtProofreadingError error = getErrorFromCache(y, x);
       if (error == null) {
         return null;
       }
@@ -1177,7 +1178,7 @@ public class WtSingleDocument {
     WtViewCursorTools viewCursor = new WtViewCursorTools(xComponent);
     int y = docCache.getFlatParagraphNumber(viewCursor.getViewCursorParagraph());
     int x = viewCursor.getViewCursorCharacter();
-    SingleProofreadingError error = getErrorFromCache(y, x);
+    WtProofreadingError error = getErrorFromCache(y, x);
     setIgnoredMatch (x, y, error.aRuleIdentifier, false);
     return docID;
   }
@@ -1210,7 +1211,7 @@ public class WtSingleDocument {
     WtViewCursorTools viewCursor = new WtViewCursorTools(xComponent);
     int y = docCache.getFlatParagraphNumber(viewCursor.getViewCursorParagraph());
     int x = viewCursor.getViewCursorCharacter();
-    SingleProofreadingError error = getErrorFromCache(y, x);
+    WtProofreadingError error = getErrorFromCache(y, x);
     Locale locale = docCache.getFlatParagraphLocale(y);
     mDocHandler.ignoreRule(error.aRuleIdentifier, locale);
   }
@@ -1235,7 +1236,7 @@ public class WtSingleDocument {
     WtViewCursorTools viewCursor = new WtViewCursorTools(xComponent);
     int y = docCache.getFlatParagraphNumber(viewCursor.getViewCursorParagraph());
     int x = viewCursor.getViewCursorCharacter();
-    SingleProofreadingError error = getErrorFromCache(y, x);
+    WtProofreadingError error = getErrorFromCache(y, x);
     Locale locale = error.nErrorType == TextMarkupType.SPELLCHECK ? docCache.getFlatParagraphLocale(y) : null;
     int len = error.nErrorType == TextMarkupType.SPELLCHECK ? error.nErrorLength : 0;
     setPermanentIgnoredMatch(error.nErrorStart, y, len, error.aRuleIdentifier, locale, false);
@@ -1359,20 +1360,20 @@ public class WtSingleDocument {
    * get an error out of the cache 
    * by the position of the error (flat paragraph number and number of character)
    */
-  private SingleProofreadingError getErrorFromCache(int nPara, int nChar) {
-    List<SingleProofreadingError> tmpErrors = new ArrayList<SingleProofreadingError>();
+  private WtProofreadingError getErrorFromCache(int nPara, int nChar) {
+    List<WtProofreadingError> tmpErrors = new ArrayList<WtProofreadingError>();
     if (nPara < 0 || nPara >= docCache.size()) {
       WtMessageHandler.printToLogFile("SingleDocument: getRuleIdFromCache(nPara = " + nPara + ", docCache.size() = " + docCache.size() + "): nPara out of range!");
       return null;
     }
     for (WtResultCache paraCache : paragraphsCache) {
-      List<SingleProofreadingError> tErrors = paraCache.getErrorsAtPosition(nPara, nChar);
+      List<WtProofreadingError> tErrors = paraCache.getErrorsAtPosition(nPara, nChar);
       if (tErrors != null) {
         tmpErrors.addAll(tErrors);
       }
     }
     if (tmpErrors.size() > 0) {
-      SingleProofreadingError[] errors = new SingleProofreadingError[tmpErrors.size()];
+      WtProofreadingError[] errors = new WtProofreadingError[tmpErrors.size()];
       for (int i = 0; i < tmpErrors.size(); i++) {
         errors[i] = tmpErrors.get(i);
       }
@@ -1380,6 +1381,12 @@ public class WtSingleDocument {
       if (debugMode > 0) {
         for (int i = 0; i < errors.length; i++) {
           WtMessageHandler.printToLogFile("SingleDocument: getRuleIdFromCache: Error[" + i + "]: ruleID: " + errors[i].aRuleIdentifier + ", Start = " + errors[i].nErrorStart + ", Length = " + errors[i].nErrorLength);
+        }
+      }
+      errors = filterOverlappingErrors(errors, config.filterOverlappingMatches());
+      for (int i = 0; i < errors.length; i++) {
+        if (nChar >= errors[i].nErrorStart && nChar < errors[i].nErrorStart + errors[i].nErrorLength) {
+          return errors[i];
         }
       }
       return errors[0];
@@ -1392,22 +1399,22 @@ public class WtSingleDocument {
   /**
    * Merge errors from different checks (paragraphs and sentences)
    */
-  public SingleProofreadingError[] mergeErrors(List<SingleProofreadingError[]> pErrors, int nPara) {
+  public WtProofreadingError[] mergeErrors(List<WtProofreadingError[]> pErrors, int nPara) {
     int errorCount = 0;
     if (pErrors != null) {
-      for (SingleProofreadingError[] pError : pErrors) {
+      for (WtProofreadingError[] pError : pErrors) {
         if (pError != null) {
           errorCount += pError.length;
         }
       }
     }
     if (errorCount == 0 || pErrors == null) {
-      return new SingleProofreadingError[0];
+      return new WtProofreadingError[0];
     }
-    SingleProofreadingError[] errorArray = new SingleProofreadingError[errorCount];
+    WtProofreadingError[] errorArray = new WtProofreadingError[errorCount];
     if (pErrors != null) {
       errorCount = 0;
-      for (SingleProofreadingError[] pError : pErrors) {
+      for (WtProofreadingError[] pError : pErrors) {
         if (pError != null) {
           arraycopy(pError, 0, errorArray, errorCount, pError.length);
           errorCount += pError.length;
@@ -1421,7 +1428,7 @@ public class WtSingleDocument {
   /**
    * Proofs if an error is equivalent
    */
-  private boolean isEquivalentError(SingleProofreadingError filteredError, SingleProofreadingError error) {
+  private boolean isEquivalentError(WtProofreadingError filteredError, WtProofreadingError error) {
     if (filteredError == null || error == null 
         || error.nErrorStart != filteredError.nErrorStart || error.nErrorLength != filteredError.nErrorLength) {
       return false;
@@ -1454,12 +1461,12 @@ public class WtSingleDocument {
   /**
    * Filter ignored errors (from ignore once and spell errors)
    */
-  private SingleProofreadingError[] filterIgnoredMatches (SingleProofreadingError[] unFilteredErrors, int nPara) {
+  private WtProofreadingError[] filterIgnoredMatches (WtProofreadingError[] unFilteredErrors, int nPara) {
     if ((!ignoredMatches.isEmpty() && ignoredMatches.containsParagraph(nPara)) || 
         (!permanentIgnoredMatches.isEmpty() && permanentIgnoredMatches.containsParagraph(nPara))){
-      SingleProofreadingError lastFilteredError = null;
-      List<SingleProofreadingError> filteredErrors = new ArrayList<>();
-      for (SingleProofreadingError error : unFilteredErrors) {
+      WtProofreadingError lastFilteredError = null;
+      List<WtProofreadingError> filteredErrors = new ArrayList<>();
+      for (WtProofreadingError error : unFilteredErrors) {
         if (ignoredMatches.isIgnored(error.nErrorStart, error.nErrorStart + error.nErrorLength, nPara, error.aRuleIdentifier) ||
             permanentIgnoredMatches.isIgnored(error.nErrorStart, error.nErrorStart + error.nErrorLength, nPara, error.aRuleIdentifier)) {
           lastFilteredError = error;
@@ -1471,40 +1478,40 @@ public class WtSingleDocument {
         WtMessageHandler.printToLogFile("SingleCheck: filterIgnoredMatches: unFilteredErrors.length: " + unFilteredErrors.length);
         WtMessageHandler.printToLogFile("SingleCheck: filterIgnoredMatches: filteredErrors.length: " + filteredErrors.size());
       }
-      return filteredErrors.toArray(new SingleProofreadingError[0]);
+      return filteredErrors.toArray(new WtProofreadingError[0]);
     }
     return unFilteredErrors;
   }
+
+  /**
+   * Is an overlapping error
+   */
+  private boolean isOverlappingError(WtProofreadingError error1, WtProofreadingError error2) {
+    return ((error1.nErrorStart >= error2.nErrorStart && error1.nErrorStart < error2.nErrorStart + error2.nErrorLength)
+        || (error2.nErrorStart >= error1.nErrorStart && error2.nErrorStart < error1.nErrorStart + error1.nErrorLength));
+  }
   
-  private static SingleProofreadingError duplicateSingleProofreadingError (SingleProofreadingError error) {
-    SingleProofreadingError duplicate = new SingleProofreadingError();
-    duplicate.aFullComment = error.aFullComment;
-    duplicate.aProperties= error.aProperties;
-    duplicate.aRuleIdentifier = error.aRuleIdentifier;
-    duplicate.aShortComment = error.aShortComment;
-    duplicate.aSuggestions = error.aSuggestions;
-    duplicate.nErrorLength = error.nErrorLength;
-    duplicate.nErrorStart = error.nErrorStart;
-    duplicate.nErrorType = error.nErrorType;
-    return duplicate;
+  /**
+   * change size of overlapping error1
+   */
+  private boolean isAiRule(WtProofreadingError error) {
+    return error.aRuleIdentifier.equals(WtOfficeTools.AI_GRAMMAR_RULE_ID);
   }
   
   /**
    * Filter overlapping errors
    * Splits overlapping errors
    */
-  public SingleProofreadingError[] filterOverlappingErrors (SingleProofreadingError[] errors) {
-//    MessageHandler.printToLogFile("errors: " + errors.length);
+  public WtProofreadingError[] filterOverlappingErrors (WtProofreadingError[] errors, boolean filterOverlap) {
     if (errors == null || errors.length < 2) {
       return errors;
     }
     List<Integer> overlaps = new ArrayList<>();
     for(int i = 0; i < errors.length; i++) {
-      SingleProofreadingError error1 = errors[i];
+      WtProofreadingError error1 = errors[i];
       for(int j = 0; j < errors.length; j++) {
-        SingleProofreadingError error2 = errors[j];
-        if (i != j && (error2.nErrorStart != error1.nErrorStart || error2.nErrorStart != error1.nErrorStart)
-            && error2.nErrorStart >= error1.nErrorStart && error2.nErrorStart < error1.nErrorStart + error1.nErrorLength) {
+        WtProofreadingError error2 = errors[j];
+        if (i != j && isOverlappingError(error1, error2)) {
           if (!overlaps.contains(i)) {
             overlaps.add(i);
           }
@@ -1514,54 +1521,73 @@ public class WtSingleDocument {
     if (overlaps.isEmpty()) {
       return errors;
     }
-//    MessageHandler.printToLogFile("overlaps: " + overlaps.size());
-//    for (int i : overlaps) {
-//      MessageHandler.printToLogFile("Rule: " + errors[i].aRuleIdentifier 
-//          + ", nStart: " + errors[i].nErrorStart + ", nLength: " + errors[i].nErrorLength);
-//    }
-//    MessageHandler.printToLogFile("");
-    List<SingleProofreadingError> filteredErrors = new ArrayList<>();
-    for (int i = 0; i < overlaps.size(); i++) {
-      int k = overlaps.get(i);
-      SingleProofreadingError error1 = duplicateSingleProofreadingError(errors[k]);
-      for(int j = 0; j < errors.length; j++) {
-        SingleProofreadingError error2 = errors[j];
-        if (k != j) {
-          if (error2.nErrorStart == error1.nErrorStart && error2.nErrorLength < error1.nErrorLength) {
-            error1.nErrorStart = error2.nErrorStart + error2.nErrorLength + 1;
-            error1.nErrorLength -= error1.nErrorStart;
-          } else if (error2.nErrorStart > error1.nErrorStart && error2.nErrorStart < error1.nErrorStart + error1.nErrorLength) {
-            if (error2.nErrorStart + error2.nErrorLength < error1.nErrorStart + error1.nErrorLength) {
-              SingleProofreadingError tmpError = duplicateSingleProofreadingError(error1);
-              error1.nErrorLength = error2.nErrorStart - error1.nErrorStart - 1;
-//              MessageHandler.printToLogFile("Add Error(1): Rule: " + error1.aRuleIdentifier 
-//                  + ", nStart: " + error1.nErrorStart + ", nLength: " + error1.nErrorLength);
-              filteredErrors.add(error1);
-              error1 = tmpError;
-              int diff = error2.nErrorStart + error2.nErrorLength - error1.nErrorStart;
-              error1.nErrorStart += (diff + 1);
+//    WtMessageHandler.printToLogFile("overlaps: " + overlaps.size() + ", filterOverlap: " + filterOverlap);
+    List<WtProofreadingError> filteredErrors = new ArrayList<>();
+    if (!filterOverlap) {
+      for (int i = 0; i < overlaps.size(); i++) {
+        int k = overlaps.get(i);
+        WtProofreadingError error1 = new WtProofreadingError(errors[k]);
+        for(int j = 0; j < errors.length; j++) {
+          WtProofreadingError error2 = errors[j];
+          if (k != j) {
+            if (error2.nErrorStart == error1.nErrorStart && error2.nErrorLength < error1.nErrorLength) {
+              int diff = error2.nErrorStart + error2.nErrorLength + 1 - error1.nErrorStart;
+              error1.nErrorStart += diff;
               error1.nErrorLength -= diff;
-            } else {
-              error1.nErrorLength = error2.nErrorStart - error1.nErrorStart - 1;
+            } else if (error2.nErrorStart > error1.nErrorStart && error2.nErrorStart < error1.nErrorStart + error1.nErrorLength) {
+              if (error2.nErrorStart + error2.nErrorLength < error1.nErrorStart + error1.nErrorLength) {
+                WtProofreadingError tmpError = new WtProofreadingError(error1);
+                error1.nErrorLength = error2.nErrorStart - error1.nErrorStart - 1;
+                filteredErrors.add(error1);
+                error1 = tmpError;
+                int diff = error2.nErrorStart + error2.nErrorLength - error1.nErrorStart;
+                error1.nErrorStart += (diff + 1);
+                error1.nErrorLength -= diff;
+              } else {
+                error1.nErrorLength = error2.nErrorStart - error1.nErrorStart - 1;
+              }
             }
           }
         }
+        filteredErrors.add(error1);
       }
-//      MessageHandler.printToLogFile("Add Error(2): Rule: " + error1.aRuleIdentifier 
-//          + ", nStart: " + error1.nErrorStart + ", nLength: " + error1.nErrorLength);
-      filteredErrors.add(error1);
+    } else {
+      List<Integer> filtered = new ArrayList<>();
+      for (int i = 0; i < overlaps.size(); i++) {
+        int k = overlaps.get(i);
+        if (!filtered.contains(k)) {
+          WtProofreadingError error1 = new WtProofreadingError(errors[k]);
+          for(int j = 0; j < overlaps.size(); j++) {
+            int l = overlaps.get(j);
+            WtProofreadingError error2 = errors[l];
+            if (k != l && isOverlappingError(error1, error2)) {
+              if (!error1.bDefaultRule && error2.bDefaultRule) {
+                filtered.add(k);
+                error1 = error2;
+              } else if (isAiRule(error1) && error2.bDefaultRule && error2.aSuggestions.length > 0) { 
+                filtered.add(k);
+                error1 = error2;
+              } else if (error1.aSuggestions.length < error2.aSuggestions.length) { 
+                filtered.add(k);
+                error1 = error2;
+              } else {
+                filtered.add(l);
+              }
+            }
+          }
+          filteredErrors.add(error1);
+        }
+      }
+      for (int i : filtered) {
+        WtMessageHandler.printToLogFile("Filtered Rule: " + errors[i].aRuleIdentifier);
+      }
     }
     for(int i = 0; i < errors.length; i++) {
       if (!overlaps.contains(i)) {
         filteredErrors.add(errors[i]);
       }
     }
-//    MessageHandler.printToLogFile("");
-//    for (SingleProofreadingError error : filteredErrors) {
-//      MessageHandler.printToLogFile("Rule: " + error.aRuleIdentifier 
-//          + ", nStart: " + error.nErrorStart + ", nLength: " + error.nErrorLength);
-//    }
-    return filteredErrors.toArray(new SingleProofreadingError[0]);
+    return filteredErrors.toArray(new WtProofreadingError[0]);
   }
 
   /**
@@ -1595,7 +1621,7 @@ public class WtSingleDocument {
         }
         for (SingleProofreadingError error : paRes.aErrors) {
           if (error.nErrorStart <= nChar && nChar < error.nErrorStart + error.nErrorLength) {
-            return new RuleDesc(paRes.aLocale, -1, error);
+            return new RuleDesc(paRes.aLocale, -1, new WtProofreadingError(error));
           }
         }
       }
@@ -1617,7 +1643,7 @@ public class WtSingleDocument {
       return getRuleIdFromCheck(x, viewCursor);
     }
     int y = docCache.getFlatParagraphNumber(viewCursor.getViewCursorParagraph());
-    SingleProofreadingError error = getErrorFromCache(y, x);
+    WtProofreadingError error = getErrorFromCache(y, x);
     if (error != null) {
       return new RuleDesc(docCache.getFlatParagraphLocale(y), y, error);
     }
@@ -1736,14 +1762,14 @@ public class WtSingleDocument {
    */
   ProofreadingResult getErrorsFromCache(int nFPara, ProofreadingResult paRes, 
                       String para, Locale locale, WtLanguageTool lt) throws IOException {
-    List<SingleProofreadingError[]> errors = new ArrayList<>();
+    List<WtProofreadingError[]> errors = new ArrayList<>();
     paRes.nStartOfSentencePosition = 0;
     paRes.nStartOfNextSentencePosition = para.length();
     paRes.nBehindEndOfSentencePosition = paRes.nStartOfNextSentencePosition;
     for (int cacheNum = 0; cacheNum < WtOfficeTools.NUMBER_CACHE; cacheNum++) {
       errors.add(paragraphsCache.get(cacheNum).getMatches(nFPara, LoErrorType.GRAMMAR));
     }
-    paRes.aErrors = mergeErrors(errors, nFPara);
+    paRes.aErrors = WtOfficeTools.wtErrorsToProofreading(mergeErrors(errors, nFPara));
     if (debugMode > 1) {
       WtMessageHandler.printToLogFile("SingleDocument: getErrorsFromCache: Sentence: start: " + paRes.nStartOfSentencePosition
           + ", end: " + paRes.nBehindEndOfSentencePosition + ", next: " + paRes.nStartOfNextSentencePosition 
@@ -1754,8 +1780,6 @@ public class WtSingleDocument {
     return paRes;
   }
   
-  
-
 /*    !!!  remove after tests   !!!
   private void addSynonyms(ProofreadingResult paRes, String para, Locale locale, SwJLanguageTool lt) throws IOException {
     LinguisticServices linguServices = mDocHandler.getLinguisticServices();
@@ -1839,9 +1863,9 @@ public class WtSingleDocument {
   public static class RuleDesc {
     String langCode;
     int nFPara;
-    SingleProofreadingError error;
+    WtProofreadingError error;
     
-    RuleDesc(Locale locale, int nFPara, SingleProofreadingError error) {
+    RuleDesc(Locale locale, int nFPara, WtProofreadingError error) {
       langCode = WtOfficeTools.localeToString(locale);
       this.nFPara = nFPara;
       this.error = error;
@@ -1851,26 +1875,27 @@ public class WtSingleDocument {
   /**
    * Add statistical analysis errors
    */
-  public static SingleProofreadingError[] addStatAnalysisErrors (SingleProofreadingError[] errors, 
-          SingleProofreadingError[] statAnErrors, String statAnRuleId) {
+  public static WtProofreadingError[] addStatAnalysisErrors (WtProofreadingError[] errors, 
+      WtProofreadingError[] statAnErrors, String statAnRuleId) {
     
-    List<SingleProofreadingError> errorList = new  ArrayList<>();
-    for (SingleProofreadingError error : statAnErrors) {
+    List<WtProofreadingError> errorList = new  ArrayList<>();
+    for (WtProofreadingError error : statAnErrors) {
       errorList.add(error);
     }
-    for (SingleProofreadingError error : errors) {
+    for (WtProofreadingError error : errors) {
       if (!error.aRuleIdentifier.equals(statAnRuleId)) {
         errorList.add(error);
       }
     }
-    return errorList.toArray(new SingleProofreadingError[errorList.size()]);
+    return errorList.toArray(new WtProofreadingError[errorList.size()]);
   }
   
   private void addStatAnalysisErrors(ProofreadingResult paRes, int nFPara) {
     if (statAnCache != null && statAnRuleId != null) {
-      SingleProofreadingError[] statAnErrors = statAnCache.getSafeMatches(nFPara);
+      WtProofreadingError[] statAnErrors = statAnCache.getSafeMatches(nFPara);
       if (statAnErrors != null && statAnErrors.length > 0) {
-        paRes.aErrors = addStatAnalysisErrors (paRes.aErrors, statAnErrors, statAnRuleId);
+        paRes.aErrors = WtOfficeTools.wtErrorsToProofreading(
+            addStatAnalysisErrors (WtOfficeTools.proofreadingToWtErrors(paRes.aErrors), statAnErrors, statAnRuleId));
       }
     }
   }

@@ -48,7 +48,6 @@ import com.sun.star.frame.XModel;
 import com.sun.star.lang.EventObject;
 import com.sun.star.lang.XComponent;
 import com.sun.star.lang.XMultiServiceFactory;
-import com.sun.star.linguistic2.SingleProofreadingError;
 import com.sun.star.text.XTextRange;
 import com.sun.star.ui.ActionTriggerSeparatorType;
 import com.sun.star.ui.ContextMenuExecuteEvent;
@@ -717,7 +716,9 @@ public class WtMenus {
               }
             }
             if (!isSpellError) {
-              document.getErrorAndChangeRange(aEvent, false);
+              if (!config.filterOverlappingMatches()) {
+                document.getErrorAndChangeRange(aEvent, false);
+              }
               addLTMenus(i, count, null, xContextMenu, xMenuElementFactory);
               if (document.getCurrentNumberOfParagraph() >= 0) {
                 props.setPropertyValue("CommandURL", LT_IGNORE_ONCE_COMMAND);
@@ -739,7 +740,7 @@ public class WtMenus {
         }
 
         //  Workaround for LO 24.x
-        SingleProofreadingError error = document.getErrorAndChangeRange(aEvent, true);
+        WtProofreadingError error = document.getErrorAndChangeRange(aEvent, true);
         if (error != null) {
           addLTMenus(0, count, error, xContextMenu, xMenuElementFactory);
           isRunning = false;
@@ -801,7 +802,7 @@ public class WtMenus {
       return ContextMenuInterceptorAction.IGNORED;
     }
     
-    private void addLTMenus(int n, int count, SingleProofreadingError error, XIndexContainer xContextMenu, 
+    private void addLTMenus(int n, int count, WtProofreadingError error, XIndexContainer xContextMenu, 
         XMultiServiceFactory xMenuElementFactory) throws Throwable {
       if (error != null) {
         for (int i = count - 1; i >= 0; i--) {

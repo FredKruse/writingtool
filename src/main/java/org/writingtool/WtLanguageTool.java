@@ -96,15 +96,15 @@ public class WtLanguageTool {
     } else if (isMultiThread) {
       lt = null;
       mlt = new MultiThreadedJLanguageToolLo(language, motherTongue, userConfig);
-      if (!config.filterOverlappingMatches()) {
+//      if (!config.filterOverlappingMatches()) {
         mlt.setCleanOverlappingMatches(false);
-      }
+//      }
       rlt = null;
     } else {
       lt = new JLanguageToolLo(language, motherTongue, null, userConfig);
-      if (!config.filterOverlappingMatches()) {
+//      if (!config.filterOverlappingMatches()) {
         lt.setCleanOverlappingMatches(false);
-      }
+//      }
       mlt = null;
       rlt = null;
     }

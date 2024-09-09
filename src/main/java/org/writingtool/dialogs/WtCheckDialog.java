@@ -83,6 +83,8 @@ import org.writingtool.WtDocumentsHandler;
 import org.writingtool.WtIgnoredMatches;
 import org.writingtool.WtLanguageTool;
 import org.writingtool.WtLinguisticServices;
+import org.writingtool.WtProofreadingError;
+import org.writingtool.WtPropertyValue;
 import org.writingtool.WtResultCache;
 import org.writingtool.WtSingleCheck;
 import org.writingtool.WtSingleDocument;
@@ -107,7 +109,6 @@ import com.sun.star.lang.Locale;
 import com.sun.star.lang.XComponent;
 import com.sun.star.lang.XMultiComponentFactory;
 import com.sun.star.linguistic2.ProofreadingResult;
-import com.sun.star.linguistic2.SingleProofreadingError;
 import com.sun.star.text.TextMarkupType;
 import com.sun.star.text.XFlatParagraph;
 import com.sun.star.text.XMarkingAccess;
@@ -461,15 +462,15 @@ public class WtCheckDialog extends Thread {
     Map<Integer, List<Integer>> replacePoints = new HashMap<Integer, List<Integer>>();
     int nLength = word.length();
     for (int n = 0; n < docCache.size(); n++) {
-      List<SingleProofreadingError[]> pErrors = new ArrayList<>();
+      List<WtProofreadingError[]> pErrors = new ArrayList<>();
       for (WtResultCache resultCache : document.getParagraphsCache()) {
         pErrors.add(resultCache.getSafeMatches(n));
       }
-      SingleProofreadingError[] errors = document.mergeErrors(pErrors, n);
+      WtProofreadingError[] errors = document.mergeErrors(pErrors, n);
       if (errors != null) {
         List<Integer> startPoints = null;
         for (int i = errors.length - 1; i >= 0; i--) {
-          SingleProofreadingError error = errors[i];
+          WtProofreadingError error = errors[i];
           if (nLength == error.nErrorLength && ruleID.equals(error.aRuleIdentifier)) {
             String sPara = docCache.getFlatParagraph(n);
             String errWord = sPara.substring(error.nErrorStart, error.nErrorStart + error.nErrorLength);
@@ -517,7 +518,7 @@ public class WtCheckDialog extends Thread {
       errType = LoErrorType.BOTH;
     }
 
-    SingleProofreadingError  error = getNextGrammatikOrSpellErrorInParagraph(x, nFPara, text, footnotePosition, locale, document, errType);
+    WtProofreadingError  error = getNextGrammatikOrSpellErrorInParagraph(x, nFPara, text, footnotePosition, locale, document, errType);
     if (error != null) {
       return new CheckError(locale, error);
     } else {
@@ -529,11 +530,11 @@ public class WtCheckDialog extends Thread {
    * Get the proofreading result from cache
    * @throws Throwable 
    */
-  SingleProofreadingError[] getErrorsFromCache(int nFPara) throws Throwable {
+  WtProofreadingError[] getErrorsFromCache(int nFPara) throws Throwable {
     int nWait = 0;
     boolean noNull = true;
     WtSingleDocument document = null;
-    List<SingleProofreadingError[]> errors = new ArrayList<>();
+    List<WtProofreadingError[]> errors = new ArrayList<>();
     while (nWait < TEST_LOOPS) {
       document = documents.getCurrentDocument();
 //      for (int cacheNum = 0; cacheNum < lt.getNumMinToCheckParas().size(); cacheNum++) {
@@ -541,7 +542,7 @@ public class WtCheckDialog extends Thread {
         if (!docCache.isAutomaticGenerated(nFPara, true) && ((cacheNum == WtOfficeTools.CACHE_SINGLE_PARAGRAPH 
                 || (lt.isSortedRuleForIndex(cacheNum) && !document.getDocumentCache().isSingleParagraph(nFPara)))
             || (cacheNum == WtOfficeTools.CACHE_AI && useAi))) {
-          SingleProofreadingError[] pErrors = document.getParagraphsCache().get(cacheNum).getSafeMatches(nFPara);
+          WtProofreadingError[] pErrors = document.getParagraphsCache().get(cacheNum).getSafeMatches(nFPara);
           //  Note: unsafe matches are needed to prevent the thread to get into a read lock
           if (pErrors == null) {
             noNull = false;
@@ -554,7 +555,7 @@ public class WtCheckDialog extends Thread {
             errors.add(pErrors);
           }
         } else {
-          errors.add(new SingleProofreadingError[0]);
+          errors.add(new WtProofreadingError[0]);
         }
       }
       if (noNull) {
@@ -578,9 +579,9 @@ public class WtCheckDialog extends Thread {
   /**
    * get a list of all spelling errors of the flat paragraph nPara
    */
-  public SingleProofreadingError[] getSpellErrors(int nPara, String text, Locale lang, WtSingleDocument document) throws Throwable {
+  public WtProofreadingError[] getSpellErrors(int nPara, String text, Locale lang, WtSingleDocument document) throws Throwable {
     try {
-      List<SingleProofreadingError> errorArray = new ArrayList<>();
+      List<WtProofreadingError> errorArray = new ArrayList<>();
       if (document == null) {
         return null;
       }
@@ -631,7 +632,7 @@ public class WtCheckDialog extends Thread {
                 linguServices = new WtLinguisticServices(xContext);
               }
               if (!sToken.contains(" ") && !linguServices.isCorrectSpell(sToken, locale)) {
-                SingleProofreadingError aError = new SingleProofreadingError();
+                WtProofreadingError aError = new WtProofreadingError();
                 if (debugMode) {
                   WtMessageHandler.printToLogFile("CheckDialog: getSpellErrors: Spell Error: Word: " + sToken 
                       + ", Start: " + nStart + ", End: " + nEnd + ", Token(" + i + "): " + tokens[i].getToken()
@@ -660,7 +661,7 @@ public class WtCheckDialog extends Thread {
         }
         pos = analyzedSentence.getCorrectedTextLength();
       }
-      return errorArray.toArray(new SingleProofreadingError[errorArray.size()]);
+      return errorArray.toArray(new WtProofreadingError[errorArray.size()]);
     } catch (Throwable t) {
       WtMessageHandler.showError(t);
     }
@@ -670,17 +671,17 @@ public class WtCheckDialog extends Thread {
   /**
    * Get the first grammatical or spell error in the flat paragraph y at or after character position x
    */
-  SingleProofreadingError getNextGrammatikOrSpellErrorInParagraph(int x, int nFPara, String text, int[] footnotePosition, 
+  WtProofreadingError getNextGrammatikOrSpellErrorInParagraph(int x, int nFPara, String text, int[] footnotePosition, 
       Locale locale, WtSingleDocument document, LoErrorType errType) throws Throwable {
     if (text == null || text.isEmpty() || x >= text.length() || !WtDocumentsHandler.hasLocale(locale)) {
       return null;
     }
     if (document.getDocumentType() == DocumentType.WRITER && documents.getTextLevelCheckQueue() != null && !documents.noLtSpeller()) {
-      SingleProofreadingError[] errors = getErrorsFromCache(nFPara);
+      WtProofreadingError[] errors = getErrorsFromCache(nFPara);
       if (errors == null) {
         return null;
       }
-      for (SingleProofreadingError error : errors) {
+      for (WtProofreadingError error : errors) {
         if (debugMode) {
           WtMessageHandler.printToLogFile("CheckDialog: getNextGrammatikErrorInParagraph: Start: " + error.nErrorStart + ", ID: " + error.aRuleIdentifier);
           if (error.nErrorType == TextMarkupType.SPELLCHECK) {
@@ -701,7 +702,7 @@ public class WtCheckDialog extends Thread {
             }
             if ((error.aSuggestions == null || error.aSuggestions.length == 0) 
                 && documents.getLinguisticServices().isThesaurusRelevantRule(error.aRuleIdentifier)) {
-              error.aSuggestions = document.getSynonymArray(error, text, locale, lt, false);
+              error.aSuggestions = document.getSynonymArray(error.toSingleProofreadingError(), text, locale, lt, false);
             } else if (error.nErrorType == TextMarkupType.SPELLCHECK) {
               List<String> suggestionList = new ArrayList<>();
               for (String suggestion : error.aSuggestions) {
@@ -753,19 +754,19 @@ public class WtCheckDialog extends Thread {
             }
           }
           paRes = document.getCheckResults(text, locale, paRes, propertyValues, false, lt, nFPara, errType);
-          SingleProofreadingError[] spellErrors = null;
-          SingleProofreadingError[] allErrors = null;
+          WtProofreadingError[] spellErrors = null;
+          WtProofreadingError[] allErrors = null;
           if (checkType != 3 && errType != LoErrorType.GRAMMAR) {
             spellErrors = getSpellErrors(nFPara, text, locale, document);
           }
           if (paRes == null || paRes.aErrors == null || paRes.aErrors.length == 0) {
             allErrors = spellErrors;
           } else if (spellErrors == null || spellErrors.length == 0) {
-            allErrors = paRes.aErrors;
+            allErrors = WtOfficeTools.proofreadingToWtErrors(paRes.aErrors);
           } else {
-            List<SingleProofreadingError[]> errorList = new ArrayList<>();
+            List<WtProofreadingError[]> errorList = new ArrayList<>();
             errorList.add(spellErrors);
-            errorList.add(paRes.aErrors);
+            errorList.add(WtOfficeTools.proofreadingToWtErrors(paRes.aErrors));
             allErrors = document.mergeErrors(errorList, nFPara);
           }
           if (allErrors != null) {
@@ -774,7 +775,7 @@ public class WtCheckDialog extends Thread {
                   + paRes.aErrors.length + ", Paragraph: " + nFPara + ", Next Position: " + paRes.nStartOfNextSentencePosition
                   + ", Text.length: " + text.length());
             }
-            for (SingleProofreadingError error : allErrors) {
+            for (WtProofreadingError error : allErrors) {
               if (debugMode) {
                 WtMessageHandler.printToLogFile("CheckDialog: getNextGrammatikErrorInParagraph: Start: " + error.nErrorStart + ", ID: " + error.aRuleIdentifier);
                 if (error.nErrorType != TextMarkupType.SPELLCHECK) {
@@ -803,7 +804,7 @@ public class WtCheckDialog extends Thread {
                   }
                   if ((error.aSuggestions == null || error.aSuggestions.length == 0) 
                       && documents.getLinguisticServices().isThesaurusRelevantRule(error.aRuleIdentifier)) {
-                    error.aSuggestions = document.getSynonymArray(error, text, locale, lt, false);
+                    error.aSuggestions = document.getSynonymArray(error.toSingleProofreadingError(), text, locale, lt, false);
                   } else if (error.nErrorType == TextMarkupType.SPELLCHECK) {
                     List<String> suggestionList = new ArrayList<>();
                     for (String suggestion : error.aSuggestions) {
@@ -946,20 +947,20 @@ public class WtCheckDialog extends Thread {
   }
 
   /**
-   * class contains the SingleProofreadingError and the locale of the match
+   * class contains the WtProofreadingError and the locale of the match
    */
   private class CheckError {
     public Locale locale;
-    public SingleProofreadingError error;
+    public WtProofreadingError error;
     
-    CheckError(Locale locale, SingleProofreadingError error) {
+    CheckError(Locale locale, WtProofreadingError error) {
       this.locale = locale;
       this.error = error;
     }
   }
   
   /**
-   * class contains the SingleProofreadingError and the locale of the match
+   * class contains the WtProofreadingError and the locale of the match
    */
   private class RuleIdentification {
     public String ruleId;
@@ -1024,7 +1025,7 @@ public class WtCheckDialog extends Thread {
     
     private WtSingleDocument currentDocument;
     private WtViewCursorTools viewCursor;
-    private SingleProofreadingError error;
+    private WtProofreadingError error;
     private List<RuleIdentification> allDifferentErrors;
     String docId;
     private String[] userDictionaries;
@@ -2044,9 +2045,9 @@ public class WtCheckDialog extends Thread {
         for (int cacheNum = 0; cacheNum < lt.getNumMinToCheckParas().size(); cacheNum++) {
           if (!docCache.isAutomaticGenerated(nFPara, true) && (cacheNum == 0 || (lt.isSortedRuleForIndex(cacheNum) 
                                   && !currentDocument.getDocumentCache().isSingleParagraph(nFPara)))) {
-            SingleProofreadingError[] pErrors = currentDocument.getParagraphsCache().get(cacheNum).getSafeMatches(nFPara);
+            WtProofreadingError[] pErrors = currentDocument.getParagraphsCache().get(cacheNum).getSafeMatches(nFPara);
             if (pErrors != null) {
-              for (SingleProofreadingError pError : pErrors) {
+              for (WtProofreadingError pError : pErrors) {
                 if (pError.nErrorType != TextMarkupType.SPELLCHECK) {
                   boolean toAdd = true;
                   for (RuleIdentification error : errors) {
@@ -2452,7 +2453,7 @@ public class WtCheckDialog extends Thread {
     /**
      * set the attributes for the text inside the editor element
      */
-    private void setAttributesForErrorText(SingleProofreadingError error) {
+    private void setAttributesForErrorText(WtProofreadingError error) {
       //  Get Attributes
       sentenceIncludeError.setEnabled(true);
       MutableAttributeSet attrs = sentenceIncludeError.getInputAttributes();
@@ -2469,10 +2470,10 @@ public class WtCheckDialog extends Thread {
       if (isSpellError) {
         color = Color.RED;
       } else {
-        PropertyValue[] properties = error.aProperties;
-        for (PropertyValue property : properties) {
-          if ("LineColor".equals(property.Name)) {
-            color = new Color((int) property.Value);
+        WtPropertyValue[] properties = error.aProperties;
+        for (WtPropertyValue property : properties) {
+          if ("LineColor".equals(property.name)) {
+            color = new Color((int) property.value);
             break;
           }
         }
@@ -2488,12 +2489,12 @@ public class WtCheckDialog extends Thread {
      * returns the URL to more information of match
      * returns null, if such an URL does not exist
      */
-    private String getUrl(SingleProofreadingError error) {
+    private String getUrl(WtProofreadingError error) {
       if (!isSpellError) {
-        PropertyValue[] properties = error.aProperties;
-        for (PropertyValue property : properties) {
-          if ("FullCommentURL".equals(property.Name)) {
-            String url = new String((String) property.Value);
+        WtPropertyValue[] properties = error.aProperties;
+        for (WtPropertyValue property : properties) {
+          if ("FullCommentURL".equals(property.name)) {
+            String url = new String((String) property.value);
             return url;
           }
         }
@@ -3390,7 +3391,7 @@ public class WtCheckDialog extends Thread {
       }
     }
 
-    void setFlatViewCursor(int x, int y, SingleProofreadingError error, WtViewCursorTools viewCursor) throws Throwable {
+    void setFlatViewCursor(int x, int y, WtProofreadingError error, WtViewCursorTools viewCursor) throws Throwable {
       this.x = x;
       this.y = y;
       if (docType == DocumentType.WRITER) {
@@ -3410,7 +3411,7 @@ public class WtCheckDialog extends Thread {
         }
         if (error != null) {
           undoMarkup = new UndoMarkupContainer();
-          WtOfficeDrawTools.setMarkup(y, error, undoMarkup, currentDocument.getXComponent());
+          WtOfficeDrawTools.setMarkup(y, error.toSingleProofreadingError(), undoMarkup, currentDocument.getXComponent());
         }
       } else {
         WtOfficeSpreadsheetTools.setCurrentSheet(y, currentDocument.getXComponent());

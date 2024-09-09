@@ -29,8 +29,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.writingtool.tools.WtOfficeTools.LoErrorType;
 
-import com.sun.star.beans.PropertyState;
-import com.sun.star.beans.PropertyValue;
 import com.sun.star.linguistic2.SingleProofreadingError;
 import com.sun.star.text.TextMarkupType;
 
@@ -146,7 +144,7 @@ public class WtResultCache implements Serializable {
   /**
    * add or replace a cache entry
    */
-  public void put(int numberOfParagraph, List<Integer> nextSentencePositions, SingleProofreadingError[] errorArray) {
+  public void put(int numberOfParagraph, List<Integer> nextSentencePositions, WtProofreadingError[] errorArray) {
     rwLock.writeLock().lock();
     try {
       entries.put(numberOfParagraph, new SerialCacheEntry(nextSentencePositions, errorArray));
@@ -158,7 +156,7 @@ public class WtResultCache implements Serializable {
   /**
    * add or replace a cache entry for paragraph
    */
-  public void put(int numberOfParagraph, SingleProofreadingError[] errorArray) {
+  public void put(int numberOfParagraph, WtProofreadingError[] errorArray) {
     rwLock.writeLock().lock();
     try {
       entries.put(numberOfParagraph, new SerialCacheEntry(null, errorArray));
@@ -170,7 +168,7 @@ public class WtResultCache implements Serializable {
   /**
    * add proof reading errors to a cache entry for paragraph
    */
-  public void add(int numberOfParagraph, SingleProofreadingError[] errorArray) {
+  public void add(int numberOfParagraph, WtProofreadingError[] errorArray) {
     rwLock.writeLock().lock();
     try {
       SerialCacheEntry cacheEntry = entries.get(numberOfParagraph);
@@ -299,7 +297,7 @@ public class WtResultCache implements Serializable {
    * get Proofreading errors of on paragraph from cache
    * get an error array, if a prargrapherray exists
    */
-  public SingleProofreadingError[] getSafeMatches(int numberOfParagraph) {
+  public WtProofreadingError[] getSafeMatches(int numberOfParagraph) {
     rwLock.readLock().lock();
     try {
       SerialCacheEntry entry = entries.get(numberOfParagraph);
@@ -307,9 +305,9 @@ public class WtResultCache implements Serializable {
         return null;
       }
       if (entry.errorArray == null) {
-        return (new SingleProofreadingError[0]);
+        return (new WtProofreadingError[0]);
       }
-      return entry.getErrorArray();
+      return entry.getWtErrorArray();
     } finally {
       rwLock.readLock().unlock();
     }
@@ -318,25 +316,25 @@ public class WtResultCache implements Serializable {
   /**
    * get Proofreading errors of on paragraph from cache
    */
-  public SingleProofreadingError[] getMatches(int numberOfParagraph, LoErrorType errType) {
+  public WtProofreadingError[] getMatches(int numberOfParagraph, LoErrorType errType) {
     rwLock.readLock().lock();
     try {
       SerialCacheEntry entry = entries.get(numberOfParagraph);
       if (entry == null) {
         return null;
       }
-      SingleProofreadingError[] errorArray = entry.getErrorArray();
+      WtProofreadingError[] errorArray = entry.getWtErrorArray();
       if (errType == LoErrorType.BOTH || errorArray == null || errorArray.length == 0) {
         return errorArray;
       }
-      List<SingleProofreadingError> errorList = new ArrayList<>();
-      for (SingleProofreadingError eArray : errorArray) {
+      List<WtProofreadingError> errorList = new ArrayList<>();
+      for (WtProofreadingError eArray : errorArray) {
         if ((errType == LoErrorType.GRAMMAR && eArray.nErrorType == TextMarkupType.PROOFREADING)
             || (errType == LoErrorType.SPELL && eArray.nErrorType == TextMarkupType.SPELLCHECK)) {
           errorList.add(eArray);
         }
       }
-      return errorList.toArray(new SingleProofreadingError[errorList.size()]);
+      return errorList.toArray(new WtProofreadingError[errorList.size()]);
     } finally {
       rwLock.readLock().unlock();
     }
@@ -397,7 +395,7 @@ public class WtResultCache implements Serializable {
   /**
    * get Proofreading errors of sentence out of paragraph matches from cache
    */
-  public SingleProofreadingError[] getFromPara(int numberOfParagraph,
+  public WtProofreadingError[] getFromPara(int numberOfParagraph,
                                         int startOfSentencePosition, int endOfSentencePosition, LoErrorType errType) {
     rwLock.readLock().lock();
     try {
@@ -405,8 +403,8 @@ public class WtResultCache implements Serializable {
       if (entry == null) {
         return null;
       }
-      List<SingleProofreadingError> errorList = new ArrayList<>();
-      for (SingleProofreadingError eArray : entry.getErrorArray()) {
+      List<WtProofreadingError> errorList = new ArrayList<>();
+      for (WtProofreadingError eArray : entry.getWtErrorArray()) {
         if ((errType == LoErrorType.BOTH 
             || (errType == LoErrorType.GRAMMAR && eArray.nErrorType == TextMarkupType.PROOFREADING)
             || (errType == LoErrorType.SPELL && eArray.nErrorType == TextMarkupType.SPELLCHECK))
@@ -414,7 +412,7 @@ public class WtResultCache implements Serializable {
           errorList.add(eArray);
         }
       }
-      return errorList.toArray(new SingleProofreadingError[0]);
+      return errorList.toArray(new WtProofreadingError[0]);
     } finally {
       rwLock.readLock().unlock();
     }
@@ -428,15 +426,15 @@ public class WtResultCache implements Serializable {
     if (newEntries == null || oldEntries == null) {
       return true;
     }
-    SingleProofreadingError[] oldErrorArray = oldEntries.getErrorArray();
-    SingleProofreadingError[] newErrorArray = newEntries.getErrorArray();
+    WtProofreadingError[] oldErrorArray = oldEntries.getWtErrorArray();
+    WtProofreadingError[] newErrorArray = newEntries.getWtErrorArray();
     if (oldErrorArray == null || newErrorArray == null || oldErrorArray.length != newErrorArray.length) {
       return true;
     }
-    for (SingleProofreadingError nError : newErrorArray) {
+    for (WtProofreadingError nError : newErrorArray) {
       if (nError.nErrorType != TextMarkupType.SPELLCHECK) {
         boolean found = false;
-        for (SingleProofreadingError oError : oldErrorArray) {
+        for (WtProofreadingError oError : oldErrorArray) {
             if (nError.nErrorType != TextMarkupType.SPELLCHECK
                 && nError.nErrorStart == oError.nErrorStart && nError.nErrorLength == oError.nErrorLength
                     && nError.aRuleIdentifier.equals(oError.aRuleIdentifier)) {
@@ -501,16 +499,16 @@ public class WtResultCache implements Serializable {
       Set<Integer> keySet = entries.keySet();
       for (int n : keySet) {
         SerialCacheEntry entry = entries.get(n);
-        SingleProofreadingError[] eArray = entry.getErrorArray();
+        WtProofreadingError[] eArray = entry.getWtErrorArray();
         int nErr = 0;
-        for (SingleProofreadingError sError : eArray) {
+        for (WtProofreadingError sError : eArray) {
           if (sError.aRuleIdentifier.equals(ruleId)) {
             nErr++;
           }
         }
         if (nErr > 0) {
           changed.add(n);
-          SingleProofreadingError[] newArray = new SingleProofreadingError[eArray.length - nErr];
+          WtProofreadingError[] newArray = new WtProofreadingError[eArray.length - nErr];
           for (int i = 0, j = 0; i < eArray.length && j < newArray.length; i++) {
             if (!eArray[i].aRuleIdentifier.equals(ruleId)) {
               newArray[j] = eArray[i];
@@ -569,15 +567,15 @@ public class WtResultCache implements Serializable {
   /**
    * get all errors from a position within a paragraph as List
    */
-  public List<SingleProofreadingError> getErrorsAtPosition(int numPara, int numChar) {
+  public List<WtProofreadingError> getErrorsAtPosition(int numPara, int numChar) {
     rwLock.readLock().lock();
-    List<SingleProofreadingError> errors = new ArrayList<>();
+    List<WtProofreadingError> errors = new ArrayList<>();
     try {
       SerialCacheEntry entry = entries.get(numPara);
       if (entry == null) {
         return null;
       }
-      for (SingleProofreadingError err : entry.getErrorArray()) {
+      for (WtProofreadingError err : entry.getWtErrorArray()) {
         if (numChar >= err.nErrorStart && numChar < err.nErrorStart + err.nErrorLength) {
           errors.add(err);
         }
@@ -618,23 +616,30 @@ public class WtResultCache implements Serializable {
    */
   class SerialCacheEntry implements Serializable {
     private static final long serialVersionUID = 2L;
-    SerialProofreadingError[] errorArray;
+    WtProofreadingError[] errorArray;
     List<Integer> nextSentencePositions = null;
 
-    SerialCacheEntry(List<Integer> nextSentencePositions, SingleProofreadingError[] sErrorArray) {
+    SerialCacheEntry(List<Integer> nextSentencePositions, WtProofreadingError[] sErrorArray) {
       if (nextSentencePositions != null) {
         this.nextSentencePositions = new ArrayList<Integer>(nextSentencePositions);
       }
-      this.errorArray = new SerialProofreadingError[sErrorArray.length];
+      this.errorArray = new WtProofreadingError[sErrorArray.length];
       for (int i = 0; i < sErrorArray.length; i++) {
-        this.errorArray[i] = new SerialProofreadingError(sErrorArray[i]);
+        this.errorArray[i] = new WtProofreadingError(sErrorArray[i]);
       }
+    }
+    
+    /**
+     * Get an WtProofreadingError array for one entry
+     */
+    WtProofreadingError[] getWtErrorArray() {
+      return errorArray;
     }
     
     /**
      * Get an SingleProofreadingError array for one entry
      */
-    SingleProofreadingError[] getErrorArray() {
+    SingleProofreadingError[] getSingleErrorArray() {
       SingleProofreadingError[] eArray = new SingleProofreadingError[errorArray.length];
       for (int i = 0; i < errorArray.length; i++) {
         eArray[i] = errorArray[i].toSingleProofreadingError();
@@ -652,94 +657,18 @@ public class WtResultCache implements Serializable {
     /**
      * Add an SingleProofreadingError array to an existing one
      */
-    void addErrorArray(SingleProofreadingError[] errors) {
+    void addErrorArray(WtProofreadingError[] errors) {
       if (errors == null || errors.length == 0) {
         return;
       }
-      SerialProofreadingError newErrorArray[] = new SerialProofreadingError[errorArray.length + errors.length];
+      WtProofreadingError newErrorArray[] = new WtProofreadingError[errorArray.length + errors.length];
       for (int i = 0; i < errorArray.length; i++) {
         newErrorArray[i] = errorArray[i];
       }
       for (int i = 0; i < errors.length; i++) {
-        newErrorArray[errorArray.length + i] = new SerialProofreadingError(errors[i]);
+        newErrorArray[errorArray.length + i] = new WtProofreadingError(errors[i]);
       }
     }
   }
   
-  /**
-   * Class of serializable proofreading errors
-   */
-  private class SerialProofreadingError implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-    int nErrorStart;
-    int nErrorLength;
-    int nErrorType;
-    String aFullComment;
-    String aRuleIdentifier;
-    String aShortComment;
-    String[] aSuggestions;
-    SerialPropertyValue[] aProperties = null;
-    
-    SerialProofreadingError(SingleProofreadingError error) {
-      nErrorStart = error.nErrorStart;
-      nErrorLength = error.nErrorLength;
-      nErrorType = error.nErrorType;
-      aFullComment = error.aFullComment;
-      aRuleIdentifier = error.aRuleIdentifier;
-      aShortComment = error.aShortComment;
-      aSuggestions = error.aSuggestions;
-      if (error.aProperties != null) {
-        aProperties = new SerialPropertyValue[error.aProperties.length];
-        for (int i = 0; i < error.aProperties.length; i++) {
-          aProperties[i] = new SerialPropertyValue(error.aProperties[i]);
-        }
-      }
-    }
-    
-    SingleProofreadingError toSingleProofreadingError () {
-      SingleProofreadingError error = new SingleProofreadingError();
-      error.nErrorStart = nErrorStart;
-      error.nErrorLength = nErrorLength;
-      error.nErrorType = nErrorType;
-      error.aFullComment = aFullComment;
-      error.aRuleIdentifier = aRuleIdentifier;
-      error.aShortComment = aShortComment;
-      error.aSuggestions = aSuggestions;
-      if (aProperties != null) {
-        error.aProperties = new PropertyValue[aProperties.length];
-        for (int i = 0; i < aProperties.length; i++) {
-          error.aProperties[i] = aProperties[i].toPropertyValue();
-        }
-      } else {
-        error.aProperties = null;
-      }
-      return error;
-    }
-  }
-  
-  /**
-   * Class of serializable property values
-   */
-  private class SerialPropertyValue implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-    String name;
-    Object value;
-    
-    SerialPropertyValue(PropertyValue properties) {
-      name = properties.Name;
-      value = properties.Value;
-    }
-    
-    PropertyValue toPropertyValue() {
-      PropertyValue properties = new PropertyValue();
-      properties.Name = name;
-      properties.Value = value;
-      properties.Handle = -1;
-      properties.State = PropertyState.DIRECT_VALUE;
-      return properties;
-    }
-  }
-
 }

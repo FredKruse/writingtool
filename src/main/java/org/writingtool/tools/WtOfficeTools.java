@@ -51,6 +51,7 @@ import org.languagetool.rules.AbstractStyleTooOftenUsedWordRule;
 import org.languagetool.rules.ReadabilityRule;
 import org.languagetool.rules.Rule;
 import org.writingtool.WtDictionary;
+import org.writingtool.WtProofreadingError;
 
 import com.sun.star.awt.XMenuBar;
 import com.sun.star.awt.XPopupMenu;
@@ -70,6 +71,7 @@ import com.sun.star.lang.Locale;
 import com.sun.star.lang.XComponent;
 import com.sun.star.lang.XMultiComponentFactory;
 import com.sun.star.lang.XMultiServiceFactory;
+import com.sun.star.linguistic2.SingleProofreadingError;
 import com.sun.star.linguistic2.XProofreadingIterator;
 import com.sun.star.linguistic2.XSearchableDictionaryList;
 import com.sun.star.text.XTextDocument;
@@ -952,6 +954,28 @@ public class WtOfficeTools {
     locale = java.util.Locale.ENGLISH;
     bundle = ResourceBundle.getBundle(getWtUrlResource(locale), locale);
     return WT_SERVER_URL + "/" + bundle.getString(key);
+  }
+  
+/**
+ * convert array of WtProofreadingError to array of SingleProofreadingError
+ */
+  public static SingleProofreadingError[] wtErrorsToProofreading(WtProofreadingError[] errors) {
+    SingleProofreadingError[] sErrors = new SingleProofreadingError[errors.length];
+    for (int i = 0; i < errors.length; i++) {
+      sErrors[i] = errors[i].toSingleProofreadingError();
+    }
+    return sErrors;
+  }
+  
+/**
+ * convert array of SingleProofreadingError to array of WtProofreadingError
+ */
+  public static WtProofreadingError[] proofreadingToWtErrors(SingleProofreadingError[] errors) {
+    WtProofreadingError[] wErrors = new WtProofreadingError[errors.length];
+    for (int i = 0; i < errors.length; i++) {
+      wErrors[i] = new WtProofreadingError(errors[i]);
+    }
+    return wErrors;
   }
 
   /**

@@ -32,11 +32,10 @@ import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.rules.AbstractStyleTooOftenUsedWordRule;
 import org.languagetool.rules.ReadabilityRule;
 import org.languagetool.rules.TextLevelRule;
+import org.writingtool.WtProofreadingError;
 import org.writingtool.WtResultCache;
 import org.writingtool.tools.WtMessageHandler;
 import org.writingtool.tools.WtOfficeTools;
-
-import com.sun.star.linguistic2.SingleProofreadingError;
 
 /**
  * Adapter between LT Rules (instance of AbstractStyleTooOftenUsedWordRule) and Analyzes Dialog
@@ -297,7 +296,7 @@ public class WtUsedWordRule {
     WtResultCache statAnalysisCache = new WtResultCache();
     List<AnalyzedSentence> analyzedSentences = cache.getAnalysedParagraph(nTPara);
     if (analyzedSentences != null) {
-      List<SingleProofreadingError> wordMatches = new ArrayList<>();
+      List<WtProofreadingError> wordMatches = new ArrayList<>();
       int nSentPos = 0;
       for (AnalyzedSentence sentence : analyzedSentences) {
         for (AnalyzedTokenReadings token : sentence.getTokens()) {
@@ -308,7 +307,7 @@ public class WtUsedWordRule {
         }
         nSentPos += sentence.getCorrectedTextLength();
       }
-      statAnalysisCache.put(nFPara, wordMatches.toArray(new SingleProofreadingError[wordMatches.size()]));
+      statAnalysisCache.put(nFPara, wordMatches.toArray(new WtProofreadingError[wordMatches.size()]));
     }
     cache.setNewResultcache(rule.getId(), statAnalysisCache);
   }

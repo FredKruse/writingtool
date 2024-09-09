@@ -83,7 +83,6 @@ import com.sun.star.lang.XEventListener;
 import com.sun.star.linguistic2.LinguServiceEvent;
 import com.sun.star.linguistic2.LinguServiceEventFlags;
 import com.sun.star.linguistic2.ProofreadingResult;
-import com.sun.star.linguistic2.SingleProofreadingError;
 import com.sun.star.linguistic2.XLinguServiceEventListener;
 import com.sun.star.linguistic2.XProofreader;
 import com.sun.star.text.XTextDocument;
@@ -1477,7 +1476,7 @@ public class WtDocumentsHandler {
                 WtMessageHandler.printToLogFile("MultiDocumentsHandler: moreInfo: ruleID = " 
                               + ruleDesc.error.aRuleIdentifier + "langCode = " + ruleDesc.langCode);
               }
-              SingleProofreadingError error = ruleDesc.error;
+              WtProofreadingError error = ruleDesc.error;
               for (Rule rule : lt.getAllRules()) {
                 if (error.aRuleIdentifier.equals(rule.getId())) {
                   String tmp = error.aShortComment;
@@ -1486,9 +1485,9 @@ public class WtDocumentsHandler {
                   }
                   String msg = org.writingtool.tools.WtGeneralTools.shortenComment(tmp);
                   String sUrl = null;
-                  for (PropertyValue prop : error.aProperties) {
-                    if ("FullCommentURL".equals(prop.Name)) {
-                      sUrl = (String) prop.Value;
+                  for (WtPropertyValue prop : error.aProperties) {
+                    if ("FullCommentURL".equals(prop.name)) {
+                      sUrl = (String) prop.value;
                     }
                   }
                   URL url = sUrl == null? null : new URL(sUrl);
