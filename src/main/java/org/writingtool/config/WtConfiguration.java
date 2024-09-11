@@ -94,6 +94,7 @@ public class WtConfiguration {
   static final String DEFAULT_AI_IMG_APIKEY = "1234567";
 
   static final Color STYLE_COLOR = new Color(0, 100, 0);
+  static final Color HINT_COLOR = new Color(150, 150, 0);
 
   private static final String CONFIG_FILE = ".languagetool.cfg";
 
@@ -1179,12 +1180,15 @@ public class WtConfiguration {
    * @since 4.2
    * Get the color to underline a rule match by the Name of its category
    */
-  public Color getUnderlineColor(String category, String ruleId) {
+  public Color getUnderlineColor(String category, String ruleId, boolean categoryIsDefault) {
     if (ruleId != null && underlineRuleColors.containsKey(ruleId)) {
       return underlineRuleColors.get(ruleId);
     }
     if (underlineColors.containsKey(category)) {
       return underlineColors.get(category);
+    }
+    if (!categoryIsDefault) {
+      return HINT_COLOR;
     }
     if (styleLikeCategories.contains(category)) {
       return STYLE_COLOR;
