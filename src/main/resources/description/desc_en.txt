@@ -1,2 +1,0 @@
-WritingTool your writing assistant.
-Based on LanguageTool (grammar, style and spelling checker for more than 25 languages).
